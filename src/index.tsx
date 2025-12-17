@@ -4566,6 +4566,502 @@ app.get('/admin/customers/add', async (c) => {
   `)
 })
 
+// ============================
+// صفحة توزيع العملاء على الموظفين (للمدير فقط)
+// ============================
+app.get('/admin/customer-assignment', async (c) => {
+  // TODO: Add authentication check for manager role
+  
+  // Get all employees
+  const employees = await c.env.DB.prepare(`
+    SELECT id, username, full_name, email, role 
+    FROM users 
+    WHERE role = 'employee'
+    ORDER BY full_name
+  `).all();
+
+  // Get all customers with their assignments
+  const customers = await c.env.DB.prepare(`
+    SELECT 
+      c.*,
+      ca.employee_id,
+      u.full_name as assigned_employee_name
+    FROM customers c
+    LEFT JOIN customer_assignments ca ON c.id = ca.customer_id
+    LEFT JOIN users u ON ca.employee_id = u.id
+    ORDER BY c.created_at DESC
+  `).all();
+
+  // Get employee statistics
+  const employeeStats = await c.env.DB.prepare(`
+    SELECT 
+      u.id,
+      u.full_name,
+      u.username,
+      COUNT(ca.customer_id) as customer_count
+    FROM users u
+    LEFT JOIN customer_assignments ca ON u.id = ca.employee_id
+    WHERE u.role = 'employee'
+    GROUP BY u.id
+    ORDER BY customer_count DESC
+  `).all();
+
+  const html = `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="ar">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>توزيع العملاء على الموظفين</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <style>
+        .stat-card {
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .employee-badge {
+          display: inline-block;
+          padding: 4px 12px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: bold;
+        }
+        .assigned { background: #d1fae5; color: #065f46; }
+        .unassigned { background: #fee2e2; color: #991b1b; }
+      </style>
+    </head>
+    <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-6">
+      <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-users-cog text-indigo-600"></i>
+                توزيع العملاء على الموظفين
+              </h1>
+              <p class="text-gray-600">قم بتوزيع العملاء على الموظفين لتنظيم العمل</p>
+            </div>
+            <a href="/admin/customers" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-all">
+              <i class="fas fa-arrow-right ml-2"></i>
+              العودة للعملاء
+            </a>
+          </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          ${employeeStats.results.map((emp, index) => {
+            const colors = [
+              'from-blue-500 to-blue-600',
+              'from-green-500 to-green-600',
+              'from-purple-500 to-purple-600',
+              'from-orange-500 to-orange-600',
+              'from-pink-500 to-pink-600'
+            ];
+            return `
+              <div class="stat-card bg-gradient-to-br ${colors[index % 5]} text-white rounded-xl p-5 shadow-lg">
+                <div class="text-sm opacity-90 mb-1">${emp.full_name}</div>
+                <div class="text-3xl font-bold">${emp.customer_count}</div>
+                <div class="text-xs opacity-80 mt-1">عميل مخصص</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <!-- Bulk Assignment Tools -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+          <h2 class="text-xl font-bold text-gray-800 mb-4">
+            <i class="fas fa-magic text-purple-600"></i>
+            أدوات التوزيع السريع
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button onclick="autoDistribute()" class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-6 py-4 rounded-lg transition-all shadow-md">
+              <i class="fas fa-random ml-2"></i>
+              توزيع تلقائي متساوي
+            </button>
+            <button onclick="clearAllAssignments()" class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-4 rounded-lg transition-all shadow-md">
+              <i class="fas fa-trash ml-2"></i>
+              مسح جميع التخصيصات
+            </button>
+            <button onclick="assignSelected()" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-4 rounded-lg transition-all shadow-md">
+              <i class="fas fa-check-double ml-2"></i>
+              تخصيص المحددين
+            </button>
+          </div>
+        </div>
+
+        <!-- Customers Table -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div class="p-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+            <h2 class="text-2xl font-bold">
+              <i class="fas fa-list ml-2"></i>
+              قائمة العملاء (${customers.results.length})
+            </h2>
+          </div>
+          
+          <div class="p-6">
+            <div class="mb-4 flex gap-3">
+              <input type="text" id="searchInput" placeholder="بحث..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+              <select id="filterEmployee" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">كل الموظفين</option>
+                <option value="unassigned">غير مخصص</option>
+                ${employeeStats.results.map(emp => `
+                  <option value="${emp.id}">${emp.full_name} (${emp.customer_count})</option>
+                `).join('')}
+              </select>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-100">
+                  <tr>
+                    <th class="px-4 py-3 text-right">
+                      <input type="checkbox" id="selectAll" class="rounded" onchange="toggleSelectAll(this)">
+                    </th>
+                    <th class="px-4 py-3 text-right">رقم</th>
+                    <th class="px-4 py-3 text-right">اسم العميل</th>
+                    <th class="px-4 py-3 text-right">رقم الجوال</th>
+                    <th class="px-4 py-3 text-right">البريد الإلكتروني</th>
+                    <th class="px-4 py-3 text-right">الموظف المخصص</th>
+                    <th class="px-4 py-3 text-right">الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="customersTableBody">
+                  ${customers.results.map(customer => `
+                    <tr class="border-t hover:bg-gray-50 customer-row" data-customer-id="${customer.id}" data-employee-id="${customer.employee_id || ''}">
+                      <td class="px-4 py-3">
+                        <input type="checkbox" class="customer-checkbox rounded" value="${customer.id}">
+                      </td>
+                      <td class="px-4 py-3">#${customer.id}</td>
+                      <td class="px-4 py-3 font-semibold">${customer.full_name || 'غير محدد'}</td>
+                      <td class="px-4 py-3">${customer.phone || 'غير محدد'}</td>
+                      <td class="px-4 py-3">${customer.email || 'غير محدد'}</td>
+                      <td class="px-4 py-3">
+                        ${customer.assigned_employee_name 
+                          ? `<span class="employee-badge assigned">${customer.assigned_employee_name}</span>`
+                          : `<span class="employee-badge unassigned">غير مخصص</span>`
+                        }
+                      </td>
+                      <td class="px-4 py-3">
+                        <select class="assignment-select px-3 py-1 border border-gray-300 rounded text-sm" 
+                                data-customer-id="${customer.id}"
+                                onchange="assignCustomer(${customer.id}, this.value)">
+                          <option value="">اختر موظف...</option>
+                          ${employees.results.map(emp => `
+                            <option value="${emp.id}" ${customer.employee_id == emp.id ? 'selected' : ''}>
+                              ${emp.full_name}
+                            </option>
+                          `).join('')}
+                        </select>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        // Assign single customer
+        async function assignCustomer(customerId, employeeId) {
+          if (!employeeId) {
+            if (!confirm('هل تريد إلغاء تخصيص هذا العميل؟')) return;
+          }
+          
+          try {
+            const response = await fetch('/api/customer-assignment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                customer_id: customerId, 
+                employee_id: employeeId || null,
+                notes: ''
+              })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+              alert('تم التخصيص بنجاح!');
+              location.reload();
+            } else {
+              alert('حدث خطأ: ' + (data.error || 'خطأ غير معروف'));
+            }
+          } catch (error) {
+            alert('حدث خطأ: ' + error.message);
+          }
+        }
+
+        // Auto distribute customers equally
+        async function autoDistribute() {
+          if (!confirm('سيتم توزيع العملاء بالتساوي على جميع الموظفين. هل تريد المتابعة؟')) return;
+          
+          try {
+            const response = await fetch('/api/customer-assignment/auto-distribute', {
+              method: 'POST'
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+              alert(\`تم توزيع \${data.assigned_count} عميل على \${data.employee_count} موظف!\`);
+              location.reload();
+            } else {
+              alert('حدث خطأ: ' + (data.error || 'خطأ غير معروف'));
+            }
+          } catch (error) {
+            alert('حدث خطأ: ' + error.message);
+          }
+        }
+
+        // Clear all assignments
+        async function clearAllAssignments() {
+          if (!confirm('سيتم مسح جميع التخصيصات. هل أنت متأكد؟')) return;
+          
+          try {
+            const response = await fetch('/api/customer-assignment/clear-all', {
+              method: 'POST'
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+              alert(\`تم مسح \${data.cleared_count} تخصيص!\`);
+              location.reload();
+            }
+          } catch (error) {
+            alert('حدث خطأ: ' + error.message);
+          }
+        }
+
+        // Toggle select all checkboxes
+        function toggleSelectAll(checkbox) {
+          const checkboxes = document.querySelectorAll('.customer-checkbox');
+          checkboxes.forEach(cb => cb.checked = checkbox.checked);
+        }
+
+        // Assign selected customers
+        async function assignSelected() {
+          const selectedIds = Array.from(document.querySelectorAll('.customer-checkbox:checked'))
+            .map(cb => cb.value);
+          
+          if (selectedIds.length === 0) {
+            alert('الرجاء تحديد عملاء أولاً');
+            return;
+          }
+          
+          const employeeId = prompt('أدخل رقم الموظف:');
+          if (!employeeId) return;
+          
+          try {
+            const response = await fetch('/api/customer-assignment/bulk', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                customer_ids: selectedIds, 
+                employee_id: employeeId 
+              })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+              alert(\`تم تخصيص \${data.assigned_count} عميل!\`);
+              location.reload();
+            }
+          } catch (error) {
+            alert('حدث خطأ: ' + error.message);
+          }
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', filterTable);
+        document.getElementById('filterEmployee').addEventListener('change', filterTable);
+
+        function filterTable() {
+          const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+          const filterEmployee = document.getElementById('filterEmployee').value;
+          const rows = document.querySelectorAll('.customer-row');
+          
+          rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const employeeId = row.dataset.employeeId;
+            
+            let matchSearch = text.includes(searchTerm);
+            let matchEmployee = true;
+            
+            if (filterEmployee === 'unassigned') {
+              matchEmployee = !employeeId;
+            } else if (filterEmployee) {
+              matchEmployee = employeeId === filterEmployee;
+            }
+            
+            row.style.display = (matchSearch && matchEmployee) ? '' : 'none';
+          });
+        }
+      </script>
+    </body>
+    </html>
+  `;
+
+  return c.html(html);
+});
+
+// API: Assign customer to employee
+app.post('/api/customer-assignment', async (c) => {
+  try {
+    const { customer_id, employee_id, notes } = await c.req.json();
+    
+    // If employee_id is null, delete the assignment
+    if (!employee_id) {
+      await c.env.DB.prepare(`
+        DELETE FROM customer_assignments WHERE customer_id = ?
+      `).bind(customer_id).run();
+      
+      return c.json({ success: true, message: 'تم إلغاء التخصيص' });
+    }
+    
+    // Check if assignment already exists
+    const existing = await c.env.DB.prepare(`
+      SELECT * FROM customer_assignments WHERE customer_id = ?
+    `).bind(customer_id).first();
+    
+    if (existing) {
+      // Record in history
+      await c.env.DB.prepare(`
+        INSERT INTO assignment_history (customer_id, old_employee_id, new_employee_id, changed_by, notes)
+        VALUES (?, ?, ?, 1, ?)
+      `).bind(customer_id, existing.employee_id, employee_id, notes || '').run();
+      
+      // Update assignment
+      await c.env.DB.prepare(`
+        UPDATE customer_assignments 
+        SET employee_id = ?, assigned_by = 1, assigned_at = datetime('now'), notes = ?
+        WHERE customer_id = ?
+      `).bind(employee_id, notes || '', customer_id).run();
+    } else {
+      // Create new assignment
+      await c.env.DB.prepare(`
+        INSERT INTO customer_assignments (customer_id, employee_id, assigned_by, notes)
+        VALUES (?, ?, 1, ?)
+      `).bind(customer_id, employee_id, notes || '').run();
+      
+      // Record in history
+      await c.env.DB.prepare(`
+        INSERT INTO assignment_history (customer_id, old_employee_id, new_employee_id, changed_by, notes)
+        VALUES (?, NULL, ?, 1, ?)
+      `).bind(customer_id, employee_id, notes || '').run();
+    }
+    
+    return c.json({ success: true, message: 'تم التخصيص بنجاح' });
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500);
+  }
+});
+
+// API: Auto distribute customers equally
+app.post('/api/customer-assignment/auto-distribute', async (c) => {
+  try {
+    // Get all employees
+    const employees = await c.env.DB.prepare(`
+      SELECT id FROM users WHERE role = 'employee' ORDER BY id
+    `).all();
+    
+    if (employees.results.length === 0) {
+      return c.json({ success: false, error: 'لا يوجد موظفين' });
+    }
+    
+    // Get all unassigned customers
+    const customers = await c.env.DB.prepare(`
+      SELECT c.id 
+      FROM customers c
+      LEFT JOIN customer_assignments ca ON c.id = ca.customer_id
+      WHERE ca.customer_id IS NULL
+      ORDER BY c.id
+    `).all();
+    
+    let assignedCount = 0;
+    const employeeCount = employees.results.length;
+    
+    // Distribute customers round-robin
+    for (let i = 0; i < customers.results.length; i++) {
+      const customer = customers.results[i];
+      const employee = employees.results[i % employeeCount];
+      
+      await c.env.DB.prepare(`
+        INSERT INTO customer_assignments (customer_id, employee_id, assigned_by, notes)
+        VALUES (?, ?, 1, 'توزيع تلقائي')
+      `).bind(customer.id, employee.id).run();
+      
+      assignedCount++;
+    }
+    
+    return c.json({ 
+      success: true, 
+      assigned_count: assignedCount,
+      employee_count: employeeCount
+    });
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500);
+  }
+});
+
+// API: Clear all assignments
+app.post('/api/customer-assignment/clear-all', async (c) => {
+  try {
+    const result = await c.env.DB.prepare(`
+      DELETE FROM customer_assignments
+    `).run();
+    
+    return c.json({ 
+      success: true, 
+      cleared_count: result.meta.changes 
+    });
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500);
+  }
+});
+
+// API: Bulk assign customers
+app.post('/api/customer-assignment/bulk', async (c) => {
+  try {
+    const { customer_ids, employee_id } = await c.req.json();
+    
+    let assignedCount = 0;
+    for (const customerId of customer_ids) {
+      // Check if exists
+      const existing = await c.env.DB.prepare(`
+        SELECT * FROM customer_assignments WHERE customer_id = ?
+      `).bind(customerId).first();
+      
+      if (existing) {
+        await c.env.DB.prepare(`
+          UPDATE customer_assignments 
+          SET employee_id = ?, assigned_by = 1, assigned_at = datetime('now')
+          WHERE customer_id = ?
+        `).bind(employee_id, customerId).run();
+      } else {
+        await c.env.DB.prepare(`
+          INSERT INTO customer_assignments (customer_id, employee_id, assigned_by)
+          VALUES (?, ?, 1)
+        `).bind(customerId, employee_id).run();
+      }
+      
+      assignedCount++;
+    }
+    
+    return c.json({ 
+      success: true, 
+      assigned_count: assignedCount
+    });
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500);
+  }
+});
+
 app.get('/admin/customers', async (c) => {
   try {
     const customers = await c.env.DB.prepare('SELECT * FROM customers ORDER BY created_at DESC').all()
@@ -4593,6 +5089,11 @@ app.get('/admin/customers', async (c) => {
               </h1>
               
               <div class="flex gap-3">
+                <a href="/admin/customer-assignment" 
+                   class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-md">
+                  <i class="fas fa-users-cog ml-2"></i>
+                  توزيع العملاء
+                </a>
                 <button onclick="exportToCSV()" 
                         class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-bold transition-all">
                   <i class="fas fa-file-export ml-2"></i>
