@@ -4571,16 +4571,21 @@ app.get('/admin/customers/add', async (c) => {
 // ============================
 app.get('/admin/customer-assignment', async (c) => {
   // TODO: Add authentication check for manager role
+  // For now, assuming we are using admin without tenant in URL
+  // This will show ALL data - we need to fix this!
   
-  // Get all employees
+  // Temporary: Get tenant_id from query or default to 1
+  const tenantId = c.req.query('tenant_id') || 1;
+  
+  // Get employees of THIS tenant only
   const employees = await c.env.DB.prepare(`
     SELECT id, username, full_name, email, role 
     FROM users 
-    WHERE role = 'employee'
+    WHERE role = 'employee' AND tenant_id = ?
     ORDER BY full_name
-  `).all();
+  `).bind(tenantId).all();
 
-  // Get all customers with their assignments
+  // Get customers of THIS tenant only
   const customers = await c.env.DB.prepare(`
     SELECT 
       c.*,
@@ -4589,10 +4594,11 @@ app.get('/admin/customer-assignment', async (c) => {
     FROM customers c
     LEFT JOIN customer_assignments ca ON c.id = ca.customer_id
     LEFT JOIN users u ON ca.employee_id = u.id
+    WHERE c.tenant_id = ?
     ORDER BY c.created_at DESC
-  `).all();
+  `).bind(tenantId).all();
 
-  // Get employee statistics
+  // Get employee statistics for THIS tenant only
   const employeeStats = await c.env.DB.prepare(`
     SELECT 
       u.id,
@@ -4601,10 +4607,11 @@ app.get('/admin/customer-assignment', async (c) => {
       COUNT(ca.customer_id) as customer_count
     FROM users u
     LEFT JOIN customer_assignments ca ON u.id = ca.employee_id
-    WHERE u.role = 'employee'
+    LEFT JOIN customers c ON ca.customer_id = c.id AND c.tenant_id = ?
+    WHERE u.role = 'employee' AND u.tenant_id = ?
     GROUP BY u.id
     ORDER BY customer_count DESC
-  `).all();
+  `).bind(tenantId, tenantId).all();
 
   const html = `
     <!DOCTYPE html>
@@ -4803,8 +4810,14 @@ app.get('/admin/customer-assignment', async (c) => {
           if (!confirm('سيتم توزيع العملاء بالتساوي على جميع الموظفين. هل تريد المتابعة؟')) return;
           
           try {
+            // Get tenant_id from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const tenantId = urlParams.get('tenant_id') || '${tenantId}';
+            
             const response = await fetch('/api/customer-assignment/auto-distribute', {
-              method: 'POST'
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ tenant_id: tenantId })
             });
             
             const data = await response.json();
@@ -4965,23 +4978,29 @@ app.post('/api/customer-assignment', async (c) => {
 // API: Auto distribute customers equally
 app.post('/api/customer-assignment/auto-distribute', async (c) => {
   try {
-    // Get all employees
+    // Get tenant_id from query or body
+    const body = await c.req.json().catch(() => ({}));
+    const tenantId = body.tenant_id || c.req.query('tenant_id') || 1;
+    
+    // Get employees of THIS tenant only
     const employees = await c.env.DB.prepare(`
-      SELECT id FROM users WHERE role = 'employee' ORDER BY id
-    `).all();
+      SELECT id FROM users 
+      WHERE role = 'employee' AND tenant_id = ?
+      ORDER BY id
+    `).bind(tenantId).all();
     
     if (employees.results.length === 0) {
-      return c.json({ success: false, error: 'لا يوجد موظفين' });
+      return c.json({ success: false, error: 'لا يوجد موظفين في هذه الشركة' });
     }
     
-    // Get all unassigned customers
+    // Get unassigned customers of THIS tenant only
     const customers = await c.env.DB.prepare(`
       SELECT c.id 
       FROM customers c
       LEFT JOIN customer_assignments ca ON c.id = ca.customer_id
-      WHERE ca.customer_id IS NULL
+      WHERE ca.customer_id IS NULL AND c.tenant_id = ?
       ORDER BY c.id
-    `).all();
+    `).bind(tenantId).all();
     
     let assignedCount = 0;
     const employeeCount = employees.results.length;
