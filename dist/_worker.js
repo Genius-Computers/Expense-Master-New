@@ -10501,6 +10501,9 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
                     <td class="px-6 py-4 whitespace-nowrap">${new Date(s.created_at).toLocaleDateString("ar-SA")}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex gap-2 justify-center">
+                        <a href="/admin/requests/${s.id}/report" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded text-xs transition-all" title="تقرير الطلب الكامل">
+                          <i class="fas fa-file-alt"></i> تقرير
+                        </a>
                         <a href="/admin/requests/${s.id}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-xs transition-all">
                           <i class="fas fa-eye"></i> عرض
                         </a>
@@ -11336,7 +11339,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
                 </div>
                 <div>
                   <p class="text-sm text-gray-500">رقم الهوية</p>
-                  <p class="text-xl font-bold text-gray-800">${a.national_id||"غير محدد"}</p>
+                  <p class="text-xl font-bold text-gray-800">${a.national_id&&!a.national_id.startsWith("TEMP-")?a.national_id:"غير محدد"}</p>
                 </div>
               </div>
             </div>
@@ -11523,7 +11526,280 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
         </div>
       </body>
       </html>
-    `)}catch(t){return console.error("خطأ في عرض تقرير العميل:",t),e.html(`<h1>حدث خطأ: ${t.message}</h1>`)}});c.post("/api/banks",async e=>{try{const t=await e.req.parseBody();return await e.env.DB.prepare(`
+    `)}catch(t){return console.error("خطأ في عرض تقرير العميل:",t),e.html(`<h1>حدث خطأ: ${t.message}</h1>`)}});c.get("/admin/requests/:id/report",async e=>{try{const t=e.req.param("id"),s=await e.env.DB.prepare(`
+      SELECT 
+        fr.*,
+        c.full_name as customer_name,
+        c.phone as customer_phone,
+        c.email as customer_email,
+        c.national_id as customer_national_id,
+        c.birthdate as customer_birthdate,
+        c.monthly_salary as customer_salary,
+        b.bank_name,
+        ft.type_name as financing_type_name
+      FROM financing_requests fr
+      LEFT JOIN customers c ON fr.customer_id = c.id
+      LEFT JOIN banks b ON fr.selected_bank_id = b.id
+      LEFT JOIN financing_types ft ON fr.financing_type_id = ft.id
+      WHERE fr.id = ?
+    `).bind(t).first();if(!s)return e.html("<h1>الطلب غير موجود</h1>");const a=s,r=n=>n?new Date(n).toLocaleDateString("ar-SA",{year:"numeric",month:"long",day:"numeric"}):"غير محدد",l=n=>n?n.toLocaleString("ar-SA"):"غير محدد",i={pending:{text:"قيد المراجعة",color:"yellow",icon:"clock"},approved:{text:"مقبول",color:"green",icon:"check-circle"},rejected:{text:"مرفوض",color:"red",icon:"times-circle"}},o=i[a.status]||i.pending;return e.html(`
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>تقرير طلب التمويل - ${a.customer_name}</title>
+        <script src="https://cdn.tailwindcss.com"><\/script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        <style>
+          @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+          }
+          .report-section {
+            page-break-inside: avoid;
+          }
+        </style>
+      </head>
+      <body class="bg-gray-50">
+        <div class="max-w-5xl mx-auto p-6">
+          <!-- أزرار التحكم -->
+          <div class="mb-6 no-print flex justify-between items-center">
+            <a href="/admin/requests" class="text-blue-600 hover:text-blue-800">
+              <i class="fas fa-arrow-right ml-2"></i>
+              العودة لقائمة طلبات التمويل
+            </a>
+            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition-all">
+              <i class="fas fa-print ml-2"></i>
+              طباعة التقرير
+            </button>
+          </div>
+          
+          <!-- رأس التقرير -->
+          <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl shadow-lg p-8 mb-6 report-section">
+            <div class="text-center">
+              <h1 class="text-4xl font-bold mb-2">
+                <i class="fas fa-file-invoice ml-3"></i>
+                تقرير طلب التمويل
+              </h1>
+              <p class="text-xl opacity-90">نظام تمويل - Tamweel Finance</p>
+              <p class="text-sm opacity-75 mt-2">رقم الطلب: #${a.id} | تاريخ التقرير: ${r(new Date().toISOString())}</p>
+            </div>
+          </div>
+          
+          <!-- حالة الطلب -->
+          <div class="bg-white rounded-xl shadow-lg p-6 mb-6 report-section">
+            <div class="flex items-center justify-center">
+              <div class="bg-${o.color}-100 border-2 border-${o.color}-300 rounded-lg p-6 text-center">
+                <i class="fas fa-${o.icon} text-${o.color}-600 text-5xl mb-3"></i>
+                <p class="text-2xl font-bold text-${o.color}-700">حالة الطلب: ${o.text}</p>
+                <p class="text-sm text-gray-600 mt-2">تاريخ الطلب: ${r(a.created_at)}</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- القسم 1: معلومات العميل -->
+          <div class="bg-white rounded-xl shadow-lg p-6 mb-6 report-section">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b-2 border-blue-500 pb-2">
+              <i class="fas fa-user text-blue-600 ml-2"></i>
+              معلومات العميل
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="flex items-start space-x-3 space-x-reverse">
+                <div class="bg-blue-100 p-3 rounded-lg">
+                  <i class="fas fa-user text-blue-600 text-xl"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">اسم العميل</p>
+                  <p class="text-xl font-bold text-gray-800">${a.customer_name||"غير محدد"}</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start space-x-3 space-x-reverse">
+                <div class="bg-green-100 p-3 rounded-lg">
+                  <i class="fas fa-phone text-green-600 text-xl"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">رقم الهاتف</p>
+                  <p class="text-xl font-bold text-gray-800" dir="ltr">${a.customer_phone||"غير محدد"}</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start space-x-3 space-x-reverse">
+                <div class="bg-purple-100 p-3 rounded-lg">
+                  <i class="fas fa-envelope text-purple-600 text-xl"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">البريد الإلكتروني</p>
+                  <p class="text-xl font-bold text-gray-800">${a.customer_email||"غير محدد"}</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start space-x-3 space-x-reverse">
+                <div class="bg-red-100 p-3 rounded-lg">
+                  <i class="fas fa-calendar text-red-600 text-xl"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">تاريخ الميلاد</p>
+                  <p class="text-xl font-bold text-gray-800">${r(a.customer_birthdate)}</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start space-x-3 space-x-reverse">
+                <div class="bg-yellow-100 p-3 rounded-lg">
+                  <i class="fas fa-money-bill-wave text-yellow-600 text-xl"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">الراتب الشهري</p>
+                  <p class="text-xl font-bold text-yellow-600">${l(a.customer_salary)} ريال</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start space-x-3 space-x-reverse">
+                <div class="bg-indigo-100 p-3 rounded-lg">
+                  <i class="fas fa-id-badge text-indigo-600 text-xl"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">رقم الهوية</p>
+                  <p class="text-xl font-bold text-gray-800">${a.customer_national_id&&!a.customer_national_id.startsWith("TEMP-")?a.customer_national_id:"غير محدد"}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- القسم 2: تفاصيل طلب التمويل -->
+          <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-lg p-6 mb-6 report-section border-2 border-purple-400">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b-2 border-purple-500 pb-2">
+              <i class="fas fa-file-invoice-dollar text-purple-600 ml-2"></i>
+              تفاصيل طلب التمويل
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-white rounded-lg p-4 shadow">
+                <div class="flex items-start space-x-3 space-x-reverse">
+                  <div class="bg-purple-100 p-3 rounded-lg">
+                    <i class="fas fa-tag text-purple-600 text-xl"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">نوع التمويل</p>
+                    <p class="text-2xl font-bold text-purple-600">${a.financing_type_name||"غير محدد"}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="bg-white rounded-lg p-4 shadow">
+                <div class="flex items-start space-x-3 space-x-reverse">
+                  <div class="bg-blue-100 p-3 rounded-lg">
+                    <i class="fas fa-hand-holding-usd text-blue-600 text-xl"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">المبلغ المطلوب</p>
+                    <p class="text-2xl font-bold text-blue-600">${l(a.requested_amount)} ريال</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="bg-white rounded-lg p-4 shadow">
+                <div class="flex items-start space-x-3 space-x-reverse">
+                  <div class="bg-green-100 p-3 rounded-lg">
+                    <i class="fas fa-clock text-green-600 text-xl"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">مدة التمويل</p>
+                    <p class="text-2xl font-bold text-green-600">${a.duration_months||"غير محدد"} شهر</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="bg-white rounded-lg p-4 shadow">
+                <div class="flex items-start space-x-3 space-x-reverse">
+                  <div class="bg-yellow-100 p-3 rounded-lg">
+                    <i class="fas fa-university text-yellow-600 text-xl"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">البنك المختار</p>
+                    <p class="text-2xl font-bold text-yellow-600">${a.bank_name||"غير محدد"}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="bg-white rounded-lg p-4 shadow">
+                <div class="flex items-start space-x-3 space-x-reverse">
+                  <div class="bg-red-100 p-3 rounded-lg">
+                    <i class="fas fa-receipt text-red-600 text-xl"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">الالتزامات الشهرية</p>
+                    <p class="text-2xl font-bold text-red-600">${l(a.monthly_obligations)} ريال</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="bg-white rounded-lg p-4 shadow">
+                <div class="flex items-start space-x-3 space-x-reverse">
+                  <div class="bg-indigo-100 p-3 rounded-lg">
+                    <i class="fas fa-calendar-check text-indigo-600 text-xl"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">القسط الشهري</p>
+                    <p class="text-2xl font-bold text-indigo-600">${l(a.monthly_payment)} ريال</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- القسم 3: معلومات إضافية -->
+          <div class="bg-white rounded-xl shadow-lg p-6 mb-6 report-section">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b-2 border-gray-500 pb-2">
+              <i class="fas fa-info-circle text-gray-600 ml-2"></i>
+              معلومات إضافية
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="flex items-start space-x-3 space-x-reverse">
+                <div class="bg-blue-100 p-3 rounded-lg">
+                  <i class="fas fa-calendar-plus text-blue-600 text-xl"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">تاريخ تقديم الطلب</p>
+                  <p class="text-lg font-bold text-gray-800">${r(a.created_at)}</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start space-x-3 space-x-reverse">
+                <div class="bg-purple-100 p-3 rounded-lg">
+                  <i class="fas fa-edit text-purple-600 text-xl"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">آخر تحديث</p>
+                  <p class="text-lg font-bold text-gray-800">${r(a.updated_at)}</p>
+                </div>
+              </div>
+              
+              ${a.notes?`
+              <div class="md:col-span-2">
+                <div class="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
+                  <p class="text-sm text-gray-500 mb-2">ملاحظات</p>
+                  <p class="text-gray-700">${a.notes}</p>
+                </div>
+              </div>
+              `:""}
+            </div>
+          </div>
+          
+          <!-- تذييل التقرير -->
+          <div class="bg-gray-100 rounded-xl p-6 text-center report-section">
+            <p class="text-gray-600">
+              <i class="fas fa-shield-alt ml-2"></i>
+              هذا التقرير سري ومخصص للاستخدام الداخلي فقط
+            </p>
+            <p class="text-sm text-gray-500 mt-2">
+              تم إنشاء هذا التقرير بواسطة نظام تمويل - Tamweel Finance Management System
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `)}catch(t){return console.error("خطأ في عرض تقرير طلب التمويل:",t),e.html(`<h1>حدث خطأ: ${t.message}</h1>`)}});c.post("/api/banks",async e=>{try{const t=await e.req.parseBody();return await e.env.DB.prepare(`
       INSERT INTO banks (bank_name, description, is_active, created_at)
       VALUES (?, ?, 1, datetime('now'))
     `).bind(t.bank_name,t.description||"").run(),e.redirect("/admin/banks")}catch{return e.json({error:"فشل إضافة البنك"},500)}});c.get("/admin/banks/:id",async e=>{try{const t=e.req.param("id"),s=await e.env.DB.prepare("SELECT * FROM banks WHERE id = ?").bind(t).first();return s?e.html(`
