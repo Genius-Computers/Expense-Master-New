@@ -433,9 +433,19 @@ app.post('/api/auth/reset-password', async (c) => {
 // Get all banks (global banks + tenant-specific banks)
 app.get('/api/banks', async (c) => {
   try {
-    // Get all banks - simplified without tenant_id for now
-    const query = `SELECT * FROM banks ORDER BY bank_name`
-    const results = (await c.env.DB.prepare(query).all()).results
+    // Get tenant_id from query parameter or Authorization header
+    const tenantId = c.req.query('tenant_id');
+    
+    let query = `SELECT * FROM banks`;
+    let results;
+    
+    if (tenantId) {
+      query += ` WHERE tenant_id = ? ORDER BY bank_name`;
+      results = (await c.env.DB.prepare(query).bind(parseInt(tenantId)).all()).results;
+    } else {
+      query += ` ORDER BY bank_name`;
+      results = (await c.env.DB.prepare(query).all()).results;
+    }
     
     return c.json({ success: true, data: results })
   } catch (error: any) {
@@ -904,9 +914,19 @@ app.delete('/api/banks/:id', async (c) => {
 // Get all financing types
 app.get('/api/financing-types', async (c) => {
   try {
-    const { results } = await c.env.DB.prepare(`
-      SELECT * FROM financing_types ORDER BY type_name
-    `).all()
+    // Get tenant_id from query parameter
+    const tenantId = c.req.query('tenant_id');
+    
+    let query = `SELECT * FROM financing_types`;
+    let results;
+    
+    if (tenantId) {
+      query += ` WHERE tenant_id = ? OR tenant_id IS NULL ORDER BY type_name`;
+      results = (await c.env.DB.prepare(query).bind(parseInt(tenantId)).all()).results;
+    } else {
+      query += ` ORDER BY type_name`;
+      results = (await c.env.DB.prepare(query).all()).results;
+    }
     return c.json({ success: true, data: results })
   } catch (error: any) {
     return c.json({ success: false, error: error.message }, 500)

@@ -7717,7 +7717,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
       UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
     `).bind(a,r.id).run(),await e.env.DB.prepare(`
       UPDATE password_change_notifications SET is_used = 1 WHERE user_id = ? AND is_used = 0
-    `).bind(r.id).run(),e.json({success:!0,message:"تم تغيير كلمة السر بنجاح"})):e.json({success:!1,message:"المستخدم غير موجود"},404)}catch(t){return console.error("Reset password error:",t),e.json({success:!1,message:"حدث خطأ. الرجاء المحاولة مرة أخرى."},500)}});p.get("/api/banks",async e=>{try{const s=(await e.env.DB.prepare("SELECT * FROM banks ORDER BY bank_name").all()).results;return e.json({success:!0,data:s})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/admin/requests/:id/timeline",async e=>{const t=e.req.param("id"),s=await e.env.DB.prepare(`
+    `).bind(r.id).run(),e.json({success:!0,message:"تم تغيير كلمة السر بنجاح"})):e.json({success:!1,message:"المستخدم غير موجود"},404)}catch(t){return console.error("Reset password error:",t),e.json({success:!1,message:"حدث خطأ. الرجاء المحاولة مرة أخرى."},500)}});p.get("/api/banks",async e=>{try{const t=e.req.query("tenant_id");let s="SELECT * FROM banks",a;return t?(s+=" WHERE tenant_id = ? ORDER BY bank_name",a=(await e.env.DB.prepare(s).bind(parseInt(t)).all()).results):(s+=" ORDER BY bank_name",a=(await e.env.DB.prepare(s).all()).results),e.json({success:!0,data:a})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/admin/requests/:id/timeline",async e=>{const t=e.req.param("id"),s=await e.env.DB.prepare(`
     SELECT 
       fr.*,
       c.full_name as customer_name,
@@ -7991,9 +7991,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
       UPDATE banks SET bank_name = ?, bank_code = ?, logo_url = ?, is_active = ? WHERE id = ?
     `).bind(a,r,l,i,t).run(),e.redirect("/admin/banks")}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/banks/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare(`
       SELECT id FROM banks WHERE id = ?
-    `).bind(t).first()?(await e.env.DB.prepare("DELETE FROM banks WHERE id = ?").bind(t).run(),e.json({success:!0})):e.json({success:!1,error:"البنك غير موجود"},404)}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/financing-types",async e=>{try{const{results:t}=await e.env.DB.prepare(`
-      SELECT * FROM financing_types ORDER BY type_name
-    `).all();return e.json({success:!0,data:t})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/rates",async e=>{try{const t=e.req.header("Authorization"),s=t==null?void 0:t.replace("Bearer ","");let a=null;if(s){const o=atob(s).split(":");a=o[1]!=="null"?parseInt(o[1]):null}let r=`
+    `).bind(t).first()?(await e.env.DB.prepare("DELETE FROM banks WHERE id = ?").bind(t).run(),e.json({success:!0})):e.json({success:!1,error:"البنك غير موجود"},404)}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/financing-types",async e=>{try{const t=e.req.query("tenant_id");let s="SELECT * FROM financing_types",a;return t?(s+=" WHERE tenant_id = ? OR tenant_id IS NULL ORDER BY type_name",a=(await e.env.DB.prepare(s).bind(parseInt(t)).all()).results):(s+=" ORDER BY type_name",a=(await e.env.DB.prepare(s).all()).results),e.json({success:!0,data:a})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/rates",async e=>{try{const t=e.req.header("Authorization"),s=t==null?void 0:t.replace("Bearer ","");let a=null;if(s){const o=atob(s).split(":");a=o[1]!=="null"?parseInt(o[1]):null}let r=`
       SELECT 
         r.*,
         b.bank_name,
