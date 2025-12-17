@@ -443,6 +443,385 @@ app.get('/api/banks', async (c) => {
   }
 })
 
+// ============================
+// صفحة Timeline - الجدول الزمني لحالات الطلب
+// ============================
+app.get('/admin/requests/:id/timeline', async (c) => {
+  const requestId = c.req.param('id');
+  
+  // جلب بيانات الطلب
+  const request = await c.env.DB.prepare(`
+    SELECT 
+      fr.*,
+      c.full_name as customer_name,
+      c.phone as customer_phone,
+      c.email as customer_email,
+      c.created_at as customer_created_at,
+      b.bank_name,
+      ft.type_name as financing_type_name
+    FROM financing_requests fr
+    LEFT JOIN customers c ON fr.customer_id = c.id
+    LEFT JOIN banks b ON fr.selected_bank_id = b.id
+    LEFT JOIN financing_types ft ON fr.financing_type_id = ft.id
+    WHERE fr.id = ?
+  `).bind(requestId).first();
+
+  if (!request) {
+    return c.text('الطلب غير موجود', 404);
+  }
+
+  // جلب سجل تغييرات الحالة
+  const statusHistory = await c.env.DB.prepare(`
+    SELECT * FROM financing_request_status_history 
+    WHERE request_id = ? 
+    ORDER BY created_at ASC
+  `).bind(requestId).all();
+
+  // حساب الفترات الزمنية
+  function calculateDuration(start: string, end: string): string {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffMs = endDate.getTime() - startDate.getTime();
+    
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (days > 0) return `${days} يوم و ${hours} ساعة`;
+    if (hours > 0) return `${hours} ساعة و ${minutes} دقيقة`;
+    return `${minutes} دقيقة`;
+  }
+
+  function formatDateTime(dateStr: string): string {
+    const date = new Date(dateStr);
+    return date.toLocaleString('ar-SA', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+  }
+
+  // بناء Timeline
+  const timelineEvents: Array<{
+    title: string;
+    datetime: string;
+    duration: string;
+    icon: string;
+    color: string;
+  }> = [];
+
+  // 1. إنشاء حساب العميل (من الحاسبة)
+  if (request.customer_created_at) {
+    timelineEvents.push({
+      title: '📝 العميل أدخل بياناته في الحاسبة',
+      datetime: formatDateTime(request.customer_created_at),
+      duration: '',
+      icon: '📝',
+      color: '#3b82f6'
+    });
+  }
+
+  // 2. تقديم طلب التمويل الرسمي
+  timelineEvents.push({
+    title: '📋 تم تقديم طلب التمويل الرسمي',
+    datetime: formatDateTime(request.created_at),
+    duration: request.customer_created_at 
+      ? calculateDuration(request.customer_created_at, request.created_at)
+      : '',
+    icon: '📋',
+    color: '#8b5cf6'
+  });
+
+  // 3. إضافة سجل تغييرات الحالة
+  let lastEventTime = request.created_at;
+  
+  for (const history of statusHistory.results) {
+    const statusLabel = 
+      history.new_status === 'pending' ? 'قيد الانتظار' :
+      history.new_status === 'under_review' ? 'قيد المراجعة' :
+      history.new_status === 'approved' ? '✅ تمت الموافقة' :
+      history.new_status === 'rejected' ? '❌ تم الرفض' :
+      history.new_status;
+
+    const statusColor = 
+      history.new_status === 'pending' ? '#f59e0b' :
+      history.new_status === 'under_review' ? '#3b82f6' :
+      history.new_status === 'approved' ? '#10b981' :
+      history.new_status === 'rejected' ? '#ef4444' :
+      '#6b7280';
+
+    timelineEvents.push({
+      title: `تغيير الحالة إلى: ${statusLabel}`,
+      datetime: formatDateTime(history.created_at),
+      duration: calculateDuration(lastEventTime, history.created_at),
+      icon: '🔄',
+      color: statusColor
+    });
+
+    lastEventTime = history.created_at;
+  }
+
+  // حساب الوقت الإجمالي
+  const totalDuration = request.customer_created_at 
+    ? calculateDuration(request.customer_created_at, lastEventTime)
+    : calculateDuration(request.created_at, lastEventTime);
+
+  const html = `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="ar">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>الجدول الزمني - طلب رقم #${request.id}</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          padding: 20px;
+          min-height: 100vh;
+        }
+        .container {
+          max-width: 900px;
+          margin: 0 auto;
+          background: white;
+          border-radius: 20px;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+          overflow: hidden;
+        }
+        .header {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 30px;
+          text-align: center;
+        }
+        .header h1 {
+          font-size: 28px;
+          margin-bottom: 10px;
+        }
+        .header p {
+          font-size: 16px;
+          opacity: 0.9;
+        }
+        .info-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 15px;
+          padding: 30px;
+          background: #f8fafc;
+          border-bottom: 2px solid #e2e8f0;
+        }
+        .info-card {
+          background: white;
+          padding: 15px;
+          border-radius: 10px;
+          border-right: 4px solid #667eea;
+        }
+        .info-card label {
+          display: block;
+          font-size: 12px;
+          color: #64748b;
+          margin-bottom: 5px;
+          font-weight: 600;
+        }
+        .info-card span {
+          display: block;
+          font-size: 16px;
+          color: #1e293b;
+          font-weight: bold;
+        }
+        .timeline {
+          padding: 40px 30px;
+          position: relative;
+        }
+        .timeline::before {
+          content: '';
+          position: absolute;
+          right: 40px;
+          top: 0;
+          bottom: 0;
+          width: 4px;
+          background: linear-gradient(to bottom, #667eea, #764ba2);
+        }
+        .timeline-item {
+          position: relative;
+          padding-right: 80px;
+          padding-bottom: 40px;
+        }
+        .timeline-item:last-child {
+          padding-bottom: 0;
+        }
+        .timeline-icon {
+          position: absolute;
+          right: 25px;
+          width: 35px;
+          height: 35px;
+          border-radius: 50%;
+          background: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+          border: 4px solid;
+          z-index: 1;
+        }
+        .timeline-content {
+          background: white;
+          padding: 20px;
+          border-radius: 12px;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          border-right: 4px solid;
+        }
+        .timeline-title {
+          font-size: 18px;
+          font-weight: bold;
+          margin-bottom: 8px;
+          color: #1e293b;
+        }
+        .timeline-datetime {
+          font-size: 14px;
+          color: #64748b;
+          margin-bottom: 8px;
+        }
+        .timeline-duration {
+          display: inline-block;
+          background: #f1f5f9;
+          color: #475569;
+          padding: 5px 12px;
+          border-radius: 20px;
+          font-size: 13px;
+          font-weight: 600;
+        }
+        .total-summary {
+          margin: 30px;
+          padding: 25px;
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+          border-radius: 15px;
+          text-align: center;
+          box-shadow: 0 10px 25px rgba(16,185,129,0.3);
+        }
+        .total-summary h2 {
+          font-size: 22px;
+          margin-bottom: 10px;
+        }
+        .total-summary .time {
+          font-size: 32px;
+          font-weight: bold;
+        }
+        .actions {
+          padding: 30px;
+          text-align: center;
+          background: #f8fafc;
+          border-top: 2px solid #e2e8f0;
+        }
+        .btn {
+          display: inline-block;
+          padding: 12px 30px;
+          margin: 0 10px;
+          border-radius: 8px;
+          text-decoration: none;
+          font-weight: bold;
+          transition: all 0.3s;
+          cursor: pointer;
+          border: none;
+          font-size: 16px;
+        }
+        .btn-primary {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+        }
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .btn-secondary {
+          background: white;
+          color: #667eea;
+          border: 2px solid #667eea;
+        }
+        .btn-secondary:hover {
+          background: #667eea;
+          color: white;
+        }
+        @media print {
+          body { background: white; padding: 0; }
+          .actions { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>⏱️ الجدول الزمني التفصيلي</h1>
+          <p>طلب التمويل رقم #${request.id}</p>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-card">
+            <label>👤 اسم العميل</label>
+            <span>${request.customer_name || 'غير محدد'}</span>
+          </div>
+          <div class="info-card">
+            <label>📱 رقم الجوال</label>
+            <span>${request.customer_phone || 'غير محدد'}</span>
+          </div>
+          <div class="info-card">
+            <label>🏦 البنك</label>
+            <span>${request.bank_name || 'غير محدد'}</span>
+          </div>
+          <div class="info-card">
+            <label>💰 المبلغ المطلوب</label>
+            <span>${(request.requested_amount || 0).toLocaleString('ar-SA')} ريال</span>
+          </div>
+          <div class="info-card">
+            <label>📅 مدة التمويل</label>
+            <span>${request.duration_months || 0} شهر</span>
+          </div>
+          <div class="info-card">
+            <label>🎯 نوع التمويل</label>
+            <span>${request.financing_type_name || 'غير محدد'}</span>
+          </div>
+        </div>
+
+        <div class="timeline">
+          ${timelineEvents.map((event, index) => `
+            <div class="timeline-item">
+              <div class="timeline-icon" style="border-color: ${event.color}; color: ${event.color};">
+                ${event.icon}
+              </div>
+              <div class="timeline-content" style="border-right-color: ${event.color};">
+                <div class="timeline-title">${event.title}</div>
+                <div class="timeline-datetime">📅 ${event.datetime}</div>
+                ${event.duration ? `<span class="timeline-duration">⏱️ المدة: ${event.duration}</span>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="total-summary">
+          <h2>⏰ إجمالي الوقت الكلي</h2>
+          <div class="time">${totalDuration}</div>
+          <p style="margin-top: 10px; opacity: 0.9;">من بداية إدخال البيانات حتى الحالة الحالية</p>
+        </div>
+
+        <div class="actions">
+          <button onclick="window.print()" class="btn btn-primary">🖨️ طباعة التقرير</button>
+          <a href="/admin/requests" class="btn btn-secondary">↩️ العودة للطلبات</a>
+          <a href="/admin/requests/${request.id}/report" class="btn btn-secondary">📄 تقرير الطلب</a>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return c.html(html);
+});
+
 // Add bank
 app.post('/api/banks', async (c) => {
   try {
@@ -1910,10 +2289,23 @@ app.put('/api/financing-requests/:id/status', async (c) => {
     const id = c.req.param('id')
     const { status, notes } = await c.req.json()
     
+    // Get old status
+    const oldRequest = await c.env.DB.prepare(`
+      SELECT status FROM financing_requests WHERE id = ?
+    `).bind(id).first()
+    
     // Update status
     await c.env.DB.prepare(`
       UPDATE financing_requests SET status = ?, notes = ? WHERE id = ?
     `).bind(status, notes, id).run()
+    
+    // Record status change in history
+    if (oldRequest && oldRequest.status !== status) {
+      await c.env.DB.prepare(`
+        INSERT INTO financing_request_status_history (request_id, old_status, new_status, changed_by, notes)
+        VALUES (?, ?, ?, 'admin', ?)
+      `).bind(id, oldRequest.status, status, notes || '').run()
+    }
     
     // Get request details
     const request = await c.env.DB.prepare(`
@@ -5260,6 +5652,9 @@ app.get('/admin/requests', async (c) => {
                     <td class="px-6 py-4 whitespace-nowrap">${new Date(req.created_at).toLocaleDateString('ar-SA')}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex gap-2 justify-center">
+                        <a href="/admin/requests/${req.id}/timeline" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-3 py-2 rounded text-xs transition-all shadow-md" title="الجدول الزمني التفصيلي">
+                          <i class="fas fa-clock"></i> ⏱️ Timeline
+                        </a>
                         <a href="/admin/requests/${req.id}/report" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded text-xs transition-all" title="تقرير الطلب الكامل">
                           <i class="fas fa-file-alt"></i> تقرير
                         </a>
@@ -6730,6 +7125,364 @@ app.get('/admin/requests/:id/report', async (c) => {
     `)
   } catch (error: any) {
     console.error('خطأ في عرض تقرير طلب التمويل:', error)
+    return c.html(`<h1>حدث خطأ: ${error.message}</h1>`)
+  }
+})
+
+// التقرير الزمني (Timeline) لطلب التمويل
+app.get('/admin/requests/:id/timeline', async (c) => {
+  try {
+    const id = c.req.param('id')
+    
+    // جلب بيانات الطلب
+    const request = await c.env.DB.prepare(`
+      SELECT 
+        fr.*,
+        c.full_name as customer_name,
+        c.created_at as customer_registration_date,
+        c.first_calculation_date
+      FROM financing_requests fr
+      LEFT JOIN customers c ON fr.customer_id = c.id
+      WHERE fr.id = ?
+    `).bind(id).first()
+    
+    if (!request) {
+      return c.html('<h1>الطلب غير موجود</h1>')
+    }
+    
+    const req = request as any
+    
+    // جلب سجل تغييرات الحالة
+    const statusHistory = await c.env.DB.prepare(`
+      SELECT * FROM financing_request_status_history 
+      WHERE request_id = ? 
+      ORDER BY created_at ASC
+    `).bind(id).all()
+    
+    // حساب الفترات الزمنية
+    const calculateDuration = (start: string, end: string) => {
+      if (!start || !end) return null
+      const diff = new Date(end).getTime() - new Date(start).getTime()
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+      
+      if (days > 0) return `${days} يوم و ${hours} ساعة`
+      if (hours > 0) return `${hours} ساعة و ${minutes} دقيقة`
+      return `${minutes} دقيقة`
+    }
+    
+    const formatDate = (date: string) => {
+      if (!date) return 'غير محدد'
+      return new Date(date).toLocaleString('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }
+    
+    // بناء Timeline
+    const timeline: any[] = []
+    
+    // 1. تسجيل العميل
+    if (req.customer_registration_date) {
+      timeline.push({
+        title: 'تسجيل العميل',
+        icon: 'user-plus',
+        color: 'blue',
+        date: req.customer_registration_date,
+        description: `تم تسجيل العميل ${req.customer_name} في النظام`
+      })
+    }
+    
+    // 2. استخدام الحاسبة (أول مرة)
+    if (req.first_calculation_date) {
+      const duration = calculateDuration(req.customer_registration_date, req.first_calculation_date)
+      timeline.push({
+        title: 'استخدام الحاسبة',
+        icon: 'calculator',
+        color: 'green',
+        date: req.first_calculation_date,
+        description: 'العميل استخدم حاسبة التمويل لأول مرة',
+        duration: duration
+      })
+    }
+    
+    // 3. تقديم الطلب
+    timeline.push({
+      title: 'تقديم طلب التمويل',
+      icon: 'file-invoice',
+      color: 'purple',
+      date: req.created_at,
+      description: `تم تقديم طلب تمويل بمبلغ ${req.requested_amount?.toLocaleString('ar-SA')} ريال`,
+      duration: req.first_calculation_date 
+        ? calculateDuration(req.first_calculation_date, req.created_at)
+        : calculateDuration(req.customer_registration_date, req.created_at)
+    })
+    
+    // 4. تغييرات الحالة من السجل
+    if (statusHistory.results.length > 0) {
+      let lastDate = req.created_at
+      statusHistory.results.forEach((history: any) => {
+        const statusMap: any = {
+          'pending': { title: 'قيد الانتظار', icon: 'clock', color: 'yellow' },
+          'under_review': { title: 'قيد المراجعة', icon: 'search', color: 'orange' },
+          'approved': { title: 'تمت الموافقة', icon: 'check-circle', color: 'green' },
+          'rejected': { title: 'تم الرفض', icon: 'times-circle', color: 'red' }
+        }
+        
+        const status = statusMap[history.new_status] || { title: history.new_status, icon: 'info', color: 'gray' }
+        
+        timeline.push({
+          title: status.title,
+          icon: status.icon,
+          color: status.color,
+          date: history.created_at,
+          description: history.notes || `تغيرت الحالة إلى: ${status.title}`,
+          duration: calculateDuration(lastDate, history.created_at)
+        })
+        
+        lastDate = history.created_at
+      })
+    } else {
+      // إذا لم يكن هناك سجل، استخدم الحالات من الحقول المباشرة
+      if (req.reviewed_at) {
+        timeline.push({
+          title: 'قيد المراجعة',
+          icon: 'search',
+          color: 'orange',
+          date: req.reviewed_at,
+          description: 'بدأت عملية المراجعة',
+          duration: calculateDuration(req.created_at, req.reviewed_at)
+        })
+      }
+      
+      if (req.approved_at) {
+        timeline.push({
+          title: 'تمت الموافقة',
+          icon: 'check-circle',
+          color: 'green',
+          date: req.approved_at,
+          description: 'تمت الموافقة على الطلب',
+          duration: calculateDuration(req.reviewed_at || req.created_at, req.approved_at)
+        })
+      }
+      
+      if (req.rejected_at) {
+        timeline.push({
+          title: 'تم الرفض',
+          icon: 'times-circle',
+          color: 'red',
+          date: req.rejected_at,
+          description: 'تم رفض الطلب',
+          duration: calculateDuration(req.reviewed_at || req.created_at, req.rejected_at)
+        })
+      }
+    }
+    
+    // حساب الوقت الإجمالي
+    const totalDuration = timeline.length > 1 
+      ? calculateDuration(timeline[0].date, timeline[timeline.length - 1].date)
+      : null
+    
+    return c.html(`
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>التقرير الزمني - طلب #${id}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        <style>
+          @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+          }
+          .timeline-line {
+            position: absolute;
+            right: 39px;
+            top: 80px;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #3B82F6, #8B5CF6);
+          }
+          .timeline-dot {
+            position: absolute;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 10;
+          }
+        </style>
+      </head>
+      <body class="bg-gray-50">
+        <div class="max-w-5xl mx-auto p-6">
+          <!-- أزرار التحكم -->
+          <div class="mb-6 no-print flex justify-between items-center">
+            <a href="/admin/requests/${id}/report" class="text-blue-600 hover:text-blue-800">
+              <i class="fas fa-arrow-right ml-2"></i>
+              العودة للتقرير
+            </a>
+            <div class="flex gap-3">
+              <a href="/admin/requests" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-bold transition-all">
+                <i class="fas fa-list ml-2"></i>
+                قائمة الطلبات
+              </a>
+              <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition-all">
+                <i class="fas fa-print ml-2"></i>
+                طباعة
+              </button>
+            </div>
+          </div>
+          
+          <!-- رأس التقرير -->
+          <div class="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-xl shadow-lg p-8 mb-6">
+            <div class="text-center">
+              <h1 class="text-4xl font-bold mb-2">
+                <i class="fas fa-clock ml-3"></i>
+                التقرير الزمني (Timeline)
+              </h1>
+              <p class="text-xl opacity-90">رحلة طلب التمويل</p>
+              <p class="text-sm opacity-75 mt-2">طلب رقم #${id} | ${req.customer_name}</p>
+            </div>
+          </div>
+          
+          <!-- إحصائيات سريعة -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+              <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="fas fa-flag-checkered text-blue-600 text-2xl"></i>
+              </div>
+              <p class="text-sm text-gray-500">عدد المراحل</p>
+              <p class="text-3xl font-bold text-blue-600">${timeline.length}</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+              <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="fas fa-hourglass-half text-purple-600 text-2xl"></i>
+              </div>
+              <p class="text-sm text-gray-500">الوقت الإجمالي</p>
+              <p class="text-2xl font-bold text-purple-600">${totalDuration || 'جاري...'}</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+              <div class="bg-${req.status === 'approved' ? 'green' : req.status === 'rejected' ? 'red' : 'yellow'}-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="fas fa-${req.status === 'approved' ? 'check-circle' : req.status === 'rejected' ? 'times-circle' : 'clock'} text-${req.status === 'approved' ? 'green' : req.status === 'rejected' ? 'red' : 'yellow'}-600 text-2xl"></i>
+              </div>
+              <p class="text-sm text-gray-500">الحالة الحالية</p>
+              <p class="text-xl font-bold text-${req.status === 'approved' ? 'green' : req.status === 'rejected' ? 'red' : 'yellow'}-600">
+                ${req.status === 'approved' ? 'مقبول' : req.status === 'rejected' ? 'مرفوض' : 'قيد المراجعة'}
+              </p>
+            </div>
+          </div>
+          
+          <!-- Timeline -->
+          <div class="bg-white rounded-xl shadow-lg p-8 mb-6 relative">
+            <h2 class="text-2xl font-bold mb-8 text-gray-800">
+              <i class="fas fa-stream ml-2"></i>
+              المراحل الزمنية
+            </h2>
+            
+            <!-- الخط الزمني -->
+            ${timeline.length > 1 ? '<div class="timeline-line"></div>' : ''}
+            
+            <!-- العناصر -->
+            <div class="space-y-8 relative">
+              ${timeline.map((item, index) => `
+                <div class="flex items-start gap-6 relative pr-20">
+                  <!-- النقطة -->
+                  <div class="timeline-dot bg-${item.color}-500 text-white">
+                    <i class="fas fa-${item.icon}"></i>
+                  </div>
+                  
+                  <!-- المحتوى -->
+                  <div class="flex-1 bg-${item.color}-50 border-2 border-${item.color}-200 rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-2">
+                      <h3 class="text-xl font-bold text-${item.color}-700">
+                        ${index + 1}. ${item.title}
+                      </h3>
+                      ${item.duration ? `
+                        <span class="bg-${item.color}-200 text-${item.color}-800 px-3 py-1 rounded-full text-sm font-bold">
+                          <i class="fas fa-stopwatch ml-1"></i>
+                          ${item.duration}
+                        </span>
+                      ` : ''}
+                    </div>
+                    <p class="text-gray-700 mb-2">${item.description}</p>
+                    <p class="text-sm text-gray-500">
+                      <i class="fas fa-calendar ml-1"></i>
+                      ${formatDate(item.date)}
+                    </p>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <!-- ملخص الأوقات -->
+          <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-lg p-6 border-2 border-purple-300">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">
+              <i class="fas fa-chart-line text-purple-600 ml-2"></i>
+              ملخص الفترات الزمنية
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              ${timeline.filter(t => t.duration).map((item, index) => `
+                <div class="bg-white rounded-lg p-4 shadow">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="bg-${item.color}-100 p-2 rounded-lg">
+                        <i class="fas fa-${item.icon} text-${item.color}-600"></i>
+                      </div>
+                      <div>
+                        <p class="text-sm text-gray-500">من ${timeline[index]?.title || 'البداية'}</p>
+                        <p class="font-bold text-gray-800">إلى ${item.title}</p>
+                      </div>
+                    </div>
+                    <p class="text-lg font-bold text-${item.color}-600">${item.duration}</p>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            
+            ${totalDuration ? `
+              <div class="mt-4 bg-white rounded-lg p-4 shadow-lg border-2 border-purple-400">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="bg-purple-600 p-3 rounded-lg">
+                      <i class="fas fa-clock text-white text-xl"></i>
+                    </div>
+                    <p class="text-xl font-bold text-gray-800">إجمالي الوقت</p>
+                  </div>
+                  <p class="text-2xl font-bold text-purple-600">${totalDuration}</p>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+          
+          <!-- تذييل -->
+          <div class="bg-gray-100 rounded-xl p-6 text-center mt-6">
+            <p class="text-gray-600">
+              <i class="fas fa-info-circle ml-2"></i>
+              هذا التقرير يوضح الرحلة الزمنية الكاملة لطلب التمويل
+            </p>
+            <p class="text-sm text-gray-500 mt-2">
+              Tamweel Finance Management System
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `)
+  } catch (error: any) {
+    console.error('خطأ في عرض Timeline:', error)
     return c.html(`<h1>حدث خطأ: ${error.message}</h1>`)
   }
 })
