@@ -5101,6 +5101,212 @@ app.post('/api/customer-assignment/bulk', async (c) => {
   }
 });
 
+// ============================
+// صفحة عرض البنوك حسب الشركة
+// ============================
+app.get('/admin/banks', async (c) => {
+  try {
+    // Get tenant_id from query parameter
+    const tenantId = c.req.query('tenant_id');
+    
+    // Get tenant info
+    let tenantInfo = null;
+    if (tenantId) {
+      const tenant = await c.env.DB.prepare('SELECT company_name FROM tenants WHERE id = ?')
+        .bind(tenantId).first();
+      tenantInfo = tenant;
+    }
+    
+    // Build query with optional tenant filter
+    let query = 'SELECT * FROM banks';
+    if (tenantId) {
+      query += ' WHERE tenant_id = ?';
+    }
+    query += ' ORDER BY bank_name';
+    
+    const banks = tenantId
+      ? await c.env.DB.prepare(query).bind(tenantId).all()
+      : await c.env.DB.prepare(query).all();
+    
+    return c.html(`
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>البنوك ${tenantInfo ? '- ' + tenantInfo.company_name : ''}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+      </head>
+      <body class="bg-gray-50">
+        <div class="max-w-7xl mx-auto p-6">
+          <div class="mb-6">
+            <a href="/admin" class="text-blue-600 hover:text-blue-800">← العودة للوحة الرئيسية</a>
+          </div>
+          
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+              <h1 class="text-3xl font-bold text-gray-800">
+                <i class="fas fa-university text-blue-600 ml-2"></i>
+                البنوك ${tenantInfo ? '- ' + tenantInfo.company_name : '(جميع الشركات)'}
+              </h1>
+              <span class="text-2xl font-bold text-blue-600">${banks.results.length} بنك</span>
+            </div>
+            
+            ${banks.results.length === 0 ? `
+              <div class="text-center py-12">
+                <i class="fas fa-university text-gray-300 text-6xl mb-4"></i>
+                <p class="text-gray-500 text-xl">لا توجد بنوك لهذه الشركة</p>
+              </div>
+            ` : `
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead class="bg-gray-100">
+                    <tr>
+                      <th class="px-6 py-3 text-right text-sm font-bold text-gray-700">رقم</th>
+                      <th class="px-6 py-3 text-right text-sm font-bold text-gray-700">اسم البنك</th>
+                      <th class="px-6 py-3 text-right text-sm font-bold text-gray-700">كود البنك</th>
+                      <th class="px-6 py-3 text-right text-sm font-bold text-gray-700">الشركة</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200">
+                    ${banks.results.map((bank, index) => `
+                      <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 text-sm">${index + 1}</td>
+                        <td class="px-6 py-4 font-bold">${bank.bank_name}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">${bank.bank_code || '-'}</td>
+                        <td class="px-6 py-4 text-sm">
+                          <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+                            Tenant ${bank.tenant_id || 'N/A'}
+                          </span>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            `}
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+  } catch (error: any) {
+    return c.html(`<h1>Error: ${error.message}</h1>`, 500);
+  }
+});
+
+// ============================
+// صفحة عرض النسب حسب الشركة
+// ============================
+app.get('/admin/rates', async (c) => {
+  try {
+    // Get tenant_id from query parameter
+    const tenantId = c.req.query('tenant_id');
+    
+    // Get tenant info
+    let tenantInfo = null;
+    if (tenantId) {
+      const tenant = await c.env.DB.prepare('SELECT company_name FROM tenants WHERE id = ?')
+        .bind(tenantId).first();
+      tenantInfo = tenant;
+    }
+    
+    // Build query with optional tenant filter
+    let query = `
+      SELECT 
+        r.*,
+        b.bank_name,
+        f.name as financing_type_name
+      FROM bank_financing_rates r
+      LEFT JOIN banks b ON r.bank_id = b.id
+      LEFT JOIN financing_types f ON r.financing_type_id = f.id
+    `;
+    
+    if (tenantId) {
+      query += ' WHERE r.tenant_id = ?';
+    }
+    
+    query += ' ORDER BY b.bank_name, f.name';
+    
+    const rates = tenantId
+      ? await c.env.DB.prepare(query).bind(tenantId).all()
+      : await c.env.DB.prepare(query).all();
+    
+    return c.html(`
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>النسب والأسعار ${tenantInfo ? '- ' + tenantInfo.company_name : ''}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+      </head>
+      <body class="bg-gray-50">
+        <div class="max-w-7xl mx-auto p-6">
+          <div class="mb-6">
+            <a href="/admin" class="text-blue-600 hover:text-blue-800">← العودة للوحة الرئيسية</a>
+          </div>
+          
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+              <h1 class="text-3xl font-bold text-gray-800">
+                <i class="fas fa-percent text-green-600 ml-2"></i>
+                النسب والأسعار ${tenantInfo ? '- ' + tenantInfo.company_name : '(جميع الشركات)'}
+              </h1>
+              <span class="text-2xl font-bold text-green-600">${rates.results.length} نسبة</span>
+            </div>
+            
+            ${rates.results.length === 0 ? `
+              <div class="text-center py-12">
+                <i class="fas fa-percent text-gray-300 text-6xl mb-4"></i>
+                <p class="text-gray-500 text-xl">لا توجد نسب لهذه الشركة</p>
+              </div>
+            ` : `
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead class="bg-gray-100">
+                    <tr>
+                      <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">رقم</th>
+                      <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">البنك</th>
+                      <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">نوع التمويل</th>
+                      <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">النسبة %</th>
+                      <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">الحد الأدنى</th>
+                      <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">الحد الأقصى</th>
+                      <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">المدة</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200">
+                    ${rates.results.map((rate, index) => `
+                      <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-4 text-sm">${index + 1}</td>
+                        <td class="px-4 py-4 font-bold">${rate.bank_name || '-'}</td>
+                        <td class="px-4 py-4 text-sm">${rate.financing_type_name || '-'}</td>
+                        <td class="px-4 py-4">
+                          <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                            ${rate.rate}%
+                          </span>
+                        </td>
+                        <td class="px-4 py-4 text-sm">${rate.min_amount ? rate.min_amount.toLocaleString() : '-'} ريال</td>
+                        <td class="px-4 py-4 text-sm">${rate.max_amount ? rate.max_amount.toLocaleString() : '-'} ريال</td>
+                        <td class="px-4 py-4 text-sm">${rate.min_duration || '-'} - ${rate.max_duration || '-'} شهر</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            `}
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+  } catch (error: any) {
+    return c.html(`<h1>Error: ${error.message}</h1>`, 500);
+  }
+});
+
 app.get('/admin/customers', async (c) => {
   try {
     // Temporary: Get tenant_id from query parameter

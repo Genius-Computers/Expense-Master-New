@@ -10090,7 +10090,145 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
         `).bind(s,r).run():await e.env.DB.prepare(`
           INSERT INTO customer_assignments (customer_id, employee_id, assigned_by)
           VALUES (?, ?, 1)
-        `).bind(r,s).run(),a++;return e.json({success:!0,assigned_count:a})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/admin/customers",async e=>{try{const t=e.req.query("tenant_id");let s="SELECT * FROM customers";t&&(s+=" WHERE tenant_id = ?"),s+=" ORDER BY created_at DESC";const a=t?await e.env.DB.prepare(s).bind(t).all():await e.env.DB.prepare(s).all();return e.html(`
+        `).bind(r,s).run(),a++;return e.json({success:!0,assigned_count:a})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/admin/banks",async e=>{try{const t=e.req.query("tenant_id");let s=null;t&&(s=await e.env.DB.prepare("SELECT company_name FROM tenants WHERE id = ?").bind(t).first());let a="SELECT * FROM banks";t&&(a+=" WHERE tenant_id = ?"),a+=" ORDER BY bank_name";const r=t?await e.env.DB.prepare(a).bind(t).all():await e.env.DB.prepare(a).all();return e.html(`
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>البنوك ${s?"- "+s.company_name:""}</title>
+        <script src="https://cdn.tailwindcss.com"><\/script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+      </head>
+      <body class="bg-gray-50">
+        <div class="max-w-7xl mx-auto p-6">
+          <div class="mb-6">
+            <a href="/admin" class="text-blue-600 hover:text-blue-800">← العودة للوحة الرئيسية</a>
+          </div>
+          
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+              <h1 class="text-3xl font-bold text-gray-800">
+                <i class="fas fa-university text-blue-600 ml-2"></i>
+                البنوك ${s?"- "+s.company_name:"(جميع الشركات)"}
+              </h1>
+              <span class="text-2xl font-bold text-blue-600">${r.results.length} بنك</span>
+            </div>
+            
+            ${r.results.length===0?`
+              <div class="text-center py-12">
+                <i class="fas fa-university text-gray-300 text-6xl mb-4"></i>
+                <p class="text-gray-500 text-xl">لا توجد بنوك لهذه الشركة</p>
+              </div>
+            `:`
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead class="bg-gray-100">
+                    <tr>
+                      <th class="px-6 py-3 text-right text-sm font-bold text-gray-700">رقم</th>
+                      <th class="px-6 py-3 text-right text-sm font-bold text-gray-700">اسم البنك</th>
+                      <th class="px-6 py-3 text-right text-sm font-bold text-gray-700">كود البنك</th>
+                      <th class="px-6 py-3 text-right text-sm font-bold text-gray-700">الشركة</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200">
+                    ${r.results.map((l,i)=>`
+                      <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 text-sm">${i+1}</td>
+                        <td class="px-6 py-4 font-bold">${l.bank_name}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">${l.bank_code||"-"}</td>
+                        <td class="px-6 py-4 text-sm">
+                          <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+                            Tenant ${l.tenant_id||"N/A"}
+                          </span>
+                        </td>
+                      </tr>
+                    `).join("")}
+                  </tbody>
+                </table>
+              </div>
+            `}
+          </div>
+        </div>
+      </body>
+      </html>
+    `)}catch(t){return e.html(`<h1>Error: ${t.message}</h1>`,500)}});p.get("/admin/rates",async e=>{try{const t=e.req.query("tenant_id");let s=null;t&&(s=await e.env.DB.prepare("SELECT company_name FROM tenants WHERE id = ?").bind(t).first());let a=`
+      SELECT 
+        r.*,
+        b.bank_name,
+        f.name as financing_type_name
+      FROM bank_financing_rates r
+      LEFT JOIN banks b ON r.bank_id = b.id
+      LEFT JOIN financing_types f ON r.financing_type_id = f.id
+    `;t&&(a+=" WHERE r.tenant_id = ?"),a+=" ORDER BY b.bank_name, f.name";const r=t?await e.env.DB.prepare(a).bind(t).all():await e.env.DB.prepare(a).all();return e.html(`
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>النسب والأسعار ${s?"- "+s.company_name:""}</title>
+        <script src="https://cdn.tailwindcss.com"><\/script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+      </head>
+      <body class="bg-gray-50">
+        <div class="max-w-7xl mx-auto p-6">
+          <div class="mb-6">
+            <a href="/admin" class="text-blue-600 hover:text-blue-800">← العودة للوحة الرئيسية</a>
+          </div>
+          
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+              <h1 class="text-3xl font-bold text-gray-800">
+                <i class="fas fa-percent text-green-600 ml-2"></i>
+                النسب والأسعار ${s?"- "+s.company_name:"(جميع الشركات)"}
+              </h1>
+              <span class="text-2xl font-bold text-green-600">${r.results.length} نسبة</span>
+            </div>
+            
+            ${r.results.length===0?`
+              <div class="text-center py-12">
+                <i class="fas fa-percent text-gray-300 text-6xl mb-4"></i>
+                <p class="text-gray-500 text-xl">لا توجد نسب لهذه الشركة</p>
+              </div>
+            `:`
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead class="bg-gray-100">
+                    <tr>
+                      <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">رقم</th>
+                      <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">البنك</th>
+                      <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">نوع التمويل</th>
+                      <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">النسبة %</th>
+                      <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">الحد الأدنى</th>
+                      <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">الحد الأقصى</th>
+                      <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">المدة</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200">
+                    ${r.results.map((l,i)=>`
+                      <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-4 text-sm">${i+1}</td>
+                        <td class="px-4 py-4 font-bold">${l.bank_name||"-"}</td>
+                        <td class="px-4 py-4 text-sm">${l.financing_type_name||"-"}</td>
+                        <td class="px-4 py-4">
+                          <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                            ${l.rate}%
+                          </span>
+                        </td>
+                        <td class="px-4 py-4 text-sm">${l.min_amount?l.min_amount.toLocaleString():"-"} ريال</td>
+                        <td class="px-4 py-4 text-sm">${l.max_amount?l.max_amount.toLocaleString():"-"} ريال</td>
+                        <td class="px-4 py-4 text-sm">${l.min_duration||"-"} - ${l.max_duration||"-"} شهر</td>
+                      </tr>
+                    `).join("")}
+                  </tbody>
+                </table>
+              </div>
+            `}
+          </div>
+        </div>
+      </body>
+      </html>
+    `)}catch(t){return e.html(`<h1>Error: ${t.message}</h1>`,500)}});p.get("/admin/customers",async e=>{try{const t=e.req.query("tenant_id");let s="SELECT * FROM customers";t&&(s+=" WHERE tenant_id = ?"),s+=" ORDER BY created_at DESC";const a=t?await e.env.DB.prepare(s).bind(t).all():await e.env.DB.prepare(s).all();return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
