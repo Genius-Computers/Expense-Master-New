@@ -5103,7 +5103,19 @@ app.post('/api/customer-assignment/bulk', async (c) => {
 
 app.get('/admin/customers', async (c) => {
   try {
-    const customers = await c.env.DB.prepare('SELECT * FROM customers ORDER BY created_at DESC').all()
+    // Temporary: Get tenant_id from query parameter
+    const tenantId = c.req.query('tenant_id');
+    
+    // Filter customers by tenant_id if provided
+    let query = 'SELECT * FROM customers';
+    if (tenantId) {
+      query += ' WHERE tenant_id = ?';
+    }
+    query += ' ORDER BY created_at DESC';
+    
+    const customers = tenantId 
+      ? await c.env.DB.prepare(query).bind(tenantId).all()
+      : await c.env.DB.prepare(query).all()
     
     return c.html(`
       <!DOCTYPE html>
@@ -5128,7 +5140,7 @@ app.get('/admin/customers', async (c) => {
               </h1>
               
               <div class="flex gap-3">
-                <a href="/admin/customer-assignment" 
+                <a href="/admin/customer-assignment${tenantId ? '?tenant_id=' + tenantId : ''}" 
                    class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-md">
                   <i class="fas fa-users-cog ml-2"></i>
                   توزيع العملاء
@@ -6068,7 +6080,11 @@ app.get('/admin/requests/:id/edit', async (c) => {
 
 app.get('/admin/requests', async (c) => {
   try {
-    const requests = await c.env.DB.prepare(`
+    // Temporary: Get tenant_id from query parameter
+    const tenantId = c.req.query('tenant_id');
+    
+    // Build query with optional tenant filter
+    let query = `
       SELECT 
         fr.id,
         fr.customer_id,
@@ -6082,8 +6098,17 @@ app.get('/admin/requests', async (c) => {
       FROM financing_requests fr
       LEFT JOIN customers c ON fr.customer_id = c.id
       LEFT JOIN banks b ON fr.selected_bank_id = b.id
-      ORDER BY fr.created_at DESC
-    `).all()
+    `;
+    
+    if (tenantId) {
+      query += ' WHERE fr.tenant_id = ?';
+    }
+    
+    query += ' ORDER BY fr.created_at DESC';
+    
+    const requests = tenantId
+      ? await c.env.DB.prepare(query).bind(tenantId).all()
+      : await c.env.DB.prepare(query).all()
     
     return c.html(`
       <!DOCTYPE html>

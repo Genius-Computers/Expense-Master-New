@@ -10090,7 +10090,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
         `).bind(s,r).run():await e.env.DB.prepare(`
           INSERT INTO customer_assignments (customer_id, employee_id, assigned_by)
           VALUES (?, ?, 1)
-        `).bind(r,s).run(),a++;return e.json({success:!0,assigned_count:a})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/admin/customers",async e=>{try{const t=await e.env.DB.prepare("SELECT * FROM customers ORDER BY created_at DESC").all();return e.html(`
+        `).bind(r,s).run(),a++;return e.json({success:!0,assigned_count:a})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/admin/customers",async e=>{try{const t=e.req.query("tenant_id");let s="SELECT * FROM customers";t&&(s+=" WHERE tenant_id = ?"),s+=" ORDER BY created_at DESC";const a=t?await e.env.DB.prepare(s).bind(t).all():await e.env.DB.prepare(s).all();return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -10109,11 +10109,11 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
             <div class="flex justify-between items-center mb-4">
               <h1 class="text-3xl font-bold text-gray-800">
                 <i class="fas fa-users text-green-600 ml-2"></i>
-                العملاء (<span id="totalCount">${t.results.length}</span>)
+                العملاء (<span id="totalCount">${a.results.length}</span>)
               </h1>
               
               <div class="flex gap-3">
-                <a href="/admin/customer-assignment" 
+                <a href="/admin/customer-assignment${t?"?tenant_id="+t:""}" 
                    class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-md">
                   <i class="fas fa-users-cog ml-2"></i>
                   توزيع العملاء
@@ -10181,25 +10181,25 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
-                ${t.results.map(s=>`
-                  <tr class="hover:bg-gray-50" data-name="${s.full_name||""}" data-phone="${s.phone||""}" data-email="${s.email||""}">
-                    <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900">${s.id}</td>
-                    <td class="px-6 py-4 whitespace-nowrap font-medium">${s.full_name||"-"}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${s.phone||"-"}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${s.email||"-"}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${new Date(s.created_at).toLocaleDateString("ar-SA")}</td>
+                ${a.results.map(r=>`
+                  <tr class="hover:bg-gray-50" data-name="${r.full_name||""}" data-phone="${r.phone||""}" data-email="${r.email||""}">
+                    <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900">${r.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-medium">${r.full_name||"-"}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${r.phone||"-"}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${r.email||"-"}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${new Date(r.created_at).toLocaleDateString("ar-SA")}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-center">
                       <div class="flex items-center justify-center gap-2">
-                        <a href="/admin/customers/${s.id}/report" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-sm" title="تقرير العميل الكامل">
+                        <a href="/admin/customers/${r.id}/report" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-sm" title="تقرير العميل الكامل">
                           <i class="fas fa-file-alt"></i> تقرير
                         </a>
-                        <a href="/admin/customers/${s.id}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                        <a href="/admin/customers/${r.id}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
                           <i class="fas fa-eye"></i> عرض
                         </a>
-                        <a href="/admin/customers/${s.id}/edit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm">
+                        <a href="/admin/customers/${r.id}/edit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm">
                           <i class="fas fa-edit"></i> تعديل
                         </a>
-                        <a href="/admin/customers/${s.id}/delete" onclick="return confirm('هل أنت متأكد من حذف هذا العميل؟')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
+                        <a href="/admin/customers/${r.id}/delete" onclick="return confirm('هل أنت متأكد من حذف هذا العميل؟')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
                           <i class="fas fa-trash"></i> حذف
                         </a>
                       </div>
@@ -10266,7 +10266,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
           function exportToCSV() {
             const data = [
               ['#', 'الاسم', 'الهاتف', 'البريد الإلكتروني', 'الرقم الوطني', 'تاريخ التسجيل'],
-              ${t.results.map(s=>`['${s.id}', '${s.full_name||"-"}', '${s.phone||"-"}', '${s.email||"-"}', '${s.national_id||"-"}', '${new Date(s.created_at).toLocaleDateString("ar-SA")}']`).join(`,
+              ${a.results.map(r=>`['${r.id}', '${r.full_name||"-"}', '${r.phone||"-"}', '${r.email||"-"}', '${r.national_id||"-"}', '${new Date(r.created_at).toLocaleDateString("ar-SA")}']`).join(`,
               `)}
             ];
             
@@ -11015,7 +11015,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch(t){return console.error("Edit request page error:",t),e.html(`<h1>خطأ في تحميل الصفحة: ${t.message}</h1>`)}});p.get("/admin/requests",async e=>{try{const t=await e.env.DB.prepare(`
+    `)}catch(t){return console.error("Edit request page error:",t),e.html(`<h1>خطأ في تحميل الصفحة: ${t.message}</h1>`)}});p.get("/admin/requests",async e=>{try{const t=e.req.query("tenant_id");let s=`
       SELECT 
         fr.id,
         fr.customer_id,
@@ -11029,8 +11029,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
       FROM financing_requests fr
       LEFT JOIN customers c ON fr.customer_id = c.id
       LEFT JOIN banks b ON fr.selected_bank_id = b.id
-      ORDER BY fr.created_at DESC
-    `).all();return e.html(`
+    `;t&&(s+=" WHERE fr.tenant_id = ?"),s+=" ORDER BY fr.created_at DESC";const a=t?await e.env.DB.prepare(s).bind(t).all():await e.env.DB.prepare(s).all();return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -11050,7 +11049,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
             <div class="flex justify-between items-center mb-4">
               <h1 class="text-3xl font-bold text-gray-800">
                 <i class="fas fa-file-invoice text-purple-600 ml-2"></i>
-                طلبات التمويل (<span id="totalCount">${t.results.length}</span>)
+                طلبات التمويل (<span id="totalCount">${a.results.length}</span>)
               </h1>
               
               <div class="flex gap-3">
@@ -11118,36 +11117,36 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
-                ${t.results.map(s=>{var r;const a=s.status==="approved"?"مقبول":s.status==="pending"?"قيد المراجعة":"مرفوض";return`
+                ${a.results.map(r=>{var i;const l=r.status==="approved"?"مقبول":r.status==="pending"?"قيد المراجعة":"مرفوض";return`
                   <tr class="hover:bg-gray-50" 
-                      data-customer="${s.customer_name||""}" 
-                      data-bank="${s.bank_name||""}" 
-                      data-status="${a}">
-                    <td class="px-6 py-4 whitespace-nowrap font-medium">${s.customer_name||"عميل #"+s.customer_id}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${s.bank_name||"بنك #"+(s.selected_bank_id||"-")}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${(r=s.requested_amount)==null?void 0:r.toLocaleString("ar-SA")} ريال</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${s.duration_months} شهر</td>
+                      data-customer="${r.customer_name||""}" 
+                      data-bank="${r.bank_name||""}" 
+                      data-status="${l}">
+                    <td class="px-6 py-4 whitespace-nowrap font-medium">${r.customer_name||"عميل #"+r.customer_id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${r.bank_name||"بنك #"+(r.selected_bank_id||"-")}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${(i=r.requested_amount)==null?void 0:i.toLocaleString("ar-SA")} ريال</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${r.duration_months} شهر</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <span class="px-2 py-1 text-xs rounded-full ${s.status==="approved"?"bg-green-100 text-green-800":s.status==="pending"?"bg-yellow-100 text-yellow-800":"bg-red-100 text-red-800"}">
-                        ${a}
+                      <span class="px-2 py-1 text-xs rounded-full ${r.status==="approved"?"bg-green-100 text-green-800":r.status==="pending"?"bg-yellow-100 text-yellow-800":"bg-red-100 text-red-800"}">
+                        ${l}
                       </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">${new Date(s.created_at).toLocaleDateString("ar-SA")}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${new Date(r.created_at).toLocaleDateString("ar-SA")}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex gap-2 justify-center">
-                        <a href="/admin/requests/${s.id}/timeline" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-3 py-2 rounded text-xs transition-all shadow-md" title="الجدول الزمني التفصيلي">
+                        <a href="/admin/requests/${r.id}/timeline" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-3 py-2 rounded text-xs transition-all shadow-md" title="الجدول الزمني التفصيلي">
                           <i class="fas fa-clock"></i> ⏱️ Timeline
                         </a>
-                        <a href="/admin/requests/${s.id}/report" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded text-xs transition-all" title="تقرير الطلب الكامل">
+                        <a href="/admin/requests/${r.id}/report" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded text-xs transition-all" title="تقرير الطلب الكامل">
                           <i class="fas fa-file-alt"></i> تقرير
                         </a>
-                        <a href="/admin/requests/${s.id}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-xs transition-all">
+                        <a href="/admin/requests/${r.id}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-xs transition-all">
                           <i class="fas fa-eye"></i> عرض
                         </a>
-                        <a href="/admin/requests/${s.id}/edit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded text-xs transition-all">
+                        <a href="/admin/requests/${r.id}/edit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded text-xs transition-all">
                           <i class="fas fa-edit"></i> تعديل
                         </a>
-                        <a href="/admin/requests/${s.id}/delete" onclick="return confirm('هل أنت متأكد من الحذف؟')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-xs transition-all">
+                        <a href="/admin/requests/${r.id}/delete" onclick="return confirm('هل أنت متأكد من الحذف؟')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-xs transition-all">
                           <i class="fas fa-trash"></i> حذف
                         </a>
                       </div>
@@ -11212,7 +11211,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
           function exportToCSV() {
             const data = [
               ['العميل', 'البنك', 'المبلغ المطلوب', 'المدة (شهور)', 'الحالة', 'التاريخ'],
-              ${t.results.map(s=>{const a=s.status==="approved"?"مقبول":s.status==="pending"?"قيد المراجعة":"مرفوض",r=s.customer_name||`عميل #${s.customer_id}`,l=s.bank_name||`بنك #${s.selected_bank_id||"-"}`;return`['${r}', '${l}', '${s.requested_amount||0}', '${s.duration_months}', '${a}', '${new Date(s.created_at).toLocaleDateString("ar-SA")}']`}).join(`,
+              ${a.results.map(r=>{const l=r.status==="approved"?"مقبول":r.status==="pending"?"قيد المراجعة":"مرفوض",i=r.customer_name||`عميل #${r.customer_id}`,o=r.bank_name||`بنك #${r.selected_bank_id||"-"}`;return`['${i}', '${o}', '${r.requested_amount||0}', '${r.duration_months}', '${l}', '${new Date(r.created_at).toLocaleDateString("ar-SA")}']`}).join(`,
               `)}
             ];
             
