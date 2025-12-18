@@ -3564,13 +3564,33 @@ app.get('/api/reports/requests-followup', async (c) => {
       SELECT 
         fr.id,
         fr.created_at,
+        fr.approved_at,
+        fr.rejected_at,
+        fr.reviewed_at,
         fr.status,
         fr.requested_amount,
         c.full_name as customer_name,
         c.phone as customer_phone,
         u.full_name as employee_name,
         u.username as employee_username,
-        CAST((julianday('now') - julianday(fr.created_at)) AS INTEGER) as days_elapsed
+        CASE 
+          WHEN fr.status = 'approved' AND fr.approved_at IS NOT NULL THEN fr.approved_at
+          WHEN fr.status = 'rejected' AND fr.rejected_at IS NOT NULL THEN fr.rejected_at
+          WHEN fr.reviewed_at IS NOT NULL THEN fr.reviewed_at
+          ELSE NULL
+        END as last_update,
+        CASE 
+          WHEN fr.status = 'approved' AND fr.approved_at IS NOT NULL THEN 
+            CAST((julianday(fr.approved_at) - julianday(fr.created_at)) AS INTEGER)
+          WHEN fr.status = 'rejected' AND fr.rejected_at IS NOT NULL THEN 
+            CAST((julianday(fr.rejected_at) - julianday(fr.created_at)) AS INTEGER)
+          ELSE 
+            CAST((julianday('now') - julianday(fr.created_at)) AS INTEGER)
+        END as days_elapsed,
+        CASE 
+          WHEN fr.status IN ('approved', 'rejected') THEN 1
+          ELSE 0
+        END as is_closed
       FROM financing_requests fr
       LEFT JOIN customers c ON fr.customer_id = c.id
       LEFT JOIN customer_assignments ca ON c.id = ca.customer_id
@@ -3664,7 +3684,8 @@ app.get('/admin/reports/requests-followup', async (c) => {
                     <th class="px-4 py-3 text-right text-sm font-bold">رقم الهاتف</th>
                     <th class="px-4 py-3 text-right text-sm font-bold">الموظف المخصص</th>
                     <th class="px-4 py-3 text-right text-sm font-bold">تاريخ تقديم الطلب</th>
-                    <th class="px-4 py-3 text-right text-sm font-bold">المدة المنقضية</th>
+                    <th class="px-4 py-3 text-right text-sm font-bold">آخر تحديث</th>
+                    <th class="px-4 py-3 text-right text-sm font-bold">إجمالي الوقت</th>
                     <th class="px-4 py-3 text-right text-sm font-bold">المبلغ المطلوب</th>
                     <th class="px-4 py-3 text-right text-sm font-bold">حالة الطلب</th>
                   </tr>
@@ -3749,8 +3770,33 @@ app.get('/admin/reports/requests-followup', async (c) => {
               const createdDate = new Date(row.created_at);
               const formattedDate = createdDate.toLocaleDateString('ar-SA') + ' ' + createdDate.toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'});
               
+              // Format last_update
+              const lastUpdateDate = row.last_update ? new Date(row.last_update) : null;
+              const formattedLastUpdate = lastUpdateDate ? 
+                lastUpdateDate.toLocaleDateString('ar-SA') + ' ' + lastUpdateDate.toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'}) :
+                '<span class="text-gray-400">-</span>';
+              
               const daysElapsed = row.days_elapsed || 0;
-              const timeElapsed = daysElapsed === 0 ? 'اليوم' : daysElapsed === 1 ? 'أمس' : daysElapsed + ' يوم';
+              const isClosed = row.is_closed === 1;
+              
+              // Format time elapsed based on status
+              let timeElapsed = '';
+              if (daysElapsed === 0) {
+                timeElapsed = 'اليوم';
+              } else if (daysElapsed === 1) {
+                timeElapsed = 'يوم واحد';
+              } else {
+                timeElapsed = daysElapsed + ' يوم';
+              }
+              
+              // Add indicator if closed
+              const timeDisplay = isClosed ? 
+                \`<i class="fas fa-stopwatch ml-1"></i>\${timeElapsed}\` : 
+                \`<i class="fas fa-clock ml-1"></i>\${timeElapsed}\`;
+              
+              const timeClass = isClosed ? 
+                'px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-bold' : 
+                'px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-bold';
               
               return \`
                 <tr class="hover:bg-gray-50">
@@ -3766,11 +3812,14 @@ app.get('/admin/reports/requests-followup', async (c) => {
                     \` : '<span class="text-gray-400">غير مخصص</span>'}
                   </td>
                   <td class="px-4 py-4 text-sm text-gray-600">\${formattedDate}</td>
+                  <td class="px-4 py-4 text-sm text-gray-600">
+                    \${formattedLastUpdate}
+                  </td>
                   <td class="px-4 py-4">
-                    <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-bold">
-                      <i class="fas fa-clock ml-1"></i>
-                      \${timeElapsed}
+                    <span class="\${timeClass}">
+                      \${timeDisplay}
                     </span>
+                    \${isClosed ? '<div class="text-xs text-gray-500 mt-1">⏸️ منتهي</div>' : '<div class="text-xs text-purple-600 mt-1">⏱️ جاري العد</div>'}
                   </td>
                   <td class="px-4 py-4 font-bold text-green-600">
                     \${row.requested_amount ? row.requested_amount.toLocaleString('ar-SA') + ' ريال' : '-'}
