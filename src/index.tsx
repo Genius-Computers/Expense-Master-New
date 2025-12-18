@@ -6276,6 +6276,42 @@ app.get('/admin/customers', async (c) => {
         <title>العملاء</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        <style>
+          /* Custom Scrollbar - Enhanced */
+          .overflow-x-auto {
+            overflow-x: scroll !important;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #10b981 #f7fafc;
+          }
+          
+          .overflow-x-auto::-webkit-scrollbar {
+            height: 12px;
+            width: 12px;
+          }
+          
+          .overflow-x-auto::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 10px;
+            margin: 0 10px;
+          }
+          
+          .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+          }
+          
+          .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #059669 0%, #047857 100%);
+            border-color: #d1d5db;
+          }
+          
+          .overflow-x-auto table {
+            min-width: 1200px;
+            width: max-content;
+          }
+        </style>
       </head>
       <body class="bg-gray-50">
         <script>
@@ -7288,6 +7324,42 @@ app.get('/admin/requests', async (c) => {
         <title>طلبات التمويل</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        <style>
+          /* Custom Scrollbar - Enhanced */
+          .overflow-x-auto {
+            overflow-x: scroll !important;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #3b82f6 #f7fafc;
+          }
+          
+          .overflow-x-auto::-webkit-scrollbar {
+            height: 12px;
+            width: 12px;
+          }
+          
+          .overflow-x-auto::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 10px;
+            margin: 0 10px;
+          }
+          
+          .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+          }
+          
+          .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+            border-color: #d1d5db;
+          }
+          
+          .overflow-x-auto table {
+            min-width: 1200px;
+            width: max-content;
+          }
+        </style>
       </head>
       <body class="bg-gray-50">
         <script>

@@ -300,10 +300,11 @@ export function generateEditRatePage(tenantId: string, rate: any, banks: any[], 
               alert('✅ تم تحديث النسبة بنجاح!');
               window.location.href = '/admin/rates?tenant_id=${tenantId}';
             } else {
-              alert('❌ خطأ: ' + result.message);
+              alert('❌ خطأ: ' + (result.message || 'حدث خطأ غير معروف'));
             }
           } catch (error) {
-            alert('❌ حدث خطأ: ' + error.message);
+            console.error('Edit rate error:', error);
+            alert('❌ حدث خطأ: ' + (error.message || 'فشل الاتصال بالخادم'));
           }
         });
       </script>
