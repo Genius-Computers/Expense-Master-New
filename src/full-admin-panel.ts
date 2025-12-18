@@ -271,13 +271,21 @@ export const fullAdminPanel = `<!DOCTYPE html>
                 </div>
                 
                 <!-- Additional Stats -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-gray-600">البنوك النشطة</span>
                             <i class="fas fa-university text-blue-500"></i>
                         </div>
                         <p class="text-2xl font-bold text-gray-800" id="stat-banks">0</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-600">الشركات النشطة</span>
+                            <i class="fas fa-building text-emerald-500"></i>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800" id="stat-tenants">0</p>
                     </div>
                     
                     <div class="bg-white rounded-xl shadow-lg p-6">
@@ -1596,6 +1604,7 @@ export const fullAdminPanel = `<!DOCTYPE html>
                     document.getElementById('stat-pending').textContent = stats.pending_requests;
                     document.getElementById('stat-approved').textContent = stats.approved_requests;
                     document.getElementById('stat-banks').textContent = stats.active_banks;
+                    document.getElementById('stat-tenants').textContent = stats.active_tenants || 0;
                     document.getElementById('stat-subscriptions').textContent = stats.active_subscriptions;
                     document.getElementById('stat-users').textContent = stats.active_users;
                     document.getElementById('stat-calculations').textContent = stats.total_calculations;

@@ -2862,6 +2862,9 @@ app.get('/api/dashboard/stats', async (c) => {
       ? await c.env.DB.prepare(banks_query).bind(tenant_id).first()
       : await c.env.DB.prepare(banks_query).first()
     
+    // Tenants - count active companies (only for super admin)
+    const tenants_count = await c.env.DB.prepare('SELECT COUNT(*) as count FROM tenants WHERE status = "active"').first()
+    
     // Calculations - count all (no tenant_id column in calculations table)
     const calculations_count = await c.env.DB.prepare('SELECT COUNT(*) as count FROM calculations').first()
     
@@ -2875,6 +2878,7 @@ app.get('/api/dashboard/stats', async (c) => {
         active_subscriptions: subscriptions_count?.count || 0,
         total_calculations: calculations_count?.count || 0,
         active_banks: banks_count?.count || 0,
+        active_tenants: tenants_count?.count || 0,
         active_users: users_count?.count || 0
       }
     })
@@ -5344,7 +5348,15 @@ app.get('/admin/rates', async (c) => {
                 <i class="fas fa-percent text-green-600 ml-2"></i>
                 النسب والأسعار ${tenantInfo ? '- ' + tenantInfo.company_name : '(جميع الشركات)'}
               </h1>
-              <span class="text-2xl font-bold text-green-600">${rates.results.length} نسبة</span>
+              <div class="flex items-center gap-4">
+                <span class="text-2xl font-bold text-green-600">${rates.results.length} نسبة</span>
+                ${tenantId ? `
+                  <a href="/admin/rates/add?tenant_id=${tenantId}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-lg">
+                    <i class="fas fa-plus ml-2"></i>
+                    إضافة نسبة جديدة
+                  </a>
+                ` : ''}
+              </div>
             </div>
             
             ${rates.results.length === 0 ? `
@@ -5364,6 +5376,7 @@ app.get('/admin/rates', async (c) => {
                       <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">الحد الأدنى</th>
                       <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">الحد الأقصى</th>
                       <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">المدة</th>
+                      ${tenantId ? '<th class="px-4 py-3 text-right text-sm font-bold text-gray-700">إجراءات</th>' : ''}
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-200">
@@ -5380,6 +5393,16 @@ app.get('/admin/rates', async (c) => {
                         <td class="px-4 py-4 text-sm">${rate.min_amount ? rate.min_amount.toLocaleString() : '-'} ريال</td>
                         <td class="px-4 py-4 text-sm">${rate.max_amount ? rate.max_amount.toLocaleString() : '-'} ريال</td>
                         <td class="px-4 py-4 text-sm">${rate.min_duration || '-'} - ${rate.max_duration || '-'} شهر</td>
+                        ${tenantId ? `
+                          <td class="px-4 py-4 text-sm">
+                            <a href="/admin/rates/edit/${rate.id}?tenant_id=${tenantId}" class="text-blue-600 hover:text-blue-800 ml-2" title="تعديل">
+                              <i class="fas fa-edit"></i>
+                            </a>
+                            <button onclick="deleteRate(${rate.id})" class="text-red-600 hover:text-red-800" title="حذف">
+                              <i class="fas fa-trash"></i>
+                            </button>
+                          </td>
+                        ` : ''}
                       </tr>
                     `).join('')}
                   </tbody>
