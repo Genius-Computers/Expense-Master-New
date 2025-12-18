@@ -41,9 +41,14 @@ export const paymentsPage = `<!DOCTYPE html>
             border-color: #d1d5db;
         }
         
-        /* Force scrollbar visibility */
+        /* Force scrollbar to always show */
+        .overflow-x-auto {
+            overflow-x: scroll !important; /* Always show scrollbar */
+        }
+        
         .overflow-x-auto table {
-            min-width: 100%;
+            min-width: 1200px; /* Force table to be wide enough for scrollbar */
+            width: max-content;
         }
     </style>
 </head>

@@ -1,4 +1,4 @@
-var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in e?ht(e,t,{enumerable:!0,configurable:!0,writable:!0,value:s}):e[t]=s;var x=(e,t,s)=>yt(e,typeof t!="symbol"?t+"":t,s),qe=(e,t,s)=>t.has(e)||Ae("Cannot "+s);var u=(e,t,s)=>(qe(e,t,"read from private field"),s?s.call(e):t.get(e)),v=(e,t,s)=>t.has(e)?Ae("Cannot add the same private member more than once"):t instanceof WeakSet?t.add(e):t.set(e,s),f=(e,t,s,a)=>(qe(e,t,"write to private field"),a?a.call(e,s):t.set(e,s),s),k=(e,t,s)=>(qe(e,t,"access private method"),s);var Ne=(e,t,s,a)=>({set _(r){f(e,t,r,s)},get _(){return u(e,t,a)}});var Pe=(e,t,s)=>(a,r)=>{let l=-1;return n(0);async function n(i){if(i<=l)throw new Error("next() called multiple times");l=i;let o,c=!1,d;if(e[i]?(d=e[i][0][0],a.req.routeIndex=i):d=i===e.length&&r||void 0,d)try{o=await d(a,()=>n(i+1))}catch(m){if(m instanceof Error&&t)a.error=m,o=await t(m,a),c=!0;else throw m}else a.finalized===!1&&s&&(o=await s(a));return o&&(a.finalized===!1||c)&&(a.res=o),a}},vt=Symbol(),wt=async(e,t=Object.create(null))=>{const{all:s=!1,dot:a=!1}=t,l=(e instanceof st?e.raw.headers:e.headers).get("Content-Type");return l!=null&&l.startsWith("multipart/form-data")||l!=null&&l.startsWith("application/x-www-form-urlencoded")?_t(e,{all:s,dot:a}):{}};async function _t(e,t){const s=await e.formData();return s?kt(s,t):{}}function kt(e,t){const s=Object.create(null);return e.forEach((a,r)=>{t.all||r.endsWith("[]")?Et(s,r,a):s[r]=a}),t.dot&&Object.entries(s).forEach(([a,r])=>{a.includes(".")&&(St(s,a,r),delete s[a])}),s}var Et=(e,t,s)=>{e[t]!==void 0?Array.isArray(e[t])?e[t].push(s):e[t]=[e[t],s]:t.endsWith("[]")?e[t]=[s]:e[t]=s},St=(e,t,s)=>{let a=e;const r=t.split(".");r.forEach((l,n)=>{n===r.length-1?a[l]=s:((!a[l]||typeof a[l]!="object"||Array.isArray(a[l])||a[l]instanceof File)&&(a[l]=Object.create(null)),a=a[l])})},Xe=e=>{const t=e.split("/");return t[0]===""&&t.shift(),t},Tt=e=>{const{groups:t,path:s}=It(e),a=Xe(s);return $t(a,t)},It=e=>{const t=[];return e=e.replace(/\{[^}]+\}/g,(s,a)=>{const r=`@${a}`;return t.push([r,s]),r}),{groups:t,path:e}},$t=(e,t)=>{for(let s=t.length-1;s>=0;s--){const[a]=t[s];for(let r=e.length-1;r>=0;r--)if(e[r].includes(a)){e[r]=e[r].replace(a,t[s][1]);break}}return e},Se={},Dt=(e,t)=>{if(e==="*")return"*";const s=e.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);if(s){const a=`${e}#${t}`;return Se[a]||(s[2]?Se[a]=t&&t[0]!==":"&&t[0]!=="*"?[a,s[1],new RegExp(`^${s[2]}(?=/${t})`)]:[e,s[1],new RegExp(`^${s[2]}$`)]:Se[a]=[e,s[1],!0]),Se[a]}return null},Fe=(e,t)=>{try{return t(e)}catch{return e.replace(/(?:%[0-9A-Fa-f]{2})+/g,s=>{try{return t(s)}catch{return s}})}},Bt=e=>Fe(e,decodeURI),Ke=e=>{const t=e.url,s=t.indexOf("/",t.indexOf(":")+4);let a=s;for(;a<t.length;a++){const r=t.charCodeAt(a);if(r===37){const l=t.indexOf("?",a),n=t.slice(s,l===-1?void 0:l);return Bt(n.includes("%25")?n.replace(/%25/g,"%2525"):n)}else if(r===63)break}return t.slice(s,a)},Rt=e=>{const t=Ke(e);return t.length>1&&t.at(-1)==="/"?t.slice(0,-1):t},le=(e,t,...s)=>(s.length&&(t=le(t,...s)),`${(e==null?void 0:e[0])==="/"?"":"/"}${e}${t==="/"?"":`${(e==null?void 0:e.at(-1))==="/"?"":"/"}${(t==null?void 0:t[0])==="/"?t.slice(1):t}`}`),Ze=e=>{if(e.charCodeAt(e.length-1)!==63||!e.includes(":"))return null;const t=e.split("/"),s=[];let a="";return t.forEach(r=>{if(r!==""&&!/\:/.test(r))a+="/"+r;else if(/\:/.test(r))if(/\?/.test(r)){s.length===0&&a===""?s.push("/"):s.push(a);const l=r.replace("?","");a+="/"+l,s.push(a)}else a+="/"+r}),s.filter((r,l,n)=>n.indexOf(r)===l)},Le=e=>/[%+]/.test(e)?(e.indexOf("+")!==-1&&(e=e.replace(/\+/g," ")),e.indexOf("%")!==-1?Fe(e,tt):e):e,et=(e,t,s)=>{let a;if(!s&&t&&!/[%+]/.test(t)){let n=e.indexOf("?",8);if(n===-1)return;for(e.startsWith(t,n+1)||(n=e.indexOf(`&${t}`,n+1));n!==-1;){const i=e.charCodeAt(n+t.length+1);if(i===61){const o=n+t.length+2,c=e.indexOf("&",o);return Le(e.slice(o,c===-1?void 0:c))}else if(i==38||isNaN(i))return"";n=e.indexOf(`&${t}`,n+1)}if(a=/[%+]/.test(e),!a)return}const r={};a??(a=/[%+]/.test(e));let l=e.indexOf("?",8);for(;l!==-1;){const n=e.indexOf("&",l+1);let i=e.indexOf("=",l);i>n&&n!==-1&&(i=-1);let o=e.slice(l+1,i===-1?n===-1?void 0:n:i);if(a&&(o=Le(o)),l=n,o==="")continue;let c;i===-1?c="":(c=e.slice(i+1,n===-1?void 0:n),a&&(c=Le(c))),s?(r[o]&&Array.isArray(r[o])||(r[o]=[]),r[o].push(c)):r[o]??(r[o]=c)}return t?r[t]:r},Ct=et,qt=(e,t)=>et(e,t,!0),tt=decodeURIComponent,Ue=e=>Fe(e,tt),ie,C,U,at,rt,Oe,W,Ye,st=(Ye=class{constructor(e,t="/",s=[[]]){v(this,U);x(this,"raw");v(this,ie);v(this,C);x(this,"routeIndex",0);x(this,"path");x(this,"bodyCache",{});v(this,W,e=>{const{bodyCache:t,raw:s}=this,a=t[e];if(a)return a;const r=Object.keys(t)[0];return r?t[r].then(l=>(r==="json"&&(l=JSON.stringify(l)),new Response(l)[e]())):t[e]=s[e]()});this.raw=e,this.path=t,f(this,C,s),f(this,ie,{})}param(e){return e?k(this,U,at).call(this,e):k(this,U,rt).call(this)}query(e){return Ct(this.url,e)}queries(e){return qt(this.url,e)}header(e){if(e)return this.raw.headers.get(e)??void 0;const t={};return this.raw.headers.forEach((s,a)=>{t[a]=s}),t}async parseBody(e){var t;return(t=this.bodyCache).parsedBody??(t.parsedBody=await wt(this,e))}json(){return u(this,W).call(this,"text").then(e=>JSON.parse(e))}text(){return u(this,W).call(this,"text")}arrayBuffer(){return u(this,W).call(this,"arrayBuffer")}blob(){return u(this,W).call(this,"blob")}formData(){return u(this,W).call(this,"formData")}addValidatedData(e,t){u(this,ie)[e]=t}valid(e){return u(this,ie)[e]}get url(){return this.raw.url}get method(){return this.raw.method}get[vt](){return u(this,C)}get matchedRoutes(){return u(this,C)[0].map(([[,e]])=>e)}get routePath(){return u(this,C)[0].map(([[,e]])=>e)[this.routeIndex].path}},ie=new WeakMap,C=new WeakMap,U=new WeakSet,at=function(e){const t=u(this,C)[0][this.routeIndex][1][e],s=k(this,U,Oe).call(this,t);return s&&/\%/.test(s)?Ue(s):s},rt=function(){const e={},t=Object.keys(u(this,C)[0][this.routeIndex][1]);for(const s of t){const a=k(this,U,Oe).call(this,u(this,C)[0][this.routeIndex][1][s]);a!==void 0&&(e[s]=/\%/.test(a)?Ue(a):a)}return e},Oe=function(e){return u(this,C)[1]?u(this,C)[1][e]:e},W=new WeakMap,Ye),Lt={Stringify:1},lt=async(e,t,s,a,r)=>{typeof e=="object"&&!(e instanceof String)&&(e instanceof Promise||(e=e.toString()),e instanceof Promise&&(e=await e));const l=e.callbacks;return l!=null&&l.length?(r?r[0]+=e:r=[e],Promise.all(l.map(i=>i({phase:t,buffer:r,context:a}))).then(i=>Promise.all(i.filter(Boolean).map(o=>lt(o,t,!1,a,r))).then(()=>r[0]))):Promise.resolve(e)},jt="text/plain; charset=UTF-8",je=(e,t)=>({"Content-Type":e,...t}),ye,ve,M,de,A,B,we,ce,pe,K,_e,ke,Y,ne,ze,Ot=(ze=class{constructor(e,t){v(this,Y);v(this,ye);v(this,ve);x(this,"env",{});v(this,M);x(this,"finalized",!1);x(this,"error");v(this,de);v(this,A);v(this,B);v(this,we);v(this,ce);v(this,pe);v(this,K);v(this,_e);v(this,ke);x(this,"render",(...e)=>(u(this,ce)??f(this,ce,t=>this.html(t)),u(this,ce).call(this,...e)));x(this,"setLayout",e=>f(this,we,e));x(this,"getLayout",()=>u(this,we));x(this,"setRenderer",e=>{f(this,ce,e)});x(this,"header",(e,t,s)=>{this.finalized&&f(this,B,new Response(u(this,B).body,u(this,B)));const a=u(this,B)?u(this,B).headers:u(this,K)??f(this,K,new Headers);t===void 0?a.delete(e):s!=null&&s.append?a.append(e,t):a.set(e,t)});x(this,"status",e=>{f(this,de,e)});x(this,"set",(e,t)=>{u(this,M)??f(this,M,new Map),u(this,M).set(e,t)});x(this,"get",e=>u(this,M)?u(this,M).get(e):void 0);x(this,"newResponse",(...e)=>k(this,Y,ne).call(this,...e));x(this,"body",(e,t,s)=>k(this,Y,ne).call(this,e,t,s));x(this,"text",(e,t,s)=>!u(this,K)&&!u(this,de)&&!t&&!s&&!this.finalized?new Response(e):k(this,Y,ne).call(this,e,t,je(jt,s)));x(this,"json",(e,t,s)=>k(this,Y,ne).call(this,JSON.stringify(e),t,je("application/json",s)));x(this,"html",(e,t,s)=>{const a=r=>k(this,Y,ne).call(this,r,t,je("text/html; charset=UTF-8",s));return typeof e=="object"?lt(e,Lt.Stringify,!1,{}).then(a):a(e)});x(this,"redirect",(e,t)=>{const s=String(e);return this.header("Location",/[^\x00-\xFF]/.test(s)?encodeURI(s):s),this.newResponse(null,t??302)});x(this,"notFound",()=>(u(this,pe)??f(this,pe,()=>new Response),u(this,pe).call(this,this)));f(this,ye,e),t&&(f(this,A,t.executionCtx),this.env=t.env,f(this,pe,t.notFoundHandler),f(this,ke,t.path),f(this,_e,t.matchResult))}get req(){return u(this,ve)??f(this,ve,new st(u(this,ye),u(this,ke),u(this,_e))),u(this,ve)}get event(){if(u(this,A)&&"respondWith"in u(this,A))return u(this,A);throw Error("This context has no FetchEvent")}get executionCtx(){if(u(this,A))return u(this,A);throw Error("This context has no ExecutionContext")}get res(){return u(this,B)||f(this,B,new Response(null,{headers:u(this,K)??f(this,K,new Headers)}))}set res(e){if(u(this,B)&&e){e=new Response(e.body,e);for(const[t,s]of u(this,B).headers.entries())if(t!=="content-type")if(t==="set-cookie"){const a=u(this,B).headers.getSetCookie();e.headers.delete("set-cookie");for(const r of a)e.headers.append("set-cookie",r)}else e.headers.set(t,s)}f(this,B,e),this.finalized=!0}get var(){return u(this,M)?Object.fromEntries(u(this,M)):{}}},ye=new WeakMap,ve=new WeakMap,M=new WeakMap,de=new WeakMap,A=new WeakMap,B=new WeakMap,we=new WeakMap,ce=new WeakMap,pe=new WeakMap,K=new WeakMap,_e=new WeakMap,ke=new WeakMap,Y=new WeakSet,ne=function(e,t,s){const a=u(this,B)?new Headers(u(this,B).headers):u(this,K)??new Headers;if(typeof t=="object"&&"headers"in t){const l=t.headers instanceof Headers?t.headers:new Headers(t.headers);for(const[n,i]of l)n.toLowerCase()==="set-cookie"?a.append(n,i):a.set(n,i)}if(s)for(const[l,n]of Object.entries(s))if(typeof n=="string")a.set(l,n);else{a.delete(l);for(const i of n)a.append(l,i)}const r=typeof t=="number"?t:(t==null?void 0:t.status)??u(this,de);return new Response(e,{status:r,headers:a})},ze),E="ALL",Ft="all",Mt=["get","post","put","delete","options","patch"],nt="Can not add a route since the matcher is already built.",ot=class extends Error{},At="__COMPOSED_HANDLER",Nt=e=>e.text("404 Not Found",404),He=(e,t)=>{if("getResponse"in e){const s=e.getResponse();return t.newResponse(s.body,s)}return console.error(e),t.text("Internal Server Error",500)},L,S,it,j,Q,Te,Ie,ue,Pt=(ue=class{constructor(t={}){v(this,S);x(this,"get");x(this,"post");x(this,"put");x(this,"delete");x(this,"options");x(this,"patch");x(this,"all");x(this,"on");x(this,"use");x(this,"router");x(this,"getPath");x(this,"_basePath","/");v(this,L,"/");x(this,"routes",[]);v(this,j,Nt);x(this,"errorHandler",He);x(this,"onError",t=>(this.errorHandler=t,this));x(this,"notFound",t=>(f(this,j,t),this));x(this,"fetch",(t,...s)=>k(this,S,Ie).call(this,t,s[1],s[0],t.method));x(this,"request",(t,s,a,r)=>t instanceof Request?this.fetch(s?new Request(t,s):t,a,r):(t=t.toString(),this.fetch(new Request(/^https?:\/\//.test(t)?t:`http://localhost${le("/",t)}`,s),a,r)));x(this,"fire",()=>{addEventListener("fetch",t=>{t.respondWith(k(this,S,Ie).call(this,t.request,t,void 0,t.request.method))})});[...Mt,Ft].forEach(l=>{this[l]=(n,...i)=>(typeof n=="string"?f(this,L,n):k(this,S,Q).call(this,l,u(this,L),n),i.forEach(o=>{k(this,S,Q).call(this,l,u(this,L),o)}),this)}),this.on=(l,n,...i)=>{for(const o of[n].flat()){f(this,L,o);for(const c of[l].flat())i.map(d=>{k(this,S,Q).call(this,c.toUpperCase(),u(this,L),d)})}return this},this.use=(l,...n)=>(typeof l=="string"?f(this,L,l):(f(this,L,"*"),n.unshift(l)),n.forEach(i=>{k(this,S,Q).call(this,E,u(this,L),i)}),this);const{strict:a,...r}=t;Object.assign(this,r),this.getPath=a??!0?t.getPath??Ke:Rt}route(t,s){const a=this.basePath(t);return s.routes.map(r=>{var n;let l;s.errorHandler===He?l=r.handler:(l=async(i,o)=>(await Pe([],s.errorHandler)(i,()=>r.handler(i,o))).res,l[At]=r.handler),k(n=a,S,Q).call(n,r.method,r.path,l)}),this}basePath(t){const s=k(this,S,it).call(this);return s._basePath=le(this._basePath,t),s}mount(t,s,a){let r,l;a&&(typeof a=="function"?l=a:(l=a.optionHandler,a.replaceRequest===!1?r=o=>o:r=a.replaceRequest));const n=l?o=>{const c=l(o);return Array.isArray(c)?c:[c]}:o=>{let c;try{c=o.executionCtx}catch{}return[o.env,c]};r||(r=(()=>{const o=le(this._basePath,t),c=o==="/"?0:o.length;return d=>{const m=new URL(d.url);return m.pathname=m.pathname.slice(c)||"/",new Request(m,d)}})());const i=async(o,c)=>{const d=await s(r(o.req.raw),...n(o));if(d)return d;await c()};return k(this,S,Q).call(this,E,le(t,"*"),i),this}},L=new WeakMap,S=new WeakSet,it=function(){const t=new ue({router:this.router,getPath:this.getPath});return t.errorHandler=this.errorHandler,f(t,j,u(this,j)),t.routes=this.routes,t},j=new WeakMap,Q=function(t,s,a){t=t.toUpperCase(),s=le(this._basePath,s);const r={basePath:this._basePath,path:s,method:t,handler:a};this.router.add(t,s,[a,r]),this.routes.push(r)},Te=function(t,s){if(t instanceof Error)return this.errorHandler(t,s);throw t},Ie=function(t,s,a,r){if(r==="HEAD")return(async()=>new Response(null,await k(this,S,Ie).call(this,t,s,a,"GET")))();const l=this.getPath(t,{env:a}),n=this.router.match(r,l),i=new Ot(t,{path:l,matchResult:n,env:a,executionCtx:s,notFoundHandler:u(this,j)});if(n[0].length===1){let c;try{c=n[0][0][0][0](i,async()=>{i.res=await u(this,j).call(this,i)})}catch(d){return k(this,S,Te).call(this,d,i)}return c instanceof Promise?c.then(d=>d||(i.finalized?i.res:u(this,j).call(this,i))).catch(d=>k(this,S,Te).call(this,d,i)):c??u(this,j).call(this,i)}const o=Pe(n[0],this.errorHandler,u(this,j));return(async()=>{try{const c=await o(i);if(!c.finalized)throw new Error("Context is not finalized. Did you forget to return a Response object or `await next()`?");return c.res}catch(c){return k(this,S,Te).call(this,c,i)}})()},ue),dt=[];function Ut(e,t){const s=this.buildAllMatchers(),a=((r,l)=>{const n=s[r]||s[E],i=n[2][l];if(i)return i;const o=l.match(n[0]);if(!o)return[[],dt];const c=o.indexOf("",1);return[n[1][c],o]});return this.match=a,a(e,t)}var De="[^/]+",xe=".*",he="(?:|/.*)",oe=Symbol(),Ht=new Set(".\\+*[^]$()");function Wt(e,t){return e.length===1?t.length===1?e<t?-1:1:-1:t.length===1||e===xe||e===he?1:t===xe||t===he?-1:e===De?1:t===De?-1:e.length===t.length?e<t?-1:1:t.length-e.length}var Z,ee,O,ae,Yt=(ae=class{constructor(){v(this,Z);v(this,ee);v(this,O,Object.create(null))}insert(t,s,a,r,l){if(t.length===0){if(u(this,Z)!==void 0)throw oe;if(l)return;f(this,Z,s);return}const[n,...i]=t,o=n==="*"?i.length===0?["","",xe]:["","",De]:n==="/*"?["","",he]:n.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);let c;if(o){const d=o[1];let m=o[2]||De;if(d&&o[2]&&(m===".*"||(m=m.replace(/^\((?!\?:)(?=[^)]+\)$)/,"(?:"),/\((?!\?:)/.test(m))))throw oe;if(c=u(this,O)[m],!c){if(Object.keys(u(this,O)).some(g=>g!==xe&&g!==he))throw oe;if(l)return;c=u(this,O)[m]=new ae,d!==""&&f(c,ee,r.varIndex++)}!l&&d!==""&&a.push([d,u(c,ee)])}else if(c=u(this,O)[n],!c){if(Object.keys(u(this,O)).some(d=>d.length>1&&d!==xe&&d!==he))throw oe;if(l)return;c=u(this,O)[n]=new ae}c.insert(i,s,a,r,l)}buildRegExpStr(){const s=Object.keys(u(this,O)).sort(Wt).map(a=>{const r=u(this,O)[a];return(typeof u(r,ee)=="number"?`(${a})@${u(r,ee)}`:Ht.has(a)?`\\${a}`:a)+r.buildRegExpStr()});return typeof u(this,Z)=="number"&&s.unshift(`#${u(this,Z)}`),s.length===0?"":s.length===1?s[0]:"(?:"+s.join("|")+")"}},Z=new WeakMap,ee=new WeakMap,O=new WeakMap,ae),Be,Ee,Je,zt=(Je=class{constructor(){v(this,Be,{varIndex:0});v(this,Ee,new Yt)}insert(e,t,s){const a=[],r=[];for(let n=0;;){let i=!1;if(e=e.replace(/\{[^}]+\}/g,o=>{const c=`@\\${n}`;return r[n]=[c,o],n++,i=!0,c}),!i)break}const l=e.match(/(?::[^\/]+)|(?:\/\*$)|./g)||[];for(let n=r.length-1;n>=0;n--){const[i]=r[n];for(let o=l.length-1;o>=0;o--)if(l[o].indexOf(i)!==-1){l[o]=l[o].replace(i,r[n][1]);break}}return u(this,Ee).insert(l,t,a,u(this,Be),s),a}buildRegExp(){let e=u(this,Ee).buildRegExpStr();if(e==="")return[/^$/,[],[]];let t=0;const s=[],a=[];return e=e.replace(/#(\d+)|@(\d+)|\.\*\$/g,(r,l,n)=>l!==void 0?(s[++t]=Number(l),"$()"):(n!==void 0&&(a[Number(n)]=++t),"")),[new RegExp(`^${e}`),s,a]}},Be=new WeakMap,Ee=new WeakMap,Je),Jt=[/^$/,[],Object.create(null)],$e=Object.create(null);function ct(e){return $e[e]??($e[e]=new RegExp(e==="*"?"":`^${e.replace(/\/\*$|([.\\+*[^\]$()])/g,(t,s)=>s?`\\${s}`:"(?:|/.*)")}$`))}function Vt(){$e=Object.create(null)}function Gt(e){var c;const t=new zt,s=[];if(e.length===0)return Jt;const a=e.map(d=>[!/\*|\/:/.test(d[0]),...d]).sort(([d,m],[g,b])=>d?1:g?-1:m.length-b.length),r=Object.create(null);for(let d=0,m=-1,g=a.length;d<g;d++){const[b,h,w]=a[d];b?r[h]=[w.map(([_])=>[_,Object.create(null)]),dt]:m++;let y;try{y=t.insert(h,m,b)}catch(_){throw _===oe?new ot(h):_}b||(s[m]=w.map(([_,$])=>{const R=Object.create(null);for($-=1;$>=0;$--){const[q,T]=y[$];R[q]=T}return[_,R]}))}const[l,n,i]=t.buildRegExp();for(let d=0,m=s.length;d<m;d++)for(let g=0,b=s[d].length;g<b;g++){const h=(c=s[d][g])==null?void 0:c[1];if(!h)continue;const w=Object.keys(h);for(let y=0,_=w.length;y<_;y++)h[w[y]]=i[h[w[y]]]}const o=[];for(const d in n)o[d]=s[n[d]];return[l,o,r]}function re(e,t){if(e){for(const s of Object.keys(e).sort((a,r)=>r.length-a.length))if(ct(s).test(t))return[...e[s]]}}var z,J,Re,pt,Ve,Qt=(Ve=class{constructor(){v(this,Re);x(this,"name","RegExpRouter");v(this,z);v(this,J);x(this,"match",Ut);f(this,z,{[E]:Object.create(null)}),f(this,J,{[E]:Object.create(null)})}add(e,t,s){var i;const a=u(this,z),r=u(this,J);if(!a||!r)throw new Error(nt);a[e]||[a,r].forEach(o=>{o[e]=Object.create(null),Object.keys(o[E]).forEach(c=>{o[e][c]=[...o[E][c]]})}),t==="/*"&&(t="*");const l=(t.match(/\/:/g)||[]).length;if(/\*$/.test(t)){const o=ct(t);e===E?Object.keys(a).forEach(c=>{var d;(d=a[c])[t]||(d[t]=re(a[c],t)||re(a[E],t)||[])}):(i=a[e])[t]||(i[t]=re(a[e],t)||re(a[E],t)||[]),Object.keys(a).forEach(c=>{(e===E||e===c)&&Object.keys(a[c]).forEach(d=>{o.test(d)&&a[c][d].push([s,l])})}),Object.keys(r).forEach(c=>{(e===E||e===c)&&Object.keys(r[c]).forEach(d=>o.test(d)&&r[c][d].push([s,l]))});return}const n=Ze(t)||[t];for(let o=0,c=n.length;o<c;o++){const d=n[o];Object.keys(r).forEach(m=>{var g;(e===E||e===m)&&((g=r[m])[d]||(g[d]=[...re(a[m],d)||re(a[E],d)||[]]),r[m][d].push([s,l-c+o+1]))})}}buildAllMatchers(){const e=Object.create(null);return Object.keys(u(this,J)).concat(Object.keys(u(this,z))).forEach(t=>{e[t]||(e[t]=k(this,Re,pt).call(this,t))}),f(this,z,f(this,J,void 0)),Vt(),e}},z=new WeakMap,J=new WeakMap,Re=new WeakSet,pt=function(e){const t=[];let s=e===E;return[u(this,z),u(this,J)].forEach(a=>{const r=a[e]?Object.keys(a[e]).map(l=>[l,a[e][l]]):[];r.length!==0?(s||(s=!0),t.push(...r)):e!==E&&t.push(...Object.keys(a[E]).map(l=>[l,a[E][l]]))}),s?Gt(t):null},Ve),V,N,Ge,Xt=(Ge=class{constructor(e){x(this,"name","SmartRouter");v(this,V,[]);v(this,N,[]);f(this,V,e.routers)}add(e,t,s){if(!u(this,N))throw new Error(nt);u(this,N).push([e,t,s])}match(e,t){if(!u(this,N))throw new Error("Fatal error");const s=u(this,V),a=u(this,N),r=s.length;let l=0,n;for(;l<r;l++){const i=s[l];try{for(let o=0,c=a.length;o<c;o++)i.add(...a[o]);n=i.match(e,t)}catch(o){if(o instanceof ot)continue;throw o}this.match=i.match.bind(i),f(this,V,[i]),f(this,N,void 0);break}if(l===r)throw new Error("Fatal error");return this.name=`SmartRouter + ${this.activeRouter.name}`,n}get activeRouter(){if(u(this,N)||u(this,V).length!==1)throw new Error("No active router has been determined yet.");return u(this,V)[0]}},V=new WeakMap,N=new WeakMap,Ge),fe=Object.create(null),G,D,te,me,I,P,X,ge,Kt=(ge=class{constructor(t,s,a){v(this,P);v(this,G);v(this,D);v(this,te);v(this,me,0);v(this,I,fe);if(f(this,D,a||Object.create(null)),f(this,G,[]),t&&s){const r=Object.create(null);r[t]={handler:s,possibleKeys:[],score:0},f(this,G,[r])}f(this,te,[])}insert(t,s,a){f(this,me,++Ne(this,me)._);let r=this;const l=Tt(s),n=[];for(let i=0,o=l.length;i<o;i++){const c=l[i],d=l[i+1],m=Dt(c,d),g=Array.isArray(m)?m[0]:c;if(g in u(r,D)){r=u(r,D)[g],m&&n.push(m[1]);continue}u(r,D)[g]=new ge,m&&(u(r,te).push(m),n.push(m[1])),r=u(r,D)[g]}return u(r,G).push({[t]:{handler:a,possibleKeys:n.filter((i,o,c)=>c.indexOf(i)===o),score:u(this,me)}}),r}search(t,s){var o;const a=[];f(this,I,fe);let l=[this];const n=Xe(s),i=[];for(let c=0,d=n.length;c<d;c++){const m=n[c],g=c===d-1,b=[];for(let h=0,w=l.length;h<w;h++){const y=l[h],_=u(y,D)[m];_&&(f(_,I,u(y,I)),g?(u(_,D)["*"]&&a.push(...k(this,P,X).call(this,u(_,D)["*"],t,u(y,I))),a.push(...k(this,P,X).call(this,_,t,u(y,I)))):b.push(_));for(let $=0,R=u(y,te).length;$<R;$++){const q=u(y,te)[$],T=u(y,I)===fe?{}:{...u(y,I)};if(q==="*"){const H=u(y,D)["*"];H&&(a.push(...k(this,P,X).call(this,H,t,u(y,I))),f(H,I,T),b.push(H));continue}const[ft,Me,be]=q;if(!m&&!(be instanceof RegExp))continue;const F=u(y,D)[ft],xt=n.slice(c).join("/");if(be instanceof RegExp){const H=be.exec(xt);if(H){if(T[Me]=H[0],a.push(...k(this,P,X).call(this,F,t,u(y,I),T)),Object.keys(u(F,D)).length){f(F,I,T);const Ce=((o=H[0].match(/\//))==null?void 0:o.length)??0;(i[Ce]||(i[Ce]=[])).push(F)}continue}}(be===!0||be.test(m))&&(T[Me]=m,g?(a.push(...k(this,P,X).call(this,F,t,T,u(y,I))),u(F,D)["*"]&&a.push(...k(this,P,X).call(this,u(F,D)["*"],t,T,u(y,I)))):(f(F,I,T),b.push(F)))}}l=b.concat(i.shift()??[])}return a.length>1&&a.sort((c,d)=>c.score-d.score),[a.map(({handler:c,params:d})=>[c,d])]}},G=new WeakMap,D=new WeakMap,te=new WeakMap,me=new WeakMap,I=new WeakMap,P=new WeakSet,X=function(t,s,a,r){const l=[];for(let n=0,i=u(t,G).length;n<i;n++){const o=u(t,G)[n],c=o[s]||o[E],d={};if(c!==void 0&&(c.params=Object.create(null),l.push(c),a!==fe||r&&r!==fe))for(let m=0,g=c.possibleKeys.length;m<g;m++){const b=c.possibleKeys[m],h=d[c.score];c.params[b]=r!=null&&r[b]&&!h?r[b]:a[b]??(r==null?void 0:r[b]),d[c.score]=!0}}return l},ge),se,Qe,Zt=(Qe=class{constructor(){x(this,"name","TrieRouter");v(this,se);f(this,se,new Kt)}add(e,t,s){const a=Ze(t);if(a){for(let r=0,l=a.length;r<l;r++)u(this,se).insert(e,a[r],s);return}u(this,se).insert(e,t,s)}match(e,t){return u(this,se).search(e,t)}},se=new WeakMap,Qe),ut=class extends Pt{constructor(e={}){super(e),this.router=e.router??new Xt({routers:[new Qt,new Zt]})}},es=e=>{const s={...{origin:"*",allowMethods:["GET","HEAD","PUT","POST","DELETE","PATCH"],allowHeaders:[],exposeHeaders:[]},...e},a=(l=>typeof l=="string"?l==="*"?()=>l:n=>l===n?n:null:typeof l=="function"?l:n=>l.includes(n)?n:null)(s.origin),r=(l=>typeof l=="function"?l:Array.isArray(l)?()=>l:()=>[])(s.allowMethods);return async function(n,i){var d;function o(m,g){n.res.headers.set(m,g)}const c=await a(n.req.header("origin")||"",n);if(c&&o("Access-Control-Allow-Origin",c),s.credentials&&o("Access-Control-Allow-Credentials","true"),(d=s.exposeHeaders)!=null&&d.length&&o("Access-Control-Expose-Headers",s.exposeHeaders.join(",")),n.req.method==="OPTIONS"){s.origin!=="*"&&o("Vary","Origin"),s.maxAge!=null&&o("Access-Control-Max-Age",s.maxAge.toString());const m=await r(n.req.header("origin")||"",n);m.length&&o("Access-Control-Allow-Methods",m.join(","));let g=s.allowHeaders;if(!(g!=null&&g.length)){const b=n.req.header("Access-Control-Request-Headers");b&&(g=b.split(/\s*,\s*/))}return g!=null&&g.length&&(o("Access-Control-Allow-Headers",g.join(",")),n.res.headers.append("Vary","Access-Control-Request-Headers")),n.res.headers.delete("Content-Length"),n.res.headers.delete("Content-Type"),new Response(null,{headers:n.res.headers,status:204,statusText:"No Content"})}await i(),s.origin!=="*"&&n.header("Vary","Origin",{append:!0})}};const ts=`<!DOCTYPE html>
+var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in e?ht(e,t,{enumerable:!0,configurable:!0,writable:!0,value:s}):e[t]=s;var x=(e,t,s)=>yt(e,typeof t!="symbol"?t+"":t,s),qe=(e,t,s)=>t.has(e)||Ae("Cannot "+s);var u=(e,t,s)=>(qe(e,t,"read from private field"),s?s.call(e):t.get(e)),v=(e,t,s)=>t.has(e)?Ae("Cannot add the same private member more than once"):t instanceof WeakSet?t.add(e):t.set(e,s),f=(e,t,s,a)=>(qe(e,t,"write to private field"),a?a.call(e,s):t.set(e,s),s),k=(e,t,s)=>(qe(e,t,"access private method"),s);var Ne=(e,t,s,a)=>({set _(r){f(e,t,r,s)},get _(){return u(e,t,a)}});var Pe=(e,t,s)=>(a,r)=>{let l=-1;return n(0);async function n(i){if(i<=l)throw new Error("next() called multiple times");l=i;let o,c=!1,d;if(e[i]?(d=e[i][0][0],a.req.routeIndex=i):d=i===e.length&&r||void 0,d)try{o=await d(a,()=>n(i+1))}catch(m){if(m instanceof Error&&t)a.error=m,o=await t(m,a),c=!0;else throw m}else a.finalized===!1&&s&&(o=await s(a));return o&&(a.finalized===!1||c)&&(a.res=o),a}},vt=Symbol(),wt=async(e,t=Object.create(null))=>{const{all:s=!1,dot:a=!1}=t,l=(e instanceof st?e.raw.headers:e.headers).get("Content-Type");return l!=null&&l.startsWith("multipart/form-data")||l!=null&&l.startsWith("application/x-www-form-urlencoded")?_t(e,{all:s,dot:a}):{}};async function _t(e,t){const s=await e.formData();return s?kt(s,t):{}}function kt(e,t){const s=Object.create(null);return e.forEach((a,r)=>{t.all||r.endsWith("[]")?Et(s,r,a):s[r]=a}),t.dot&&Object.entries(s).forEach(([a,r])=>{a.includes(".")&&(St(s,a,r),delete s[a])}),s}var Et=(e,t,s)=>{e[t]!==void 0?Array.isArray(e[t])?e[t].push(s):e[t]=[e[t],s]:t.endsWith("[]")?e[t]=[s]:e[t]=s},St=(e,t,s)=>{let a=e;const r=t.split(".");r.forEach((l,n)=>{n===r.length-1?a[l]=s:((!a[l]||typeof a[l]!="object"||Array.isArray(a[l])||a[l]instanceof File)&&(a[l]=Object.create(null)),a=a[l])})},Xe=e=>{const t=e.split("/");return t[0]===""&&t.shift(),t},Tt=e=>{const{groups:t,path:s}=It(e),a=Xe(s);return $t(a,t)},It=e=>{const t=[];return e=e.replace(/\{[^}]+\}/g,(s,a)=>{const r=`@${a}`;return t.push([r,s]),r}),{groups:t,path:e}},$t=(e,t)=>{for(let s=t.length-1;s>=0;s--){const[a]=t[s];for(let r=e.length-1;r>=0;r--)if(e[r].includes(a)){e[r]=e[r].replace(a,t[s][1]);break}}return e},Se={},Dt=(e,t)=>{if(e==="*")return"*";const s=e.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);if(s){const a=`${e}#${t}`;return Se[a]||(s[2]?Se[a]=t&&t[0]!==":"&&t[0]!=="*"?[a,s[1],new RegExp(`^${s[2]}(?=/${t})`)]:[e,s[1],new RegExp(`^${s[2]}$`)]:Se[a]=[e,s[1],!0]),Se[a]}return null},Fe=(e,t)=>{try{return t(e)}catch{return e.replace(/(?:%[0-9A-Fa-f]{2})+/g,s=>{try{return t(s)}catch{return s}})}},Rt=e=>Fe(e,decodeURI),Ke=e=>{const t=e.url,s=t.indexOf("/",t.indexOf(":")+4);let a=s;for(;a<t.length;a++){const r=t.charCodeAt(a);if(r===37){const l=t.indexOf("?",a),n=t.slice(s,l===-1?void 0:l);return Rt(n.includes("%25")?n.replace(/%25/g,"%2525"):n)}else if(r===63)break}return t.slice(s,a)},Bt=e=>{const t=Ke(e);return t.length>1&&t.at(-1)==="/"?t.slice(0,-1):t},le=(e,t,...s)=>(s.length&&(t=le(t,...s)),`${(e==null?void 0:e[0])==="/"?"":"/"}${e}${t==="/"?"":`${(e==null?void 0:e.at(-1))==="/"?"":"/"}${(t==null?void 0:t[0])==="/"?t.slice(1):t}`}`),Ze=e=>{if(e.charCodeAt(e.length-1)!==63||!e.includes(":"))return null;const t=e.split("/"),s=[];let a="";return t.forEach(r=>{if(r!==""&&!/\:/.test(r))a+="/"+r;else if(/\:/.test(r))if(/\?/.test(r)){s.length===0&&a===""?s.push("/"):s.push(a);const l=r.replace("?","");a+="/"+l,s.push(a)}else a+="/"+r}),s.filter((r,l,n)=>n.indexOf(r)===l)},Le=e=>/[%+]/.test(e)?(e.indexOf("+")!==-1&&(e=e.replace(/\+/g," ")),e.indexOf("%")!==-1?Fe(e,tt):e):e,et=(e,t,s)=>{let a;if(!s&&t&&!/[%+]/.test(t)){let n=e.indexOf("?",8);if(n===-1)return;for(e.startsWith(t,n+1)||(n=e.indexOf(`&${t}`,n+1));n!==-1;){const i=e.charCodeAt(n+t.length+1);if(i===61){const o=n+t.length+2,c=e.indexOf("&",o);return Le(e.slice(o,c===-1?void 0:c))}else if(i==38||isNaN(i))return"";n=e.indexOf(`&${t}`,n+1)}if(a=/[%+]/.test(e),!a)return}const r={};a??(a=/[%+]/.test(e));let l=e.indexOf("?",8);for(;l!==-1;){const n=e.indexOf("&",l+1);let i=e.indexOf("=",l);i>n&&n!==-1&&(i=-1);let o=e.slice(l+1,i===-1?n===-1?void 0:n:i);if(a&&(o=Le(o)),l=n,o==="")continue;let c;i===-1?c="":(c=e.slice(i+1,n===-1?void 0:n),a&&(c=Le(c))),s?(r[o]&&Array.isArray(r[o])||(r[o]=[]),r[o].push(c)):r[o]??(r[o]=c)}return t?r[t]:r},Ct=et,qt=(e,t)=>et(e,t,!0),tt=decodeURIComponent,Ue=e=>Fe(e,tt),ie,C,U,at,rt,Oe,W,Ye,st=(Ye=class{constructor(e,t="/",s=[[]]){v(this,U);x(this,"raw");v(this,ie);v(this,C);x(this,"routeIndex",0);x(this,"path");x(this,"bodyCache",{});v(this,W,e=>{const{bodyCache:t,raw:s}=this,a=t[e];if(a)return a;const r=Object.keys(t)[0];return r?t[r].then(l=>(r==="json"&&(l=JSON.stringify(l)),new Response(l)[e]())):t[e]=s[e]()});this.raw=e,this.path=t,f(this,C,s),f(this,ie,{})}param(e){return e?k(this,U,at).call(this,e):k(this,U,rt).call(this)}query(e){return Ct(this.url,e)}queries(e){return qt(this.url,e)}header(e){if(e)return this.raw.headers.get(e)??void 0;const t={};return this.raw.headers.forEach((s,a)=>{t[a]=s}),t}async parseBody(e){var t;return(t=this.bodyCache).parsedBody??(t.parsedBody=await wt(this,e))}json(){return u(this,W).call(this,"text").then(e=>JSON.parse(e))}text(){return u(this,W).call(this,"text")}arrayBuffer(){return u(this,W).call(this,"arrayBuffer")}blob(){return u(this,W).call(this,"blob")}formData(){return u(this,W).call(this,"formData")}addValidatedData(e,t){u(this,ie)[e]=t}valid(e){return u(this,ie)[e]}get url(){return this.raw.url}get method(){return this.raw.method}get[vt](){return u(this,C)}get matchedRoutes(){return u(this,C)[0].map(([[,e]])=>e)}get routePath(){return u(this,C)[0].map(([[,e]])=>e)[this.routeIndex].path}},ie=new WeakMap,C=new WeakMap,U=new WeakSet,at=function(e){const t=u(this,C)[0][this.routeIndex][1][e],s=k(this,U,Oe).call(this,t);return s&&/\%/.test(s)?Ue(s):s},rt=function(){const e={},t=Object.keys(u(this,C)[0][this.routeIndex][1]);for(const s of t){const a=k(this,U,Oe).call(this,u(this,C)[0][this.routeIndex][1][s]);a!==void 0&&(e[s]=/\%/.test(a)?Ue(a):a)}return e},Oe=function(e){return u(this,C)[1]?u(this,C)[1][e]:e},W=new WeakMap,Ye),Lt={Stringify:1},lt=async(e,t,s,a,r)=>{typeof e=="object"&&!(e instanceof String)&&(e instanceof Promise||(e=e.toString()),e instanceof Promise&&(e=await e));const l=e.callbacks;return l!=null&&l.length?(r?r[0]+=e:r=[e],Promise.all(l.map(i=>i({phase:t,buffer:r,context:a}))).then(i=>Promise.all(i.filter(Boolean).map(o=>lt(o,t,!1,a,r))).then(()=>r[0]))):Promise.resolve(e)},jt="text/plain; charset=UTF-8",je=(e,t)=>({"Content-Type":e,...t}),ye,ve,M,de,A,R,we,ce,pe,K,_e,ke,Y,ne,ze,Ot=(ze=class{constructor(e,t){v(this,Y);v(this,ye);v(this,ve);x(this,"env",{});v(this,M);x(this,"finalized",!1);x(this,"error");v(this,de);v(this,A);v(this,R);v(this,we);v(this,ce);v(this,pe);v(this,K);v(this,_e);v(this,ke);x(this,"render",(...e)=>(u(this,ce)??f(this,ce,t=>this.html(t)),u(this,ce).call(this,...e)));x(this,"setLayout",e=>f(this,we,e));x(this,"getLayout",()=>u(this,we));x(this,"setRenderer",e=>{f(this,ce,e)});x(this,"header",(e,t,s)=>{this.finalized&&f(this,R,new Response(u(this,R).body,u(this,R)));const a=u(this,R)?u(this,R).headers:u(this,K)??f(this,K,new Headers);t===void 0?a.delete(e):s!=null&&s.append?a.append(e,t):a.set(e,t)});x(this,"status",e=>{f(this,de,e)});x(this,"set",(e,t)=>{u(this,M)??f(this,M,new Map),u(this,M).set(e,t)});x(this,"get",e=>u(this,M)?u(this,M).get(e):void 0);x(this,"newResponse",(...e)=>k(this,Y,ne).call(this,...e));x(this,"body",(e,t,s)=>k(this,Y,ne).call(this,e,t,s));x(this,"text",(e,t,s)=>!u(this,K)&&!u(this,de)&&!t&&!s&&!this.finalized?new Response(e):k(this,Y,ne).call(this,e,t,je(jt,s)));x(this,"json",(e,t,s)=>k(this,Y,ne).call(this,JSON.stringify(e),t,je("application/json",s)));x(this,"html",(e,t,s)=>{const a=r=>k(this,Y,ne).call(this,r,t,je("text/html; charset=UTF-8",s));return typeof e=="object"?lt(e,Lt.Stringify,!1,{}).then(a):a(e)});x(this,"redirect",(e,t)=>{const s=String(e);return this.header("Location",/[^\x00-\xFF]/.test(s)?encodeURI(s):s),this.newResponse(null,t??302)});x(this,"notFound",()=>(u(this,pe)??f(this,pe,()=>new Response),u(this,pe).call(this,this)));f(this,ye,e),t&&(f(this,A,t.executionCtx),this.env=t.env,f(this,pe,t.notFoundHandler),f(this,ke,t.path),f(this,_e,t.matchResult))}get req(){return u(this,ve)??f(this,ve,new st(u(this,ye),u(this,ke),u(this,_e))),u(this,ve)}get event(){if(u(this,A)&&"respondWith"in u(this,A))return u(this,A);throw Error("This context has no FetchEvent")}get executionCtx(){if(u(this,A))return u(this,A);throw Error("This context has no ExecutionContext")}get res(){return u(this,R)||f(this,R,new Response(null,{headers:u(this,K)??f(this,K,new Headers)}))}set res(e){if(u(this,R)&&e){e=new Response(e.body,e);for(const[t,s]of u(this,R).headers.entries())if(t!=="content-type")if(t==="set-cookie"){const a=u(this,R).headers.getSetCookie();e.headers.delete("set-cookie");for(const r of a)e.headers.append("set-cookie",r)}else e.headers.set(t,s)}f(this,R,e),this.finalized=!0}get var(){return u(this,M)?Object.fromEntries(u(this,M)):{}}},ye=new WeakMap,ve=new WeakMap,M=new WeakMap,de=new WeakMap,A=new WeakMap,R=new WeakMap,we=new WeakMap,ce=new WeakMap,pe=new WeakMap,K=new WeakMap,_e=new WeakMap,ke=new WeakMap,Y=new WeakSet,ne=function(e,t,s){const a=u(this,R)?new Headers(u(this,R).headers):u(this,K)??new Headers;if(typeof t=="object"&&"headers"in t){const l=t.headers instanceof Headers?t.headers:new Headers(t.headers);for(const[n,i]of l)n.toLowerCase()==="set-cookie"?a.append(n,i):a.set(n,i)}if(s)for(const[l,n]of Object.entries(s))if(typeof n=="string")a.set(l,n);else{a.delete(l);for(const i of n)a.append(l,i)}const r=typeof t=="number"?t:(t==null?void 0:t.status)??u(this,de);return new Response(e,{status:r,headers:a})},ze),E="ALL",Ft="all",Mt=["get","post","put","delete","options","patch"],nt="Can not add a route since the matcher is already built.",ot=class extends Error{},At="__COMPOSED_HANDLER",Nt=e=>e.text("404 Not Found",404),He=(e,t)=>{if("getResponse"in e){const s=e.getResponse();return t.newResponse(s.body,s)}return console.error(e),t.text("Internal Server Error",500)},L,S,it,j,Q,Te,Ie,ue,Pt=(ue=class{constructor(t={}){v(this,S);x(this,"get");x(this,"post");x(this,"put");x(this,"delete");x(this,"options");x(this,"patch");x(this,"all");x(this,"on");x(this,"use");x(this,"router");x(this,"getPath");x(this,"_basePath","/");v(this,L,"/");x(this,"routes",[]);v(this,j,Nt);x(this,"errorHandler",He);x(this,"onError",t=>(this.errorHandler=t,this));x(this,"notFound",t=>(f(this,j,t),this));x(this,"fetch",(t,...s)=>k(this,S,Ie).call(this,t,s[1],s[0],t.method));x(this,"request",(t,s,a,r)=>t instanceof Request?this.fetch(s?new Request(t,s):t,a,r):(t=t.toString(),this.fetch(new Request(/^https?:\/\//.test(t)?t:`http://localhost${le("/",t)}`,s),a,r)));x(this,"fire",()=>{addEventListener("fetch",t=>{t.respondWith(k(this,S,Ie).call(this,t.request,t,void 0,t.request.method))})});[...Mt,Ft].forEach(l=>{this[l]=(n,...i)=>(typeof n=="string"?f(this,L,n):k(this,S,Q).call(this,l,u(this,L),n),i.forEach(o=>{k(this,S,Q).call(this,l,u(this,L),o)}),this)}),this.on=(l,n,...i)=>{for(const o of[n].flat()){f(this,L,o);for(const c of[l].flat())i.map(d=>{k(this,S,Q).call(this,c.toUpperCase(),u(this,L),d)})}return this},this.use=(l,...n)=>(typeof l=="string"?f(this,L,l):(f(this,L,"*"),n.unshift(l)),n.forEach(i=>{k(this,S,Q).call(this,E,u(this,L),i)}),this);const{strict:a,...r}=t;Object.assign(this,r),this.getPath=a??!0?t.getPath??Ke:Bt}route(t,s){const a=this.basePath(t);return s.routes.map(r=>{var n;let l;s.errorHandler===He?l=r.handler:(l=async(i,o)=>(await Pe([],s.errorHandler)(i,()=>r.handler(i,o))).res,l[At]=r.handler),k(n=a,S,Q).call(n,r.method,r.path,l)}),this}basePath(t){const s=k(this,S,it).call(this);return s._basePath=le(this._basePath,t),s}mount(t,s,a){let r,l;a&&(typeof a=="function"?l=a:(l=a.optionHandler,a.replaceRequest===!1?r=o=>o:r=a.replaceRequest));const n=l?o=>{const c=l(o);return Array.isArray(c)?c:[c]}:o=>{let c;try{c=o.executionCtx}catch{}return[o.env,c]};r||(r=(()=>{const o=le(this._basePath,t),c=o==="/"?0:o.length;return d=>{const m=new URL(d.url);return m.pathname=m.pathname.slice(c)||"/",new Request(m,d)}})());const i=async(o,c)=>{const d=await s(r(o.req.raw),...n(o));if(d)return d;await c()};return k(this,S,Q).call(this,E,le(t,"*"),i),this}},L=new WeakMap,S=new WeakSet,it=function(){const t=new ue({router:this.router,getPath:this.getPath});return t.errorHandler=this.errorHandler,f(t,j,u(this,j)),t.routes=this.routes,t},j=new WeakMap,Q=function(t,s,a){t=t.toUpperCase(),s=le(this._basePath,s);const r={basePath:this._basePath,path:s,method:t,handler:a};this.router.add(t,s,[a,r]),this.routes.push(r)},Te=function(t,s){if(t instanceof Error)return this.errorHandler(t,s);throw t},Ie=function(t,s,a,r){if(r==="HEAD")return(async()=>new Response(null,await k(this,S,Ie).call(this,t,s,a,"GET")))();const l=this.getPath(t,{env:a}),n=this.router.match(r,l),i=new Ot(t,{path:l,matchResult:n,env:a,executionCtx:s,notFoundHandler:u(this,j)});if(n[0].length===1){let c;try{c=n[0][0][0][0](i,async()=>{i.res=await u(this,j).call(this,i)})}catch(d){return k(this,S,Te).call(this,d,i)}return c instanceof Promise?c.then(d=>d||(i.finalized?i.res:u(this,j).call(this,i))).catch(d=>k(this,S,Te).call(this,d,i)):c??u(this,j).call(this,i)}const o=Pe(n[0],this.errorHandler,u(this,j));return(async()=>{try{const c=await o(i);if(!c.finalized)throw new Error("Context is not finalized. Did you forget to return a Response object or `await next()`?");return c.res}catch(c){return k(this,S,Te).call(this,c,i)}})()},ue),dt=[];function Ut(e,t){const s=this.buildAllMatchers(),a=((r,l)=>{const n=s[r]||s[E],i=n[2][l];if(i)return i;const o=l.match(n[0]);if(!o)return[[],dt];const c=o.indexOf("",1);return[n[1][c],o]});return this.match=a,a(e,t)}var De="[^/]+",xe=".*",he="(?:|/.*)",oe=Symbol(),Ht=new Set(".\\+*[^]$()");function Wt(e,t){return e.length===1?t.length===1?e<t?-1:1:-1:t.length===1||e===xe||e===he?1:t===xe||t===he?-1:e===De?1:t===De?-1:e.length===t.length?e<t?-1:1:t.length-e.length}var Z,ee,O,ae,Yt=(ae=class{constructor(){v(this,Z);v(this,ee);v(this,O,Object.create(null))}insert(t,s,a,r,l){if(t.length===0){if(u(this,Z)!==void 0)throw oe;if(l)return;f(this,Z,s);return}const[n,...i]=t,o=n==="*"?i.length===0?["","",xe]:["","",De]:n==="/*"?["","",he]:n.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);let c;if(o){const d=o[1];let m=o[2]||De;if(d&&o[2]&&(m===".*"||(m=m.replace(/^\((?!\?:)(?=[^)]+\)$)/,"(?:"),/\((?!\?:)/.test(m))))throw oe;if(c=u(this,O)[m],!c){if(Object.keys(u(this,O)).some(g=>g!==xe&&g!==he))throw oe;if(l)return;c=u(this,O)[m]=new ae,d!==""&&f(c,ee,r.varIndex++)}!l&&d!==""&&a.push([d,u(c,ee)])}else if(c=u(this,O)[n],!c){if(Object.keys(u(this,O)).some(d=>d.length>1&&d!==xe&&d!==he))throw oe;if(l)return;c=u(this,O)[n]=new ae}c.insert(i,s,a,r,l)}buildRegExpStr(){const s=Object.keys(u(this,O)).sort(Wt).map(a=>{const r=u(this,O)[a];return(typeof u(r,ee)=="number"?`(${a})@${u(r,ee)}`:Ht.has(a)?`\\${a}`:a)+r.buildRegExpStr()});return typeof u(this,Z)=="number"&&s.unshift(`#${u(this,Z)}`),s.length===0?"":s.length===1?s[0]:"(?:"+s.join("|")+")"}},Z=new WeakMap,ee=new WeakMap,O=new WeakMap,ae),Re,Ee,Je,zt=(Je=class{constructor(){v(this,Re,{varIndex:0});v(this,Ee,new Yt)}insert(e,t,s){const a=[],r=[];for(let n=0;;){let i=!1;if(e=e.replace(/\{[^}]+\}/g,o=>{const c=`@\\${n}`;return r[n]=[c,o],n++,i=!0,c}),!i)break}const l=e.match(/(?::[^\/]+)|(?:\/\*$)|./g)||[];for(let n=r.length-1;n>=0;n--){const[i]=r[n];for(let o=l.length-1;o>=0;o--)if(l[o].indexOf(i)!==-1){l[o]=l[o].replace(i,r[n][1]);break}}return u(this,Ee).insert(l,t,a,u(this,Re),s),a}buildRegExp(){let e=u(this,Ee).buildRegExpStr();if(e==="")return[/^$/,[],[]];let t=0;const s=[],a=[];return e=e.replace(/#(\d+)|@(\d+)|\.\*\$/g,(r,l,n)=>l!==void 0?(s[++t]=Number(l),"$()"):(n!==void 0&&(a[Number(n)]=++t),"")),[new RegExp(`^${e}`),s,a]}},Re=new WeakMap,Ee=new WeakMap,Je),Jt=[/^$/,[],Object.create(null)],$e=Object.create(null);function ct(e){return $e[e]??($e[e]=new RegExp(e==="*"?"":`^${e.replace(/\/\*$|([.\\+*[^\]$()])/g,(t,s)=>s?`\\${s}`:"(?:|/.*)")}$`))}function Vt(){$e=Object.create(null)}function Gt(e){var c;const t=new zt,s=[];if(e.length===0)return Jt;const a=e.map(d=>[!/\*|\/:/.test(d[0]),...d]).sort(([d,m],[g,b])=>d?1:g?-1:m.length-b.length),r=Object.create(null);for(let d=0,m=-1,g=a.length;d<g;d++){const[b,h,w]=a[d];b?r[h]=[w.map(([_])=>[_,Object.create(null)]),dt]:m++;let y;try{y=t.insert(h,m,b)}catch(_){throw _===oe?new ot(h):_}b||(s[m]=w.map(([_,$])=>{const B=Object.create(null);for($-=1;$>=0;$--){const[q,T]=y[$];B[q]=T}return[_,B]}))}const[l,n,i]=t.buildRegExp();for(let d=0,m=s.length;d<m;d++)for(let g=0,b=s[d].length;g<b;g++){const h=(c=s[d][g])==null?void 0:c[1];if(!h)continue;const w=Object.keys(h);for(let y=0,_=w.length;y<_;y++)h[w[y]]=i[h[w[y]]]}const o=[];for(const d in n)o[d]=s[n[d]];return[l,o,r]}function re(e,t){if(e){for(const s of Object.keys(e).sort((a,r)=>r.length-a.length))if(ct(s).test(t))return[...e[s]]}}var z,J,Be,pt,Ve,Qt=(Ve=class{constructor(){v(this,Be);x(this,"name","RegExpRouter");v(this,z);v(this,J);x(this,"match",Ut);f(this,z,{[E]:Object.create(null)}),f(this,J,{[E]:Object.create(null)})}add(e,t,s){var i;const a=u(this,z),r=u(this,J);if(!a||!r)throw new Error(nt);a[e]||[a,r].forEach(o=>{o[e]=Object.create(null),Object.keys(o[E]).forEach(c=>{o[e][c]=[...o[E][c]]})}),t==="/*"&&(t="*");const l=(t.match(/\/:/g)||[]).length;if(/\*$/.test(t)){const o=ct(t);e===E?Object.keys(a).forEach(c=>{var d;(d=a[c])[t]||(d[t]=re(a[c],t)||re(a[E],t)||[])}):(i=a[e])[t]||(i[t]=re(a[e],t)||re(a[E],t)||[]),Object.keys(a).forEach(c=>{(e===E||e===c)&&Object.keys(a[c]).forEach(d=>{o.test(d)&&a[c][d].push([s,l])})}),Object.keys(r).forEach(c=>{(e===E||e===c)&&Object.keys(r[c]).forEach(d=>o.test(d)&&r[c][d].push([s,l]))});return}const n=Ze(t)||[t];for(let o=0,c=n.length;o<c;o++){const d=n[o];Object.keys(r).forEach(m=>{var g;(e===E||e===m)&&((g=r[m])[d]||(g[d]=[...re(a[m],d)||re(a[E],d)||[]]),r[m][d].push([s,l-c+o+1]))})}}buildAllMatchers(){const e=Object.create(null);return Object.keys(u(this,J)).concat(Object.keys(u(this,z))).forEach(t=>{e[t]||(e[t]=k(this,Be,pt).call(this,t))}),f(this,z,f(this,J,void 0)),Vt(),e}},z=new WeakMap,J=new WeakMap,Be=new WeakSet,pt=function(e){const t=[];let s=e===E;return[u(this,z),u(this,J)].forEach(a=>{const r=a[e]?Object.keys(a[e]).map(l=>[l,a[e][l]]):[];r.length!==0?(s||(s=!0),t.push(...r)):e!==E&&t.push(...Object.keys(a[E]).map(l=>[l,a[E][l]]))}),s?Gt(t):null},Ve),V,N,Ge,Xt=(Ge=class{constructor(e){x(this,"name","SmartRouter");v(this,V,[]);v(this,N,[]);f(this,V,e.routers)}add(e,t,s){if(!u(this,N))throw new Error(nt);u(this,N).push([e,t,s])}match(e,t){if(!u(this,N))throw new Error("Fatal error");const s=u(this,V),a=u(this,N),r=s.length;let l=0,n;for(;l<r;l++){const i=s[l];try{for(let o=0,c=a.length;o<c;o++)i.add(...a[o]);n=i.match(e,t)}catch(o){if(o instanceof ot)continue;throw o}this.match=i.match.bind(i),f(this,V,[i]),f(this,N,void 0);break}if(l===r)throw new Error("Fatal error");return this.name=`SmartRouter + ${this.activeRouter.name}`,n}get activeRouter(){if(u(this,N)||u(this,V).length!==1)throw new Error("No active router has been determined yet.");return u(this,V)[0]}},V=new WeakMap,N=new WeakMap,Ge),fe=Object.create(null),G,D,te,me,I,P,X,ge,Kt=(ge=class{constructor(t,s,a){v(this,P);v(this,G);v(this,D);v(this,te);v(this,me,0);v(this,I,fe);if(f(this,D,a||Object.create(null)),f(this,G,[]),t&&s){const r=Object.create(null);r[t]={handler:s,possibleKeys:[],score:0},f(this,G,[r])}f(this,te,[])}insert(t,s,a){f(this,me,++Ne(this,me)._);let r=this;const l=Tt(s),n=[];for(let i=0,o=l.length;i<o;i++){const c=l[i],d=l[i+1],m=Dt(c,d),g=Array.isArray(m)?m[0]:c;if(g in u(r,D)){r=u(r,D)[g],m&&n.push(m[1]);continue}u(r,D)[g]=new ge,m&&(u(r,te).push(m),n.push(m[1])),r=u(r,D)[g]}return u(r,G).push({[t]:{handler:a,possibleKeys:n.filter((i,o,c)=>c.indexOf(i)===o),score:u(this,me)}}),r}search(t,s){var o;const a=[];f(this,I,fe);let l=[this];const n=Xe(s),i=[];for(let c=0,d=n.length;c<d;c++){const m=n[c],g=c===d-1,b=[];for(let h=0,w=l.length;h<w;h++){const y=l[h],_=u(y,D)[m];_&&(f(_,I,u(y,I)),g?(u(_,D)["*"]&&a.push(...k(this,P,X).call(this,u(_,D)["*"],t,u(y,I))),a.push(...k(this,P,X).call(this,_,t,u(y,I)))):b.push(_));for(let $=0,B=u(y,te).length;$<B;$++){const q=u(y,te)[$],T=u(y,I)===fe?{}:{...u(y,I)};if(q==="*"){const H=u(y,D)["*"];H&&(a.push(...k(this,P,X).call(this,H,t,u(y,I))),f(H,I,T),b.push(H));continue}const[ft,Me,be]=q;if(!m&&!(be instanceof RegExp))continue;const F=u(y,D)[ft],xt=n.slice(c).join("/");if(be instanceof RegExp){const H=be.exec(xt);if(H){if(T[Me]=H[0],a.push(...k(this,P,X).call(this,F,t,u(y,I),T)),Object.keys(u(F,D)).length){f(F,I,T);const Ce=((o=H[0].match(/\//))==null?void 0:o.length)??0;(i[Ce]||(i[Ce]=[])).push(F)}continue}}(be===!0||be.test(m))&&(T[Me]=m,g?(a.push(...k(this,P,X).call(this,F,t,T,u(y,I))),u(F,D)["*"]&&a.push(...k(this,P,X).call(this,u(F,D)["*"],t,T,u(y,I)))):(f(F,I,T),b.push(F)))}}l=b.concat(i.shift()??[])}return a.length>1&&a.sort((c,d)=>c.score-d.score),[a.map(({handler:c,params:d})=>[c,d])]}},G=new WeakMap,D=new WeakMap,te=new WeakMap,me=new WeakMap,I=new WeakMap,P=new WeakSet,X=function(t,s,a,r){const l=[];for(let n=0,i=u(t,G).length;n<i;n++){const o=u(t,G)[n],c=o[s]||o[E],d={};if(c!==void 0&&(c.params=Object.create(null),l.push(c),a!==fe||r&&r!==fe))for(let m=0,g=c.possibleKeys.length;m<g;m++){const b=c.possibleKeys[m],h=d[c.score];c.params[b]=r!=null&&r[b]&&!h?r[b]:a[b]??(r==null?void 0:r[b]),d[c.score]=!0}}return l},ge),se,Qe,Zt=(Qe=class{constructor(){x(this,"name","TrieRouter");v(this,se);f(this,se,new Kt)}add(e,t,s){const a=Ze(t);if(a){for(let r=0,l=a.length;r<l;r++)u(this,se).insert(e,a[r],s);return}u(this,se).insert(e,t,s)}match(e,t){return u(this,se).search(e,t)}},se=new WeakMap,Qe),ut=class extends Pt{constructor(e={}){super(e),this.router=e.router??new Xt({routers:[new Qt,new Zt]})}},es=e=>{const s={...{origin:"*",allowMethods:["GET","HEAD","PUT","POST","DELETE","PATCH"],allowHeaders:[],exposeHeaders:[]},...e},a=(l=>typeof l=="string"?l==="*"?()=>l:n=>l===n?n:null:typeof l=="function"?l:n=>l.includes(n)?n:null)(s.origin),r=(l=>typeof l=="function"?l:Array.isArray(l)?()=>l:()=>[])(s.allowMethods);return async function(n,i){var d;function o(m,g){n.res.headers.set(m,g)}const c=await a(n.req.header("origin")||"",n);if(c&&o("Access-Control-Allow-Origin",c),s.credentials&&o("Access-Control-Allow-Credentials","true"),(d=s.exposeHeaders)!=null&&d.length&&o("Access-Control-Expose-Headers",s.exposeHeaders.join(",")),n.req.method==="OPTIONS"){s.origin!=="*"&&o("Vary","Origin"),s.maxAge!=null&&o("Access-Control-Max-Age",s.maxAge.toString());const m=await r(n.req.header("origin")||"",n);m.length&&o("Access-Control-Allow-Methods",m.join(","));let g=s.allowHeaders;if(!(g!=null&&g.length)){const b=n.req.header("Access-Control-Request-Headers");b&&(g=b.split(/\s*,\s*/))}return g!=null&&g.length&&(o("Access-Control-Allow-Headers",g.join(",")),n.res.headers.append("Vary","Access-Control-Request-Headers")),n.res.headers.delete("Content-Length"),n.res.headers.delete("Content-Type"),new Response(null,{headers:n.res.headers,status:204,statusText:"No Content"})}await i(),s.origin!=="*"&&n.header("Vary","Origin",{append:!0})}};const ts=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -7373,9 +7373,14 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
             border-color: #d1d5db;
         }
         
-        /* Force scrollbar visibility */
+        /* Force scrollbar to always show */
+        .overflow-x-auto {
+            overflow-x: scroll !important; /* Always show scrollbar */
+        }
+        
         .overflow-x-auto table {
-            min-width: 100%;
+            min-width: 1200px; /* Force table to be wide enough for scrollbar */
+            width: max-content;
         }
     </style>
 </head>
@@ -7558,9 +7563,14 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
             border-color: #d1d5db;
         }
         
-        /* Force scrollbar visibility */
+        /* Force scrollbar to always show */
+        .overflow-x-auto {
+            overflow-x: scroll !important; /* Always show scrollbar */
+        }
+        
         .overflow-x-auto table {
-            min-width: 100%;
+            min-width: 1200px; /* Force table to be wide enough for scrollbar */
+            width: max-content;
         }
     </style>
 </head>
@@ -7944,9 +7954,14 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
             border-color: #d1d5db;
         }
         
-        /* Force scrollbar visibility */
+        /* Force scrollbar to always show */
+        .overflow-x-auto {
+            overflow-x: scroll !important; /* Always show scrollbar */
+        }
+        
         .overflow-x-auto table {
-            min-width: 100%;
+            min-width: 1200px; /* Force table to be wide enough for scrollbar */
+            width: max-content;
         }
     </style>
 </head>
@@ -8757,7 +8772,311 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
     <\/script>
 </body>
 </html>
-`,p=new ut;p.use("*",es());async function fs(e){const s=(e.req.header("host")||"").split(".")[0],a=e.req.path.match(/^\/c\/([^\/]+)/),r=a?a[1]:null;let l=null;return s&&s!=="localhost"&&s!=="3000-ii8t2q2dzwwe7ckmslxss-3844e1b6"&&(l=await e.env.DB.prepare(`
+`;function fs(e,t,s){return`
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>إضافة نسبة جديدة</title>
+      <script src="https://cdn.tailwindcss.com"><\/script>
+      <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-gray-50">
+      <div class="max-w-3xl mx-auto p-6">
+        <div class="mb-6">
+          <a href="/admin/rates?tenant_id=${e}" class="text-blue-600 hover:text-blue-800">
+            <i class="fas fa-arrow-right ml-2"></i>
+            العودة للنسب
+          </a>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-lg p-8">
+          <h1 class="text-3xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-plus-circle text-green-600 ml-2"></i>
+            إضافة نسبة تمويل جديدة
+          </h1>
+          
+          <form id="addRateForm" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  <i class="fas fa-university ml-1"></i>
+                  البنك *
+                </label>
+                <select name="bank_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                  <option value="">اختر البنك</option>
+                  ${t.map(a=>`<option value="${a.id}">${a.bank_name}</option>`).join("")}
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  <i class="fas fa-tag ml-1"></i>
+                  نوع التمويل *
+                </label>
+                <select name="financing_type_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                  <option value="">اختر نوع التمويل</option>
+                  ${s.map(a=>`<option value="${a.id}">${a.type_name}</option>`).join("")}
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  <i class="fas fa-percent ml-1"></i>
+                  النسبة % *
+                </label>
+                <input type="number" name="rate" step="0.01" min="0" max="100" required 
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="مثال: 5.5">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  <i class="fas fa-money-bill ml-1"></i>
+                  الحد الأدنى للمبلغ (ريال)
+                </label>
+                <input type="number" name="min_amount" min="0" step="1000"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="مثال: 10000">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  <i class="fas fa-money-bill-wave ml-1"></i>
+                  الحد الأقصى للمبلغ (ريال)
+                </label>
+                <input type="number" name="max_amount" min="0" step="1000"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="مثال: 500000">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  <i class="fas fa-calendar ml-1"></i>
+                  الحد الأدنى للمدة (شهر)
+                </label>
+                <input type="number" name="min_duration" min="1" max="360"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="مثال: 12">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  <i class="fas fa-calendar-alt ml-1"></i>
+                  الحد الأقصى للمدة (شهر)
+                </label>
+                <input type="number" name="max_duration" min="1" max="360"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="مثال: 60">
+              </div>
+            </div>
+            
+            <div class="flex gap-4 mt-8">
+              <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-md">
+                <i class="fas fa-check ml-2"></i>
+                حفظ النسبة
+              </button>
+              <a href="/admin/rates?tenant_id=${e}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-md text-center">
+                <i class="fas fa-times ml-2"></i>
+                إلغاء
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <script>
+        document.getElementById('addRateForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const formData = new FormData(e.target);
+          const data = {
+            bank_id: parseInt(formData.get('bank_id')),
+            financing_type_id: parseInt(formData.get('financing_type_id')),
+            rate: parseFloat(formData.get('rate')),
+            min_amount: formData.get('min_amount') ? parseFloat(formData.get('min_amount')) : null,
+            max_amount: formData.get('max_amount') ? parseFloat(formData.get('max_amount')) : null,
+            min_duration: formData.get('min_duration') ? parseInt(formData.get('min_duration')) : null,
+            max_duration: formData.get('max_duration') ? parseInt(formData.get('max_duration')) : null,
+            tenant_id: ${e}
+          };
+          
+          try {
+            const response = await fetch('/api/rates', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+              },
+              body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+              alert('✅ تم إضافة النسبة بنجاح!');
+              window.location.href = '/admin/rates?tenant_id=${e}';
+            } else {
+              alert('❌ خطأ: ' + result.message);
+            }
+          } catch (error) {
+            alert('❌ حدث خطأ: ' + error.message);
+          }
+        });
+      <\/script>
+    </body>
+    </html>
+  `}function xs(e,t,s,a){return`
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>تعديل النسبة</title>
+      <script src="https://cdn.tailwindcss.com"><\/script>
+      <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-gray-50">
+      <div class="max-w-3xl mx-auto p-6">
+        <div class="mb-6">
+          <a href="/admin/rates?tenant_id=${e}" class="text-blue-600 hover:text-blue-800">
+            <i class="fas fa-arrow-right ml-2"></i>
+            العودة للنسب
+          </a>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-lg p-8">
+          <h1 class="text-3xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-edit text-blue-600 ml-2"></i>
+            تعديل نسبة التمويل
+          </h1>
+          
+          <form id="editRateForm" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  <i class="fas fa-university ml-1"></i>
+                  البنك *
+                </label>
+                <select name="bank_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                  <option value="">اختر البنك</option>
+                  ${s.map(r=>`<option value="${r.id}" ${r.id==t.bank_id?"selected":""}>${r.bank_name}</option>`).join("")}
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  <i class="fas fa-tag ml-1"></i>
+                  نوع التمويل *
+                </label>
+                <select name="financing_type_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                  <option value="">اختر نوع التمويل</option>
+                  ${a.map(r=>`<option value="${r.id}" ${r.id==t.financing_type_id?"selected":""}>${r.type_name}</option>`).join("")}
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  <i class="fas fa-percent ml-1"></i>
+                  النسبة % *
+                </label>
+                <input type="number" name="rate" step="0.01" min="0" max="100" required value="${t.rate}"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  <i class="fas fa-money-bill ml-1"></i>
+                  الحد الأدنى للمبلغ (ريال)
+                </label>
+                <input type="number" name="min_amount" min="0" step="1000" value="${t.min_amount||""}"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  <i class="fas fa-money-bill-wave ml-1"></i>
+                  الحد الأقصى للمبلغ (ريال)
+                </label>
+                <input type="number" name="max_amount" min="0" step="1000" value="${t.max_amount||""}"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  <i class="fas fa-calendar ml-1"></i>
+                  الحد الأدنى للمدة (شهر)
+                </label>
+                <input type="number" name="min_duration" min="1" max="360" value="${t.min_duration||""}"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  <i class="fas fa-calendar-alt ml-1"></i>
+                  الحد الأقصى للمدة (شهر)
+                </label>
+                <input type="number" name="max_duration" min="1" max="360" value="${t.max_duration||""}"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              </div>
+            </div>
+            
+            <div class="flex gap-4 mt-8">
+              <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-md">
+                <i class="fas fa-save ml-2"></i>
+                حفظ التعديلات
+              </button>
+              <a href="/admin/rates?tenant_id=${e}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-md text-center">
+                <i class="fas fa-times ml-2"></i>
+                إلغاء
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <script>
+        document.getElementById('editRateForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const formData = new FormData(e.target);
+          const data = {
+            bank_id: parseInt(formData.get('bank_id')),
+            financing_type_id: parseInt(formData.get('financing_type_id')),
+            rate: parseFloat(formData.get('rate')),
+            min_amount: formData.get('min_amount') ? parseFloat(formData.get('min_amount')) : null,
+            max_amount: formData.get('max_amount') ? parseFloat(formData.get('max_amount')) : null,
+            min_duration: formData.get('min_duration') ? parseInt(formData.get('min_duration')) : null,
+            max_duration: formData.get('max_duration') ? parseInt(formData.get('max_duration')) : null
+          };
+          
+          try {
+            const response = await fetch('/api/rates/${t.id}', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+              },
+              body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+              alert('✅ تم تحديث النسبة بنجاح!');
+              window.location.href = '/admin/rates?tenant_id=${e}';
+            } else {
+              alert('❌ خطأ: ' + result.message);
+            }
+          } catch (error) {
+            alert('❌ حدث خطأ: ' + error.message);
+          }
+        });
+      <\/script>
+    </body>
+    </html>
+  `}const p=new ut;p.use("*",es());async function hs(e){const s=(e.req.header("host")||"").split(".")[0],a=e.req.path.match(/^\/c\/([^\/]+)/),r=a?a[1]:null;let l=null;return s&&s!=="localhost"&&s!=="3000-ii8t2q2dzwwe7ckmslxss-3844e1b6"&&(l=await e.env.DB.prepare(`
       SELECT * FROM tenants 
       WHERE subdomain = ? AND status = 'active'
       LIMIT 1
@@ -8767,7 +9086,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
       LIMIT 1
     `).bind(r).first()),l||(l=await e.env.DB.prepare(`
       SELECT * FROM tenants WHERE id = 1 LIMIT 1
-    `).bind().first()),l}p.use("/c/:tenant/*",async(e,t)=>{const s=await fs(e);if(!s)return e.json({error:"Tenant not found",message:"الشركة غير موجودة أو غير نشطة"},404);e.set("tenant",s),e.set("tenantId",s.id),await t()});p.get("/api/tenants",async e=>{try{const{results:t}=await e.env.DB.prepare(`
+    `).bind().first()),l}p.use("/c/:tenant/*",async(e,t)=>{const s=await hs(e);if(!s)return e.json({error:"Tenant not found",message:"الشركة غير موجودة أو غير نشطة"},404);e.set("tenant",s),e.set("tenantId",s.id),await t()});p.get("/api/tenants",async e=>{try{const{results:t}=await e.env.DB.prepare(`
       SELECT * FROM tenants ORDER BY created_at DESC
     `).all();return e.json({success:!0,data:t})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/tenants",async e=>{try{const t=await e.req.json();if(!t.company_name||!t.slug)return e.json({success:!1,error:"اسم الشركة والـ Slug مطلوبان"},400);if(await e.env.DB.prepare(`
       SELECT id FROM tenants WHERE slug = ?
@@ -9196,7 +9515,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
       LEFT JOIN financing_requests f ON c.id = f.customer_id
       LEFT JOIN financing_types ft ON c.financing_type_id = ft.id`;a&&(r+=` WHERE c.tenant_id = ${a}`),r+=`
       GROUP BY c.id
-      ORDER BY c.created_at DESC`;const{results:l}=await e.env.DB.prepare(r).all();return e.json({success:!0,data:l})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/customers",async e=>{try{const t=await e.req.formData(),s=t.get("full_name"),a=t.get("phone"),r=t.get("email")||null,l=t.get("national_id")||null,n=t.get("date_of_birth")||null,i=t.get("employer_name")||null,o=t.get("job_title")||null,c=t.get("work_start_date")||null,d=t.get("city")||null,m=parseFloat(t.get("monthly_salary")||"0"),g=e.req.header("Authorization"),b=g==null?void 0:g.replace("Bearer ","");let h=null;if(b){const q=atob(b).split(":");h=q[1]!=="null"?parseInt(q[1]):null}if(l){let R="SELECT id, full_name FROM customers WHERE national_id = ?",q=[l];h&&(R+=" AND tenant_id = ?",q.push(h));const T=await e.env.DB.prepare(R).bind(...q).first();if(T)return e.html(`
+      ORDER BY c.created_at DESC`;const{results:l}=await e.env.DB.prepare(r).all();return e.json({success:!0,data:l})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/customers",async e=>{try{const t=await e.req.formData(),s=t.get("full_name"),a=t.get("phone"),r=t.get("email")||null,l=t.get("national_id")||null,n=t.get("date_of_birth")||null,i=t.get("employer_name")||null,o=t.get("job_title")||null,c=t.get("work_start_date")||null,d=t.get("city")||null,m=parseFloat(t.get("monthly_salary")||"0"),g=e.req.header("Authorization"),b=g==null?void 0:g.replace("Bearer ","");let h=null;if(b){const q=atob(b).split(":");h=q[1]!=="null"?parseInt(q[1]):null}if(l){let B="SELECT id, full_name FROM customers WHERE national_id = ?",q=[l];h&&(B+=" AND tenant_id = ?",q.push(h));const T=await e.env.DB.prepare(B).bind(...q).first();if(T)return e.html(`
           <!DOCTYPE html>
           <html lang="ar" dir="rtl">
           <head>
@@ -9531,7 +9850,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
-    `).run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_tenant ON payments(tenant_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_request ON payments(financing_request_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_customer ON payments(customer_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_employee ON payments(employee_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_date ON payments(payment_date)").run(),e.json({success:!0,message:"Payments table created successfully"})}catch(t){return console.error("Error creating payments table:",t),e.json({success:!1,error:t.message},500)}});p.get("/api/dashboard/stats",async e=>{try{const t=e.req.header("Authorization"),s=t==null?void 0:t.replace("Bearer ","");let a=null;if(s){const T=atob(s).split(":");a=T[1]!=="null"?parseInt(T[1]):null}let r="SELECT COUNT(*) as count FROM customers",l="SELECT COUNT(*) as count FROM financing_requests",n='SELECT COUNT(*) as count FROM financing_requests WHERE status = "pending"',i='SELECT COUNT(*) as count FROM financing_requests WHERE status = "approved"',o='SELECT COUNT(*) as count FROM subscriptions WHERE status = "active"',c="SELECT COUNT(*) as count FROM users WHERE is_active = 1";a!==null&&(r+=" WHERE tenant_id = ?",l+=" WHERE tenant_id = ?",n+=" AND tenant_id = ?",i+=" AND tenant_id = ?",o+=" AND tenant_id = ?",c+=" AND tenant_id = ?");const d=a!==null?await e.env.DB.prepare(r).bind(a).first():await e.env.DB.prepare(r).first(),m=a!==null?await e.env.DB.prepare(l).bind(a).first():await e.env.DB.prepare(l).first(),g=a!==null?await e.env.DB.prepare(n).bind(a).first():await e.env.DB.prepare(n).first(),b=a!==null?await e.env.DB.prepare(i).bind(a).first():await e.env.DB.prepare(i).first(),h=a!==null?await e.env.DB.prepare(o).bind(a).first():await e.env.DB.prepare(o).first(),w=a!==null?await e.env.DB.prepare(c).bind(a).first():await e.env.DB.prepare(c).first();let y="SELECT COUNT(*) as count FROM banks";a!==null&&(y+=" WHERE tenant_id = ?");const _=a!==null?await e.env.DB.prepare(y).bind(a).first():await e.env.DB.prepare(y).first(),$=await e.env.DB.prepare('SELECT COUNT(*) as count FROM tenants WHERE status = "active"').first(),R=await e.env.DB.prepare("SELECT COUNT(*) as count FROM calculations").first();return e.json({success:!0,data:{total_customers:(d==null?void 0:d.count)||0,total_requests:(m==null?void 0:m.count)||0,pending_requests:(g==null?void 0:g.count)||0,approved_requests:(b==null?void 0:b.count)||0,active_subscriptions:(h==null?void 0:h.count)||0,total_calculations:(R==null?void 0:R.count)||0,active_banks:(_==null?void 0:_.count)||0,active_tenants:($==null?void 0:$.count)||0,active_users:(w==null?void 0:w.count)||0}})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/customers/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM financing_requests WHERE customer_id = ?").bind(t).run(),await e.env.DB.prepare("DELETE FROM customers WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف العميل بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/financing-requests/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM financing_requests WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف الطلب بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/banks/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM banks WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف البنك بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/rates/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM bank_financing_rates WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف النسبة بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/subscriptions/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM subscriptions WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف الاشتراك بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/users/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM users WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف المستخدم بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/packages/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM packages WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف الباقة بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/subscription-requests",async e=>{try{const{results:t}=await e.env.DB.prepare(`
+    `).run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_tenant ON payments(tenant_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_request ON payments(financing_request_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_customer ON payments(customer_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_employee ON payments(employee_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_date ON payments(payment_date)").run(),e.json({success:!0,message:"Payments table created successfully"})}catch(t){return console.error("Error creating payments table:",t),e.json({success:!1,error:t.message},500)}});p.get("/api/dashboard/stats",async e=>{try{const t=e.req.header("Authorization"),s=t==null?void 0:t.replace("Bearer ","");let a=null;if(s){const T=atob(s).split(":");a=T[1]!=="null"?parseInt(T[1]):null}let r="SELECT COUNT(*) as count FROM customers",l="SELECT COUNT(*) as count FROM financing_requests",n='SELECT COUNT(*) as count FROM financing_requests WHERE status = "pending"',i='SELECT COUNT(*) as count FROM financing_requests WHERE status = "approved"',o='SELECT COUNT(*) as count FROM subscriptions WHERE status = "active"',c="SELECT COUNT(*) as count FROM users WHERE is_active = 1";a!==null&&(r+=" WHERE tenant_id = ?",l+=" WHERE tenant_id = ?",n+=" AND tenant_id = ?",i+=" AND tenant_id = ?",o+=" AND tenant_id = ?",c+=" AND tenant_id = ?");const d=a!==null?await e.env.DB.prepare(r).bind(a).first():await e.env.DB.prepare(r).first(),m=a!==null?await e.env.DB.prepare(l).bind(a).first():await e.env.DB.prepare(l).first(),g=a!==null?await e.env.DB.prepare(n).bind(a).first():await e.env.DB.prepare(n).first(),b=a!==null?await e.env.DB.prepare(i).bind(a).first():await e.env.DB.prepare(i).first(),h=a!==null?await e.env.DB.prepare(o).bind(a).first():await e.env.DB.prepare(o).first(),w=a!==null?await e.env.DB.prepare(c).bind(a).first():await e.env.DB.prepare(c).first();let y="SELECT COUNT(*) as count FROM banks";a!==null&&(y+=" WHERE tenant_id = ?");const _=a!==null?await e.env.DB.prepare(y).bind(a).first():await e.env.DB.prepare(y).first(),$=await e.env.DB.prepare('SELECT COUNT(*) as count FROM tenants WHERE status = "active"').first(),B=await e.env.DB.prepare("SELECT COUNT(*) as count FROM calculations").first();return e.json({success:!0,data:{total_customers:(d==null?void 0:d.count)||0,total_requests:(m==null?void 0:m.count)||0,pending_requests:(g==null?void 0:g.count)||0,approved_requests:(b==null?void 0:b.count)||0,active_subscriptions:(h==null?void 0:h.count)||0,total_calculations:(B==null?void 0:B.count)||0,active_banks:(_==null?void 0:_.count)||0,active_tenants:($==null?void 0:$.count)||0,active_users:(w==null?void 0:w.count)||0}})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/customers/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM financing_requests WHERE customer_id = ?").bind(t).run(),await e.env.DB.prepare("DELETE FROM customers WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف العميل بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/financing-requests/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM financing_requests WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف الطلب بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/banks/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM banks WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف البنك بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/rates/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM bank_financing_rates WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف النسبة بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/subscriptions/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM subscriptions WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف الاشتراك بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/users/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM users WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف المستخدم بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/packages/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM packages WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف الباقة بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/subscription-requests",async e=>{try{const{results:t}=await e.env.DB.prepare(`
       SELECT 
         sr.*,
         p.package_name
@@ -9750,9 +10069,14 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
             border-color: #d1d5db;
           }
           
-          /* Force scrollbar visibility */
+          /* Force scrollbar to always show */
+          .overflow-x-auto {
+            overflow-x: scroll !important; /* Always show scrollbar */
+          }
+          
           .overflow-x-auto table {
-            min-width: 100%;
+            min-width: 1200px; /* Force table to be wide enough for scrollbar */
+            width: max-content;
           }
         </style>
       </head>
@@ -11782,9 +12106,14 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
             border-color: #d1d5db;
           }
           
-          /* Force scrollbar visibility */
+          /* Force scrollbar to always show */
+          .overflow-x-auto {
+            overflow-x: scroll !important; /* Always show scrollbar */
+          }
+          
           .overflow-x-auto table {
-            min-width: 100%;
+            min-width: 1200px; /* Force table to be wide enough for scrollbar */
+            width: max-content;
           }
         </style>
       </head>
@@ -11923,7 +12252,13 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch(t){return e.html(`<h1>Error: ${t.message}</h1>`,500)}});p.get("/admin/customers",async e=>{try{const t=e.req.query("tenant_id");let s="SELECT * FROM customers";t&&(s+=" WHERE tenant_id = ?"),s+=" ORDER BY created_at DESC";const a=t?await e.env.DB.prepare(s).bind(t).all():await e.env.DB.prepare(s).all();return e.html(`
+    `)}catch(t){return e.html(`<h1>Error: ${t.message}</h1>`,500)}});p.get("/admin/rates/add",async e=>{const t=e.req.query("tenant_id");if(!t)return e.html("<h1>خطأ: يجب تحديد الشركة</h1>",400);const s=await e.env.DB.prepare("SELECT * FROM banks WHERE tenant_id = ? ORDER BY bank_name").bind(t).all(),a=await e.env.DB.prepare("SELECT * FROM financing_types ORDER BY type_name").all();return e.html(fs(t,s.results,a.results))});p.get("/admin/rates/edit/:id",async e=>{const t=e.req.param("id"),s=e.req.query("tenant_id");if(!s)return e.html("<h1>خطأ: يجب تحديد الشركة</h1>",400);const a=await e.env.DB.prepare(`
+    SELECT r.*, b.bank_name, f.type_name
+    FROM bank_financing_rates r
+    LEFT JOIN banks b ON r.bank_id = b.id
+    LEFT JOIN financing_types f ON r.financing_type_id = f.id
+    WHERE r.id = ? AND r.tenant_id = ?
+  `).bind(t,s).first();if(!a)return e.html("<h1>خطأ: النسبة غير موجودة</h1>",404);const r=await e.env.DB.prepare("SELECT * FROM banks WHERE tenant_id = ? ORDER BY bank_name").bind(s).all(),l=await e.env.DB.prepare("SELECT * FROM financing_types ORDER BY type_name").all();return e.html(xs(s,a,r.results,l.results))});p.get("/admin/customers",async e=>{try{const t=e.req.query("tenant_id");let s="SELECT * FROM customers";t&&(s+=" WHERE tenant_id = ?"),s+=" ORDER BY created_at DESC";const a=t?await e.env.DB.prepare(s).bind(t).all():await e.env.DB.prepare(s).all();return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -16883,4 +17218,4 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,s)=>t in
     `).bind(s).run(),a&&a.length>0)for(const r of a)await e.env.DB.prepare(`
           INSERT OR IGNORE INTO role_permissions (role_id, permission_id)
           VALUES (?, ?)
-        `).bind(s,r).run();return e.json({success:!0,message:"تم تحديث الصلاحيات بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});const We=new ut,xs=Object.assign({"/src/index.tsx":p});let bt=!1;for(const[,e]of Object.entries(xs))e&&(We.all("*",t=>{let s;try{s=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,s)}),We.notFound(t=>{let s;try{s=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,s)}),bt=!0);if(!bt)throw new Error("Can't import modules from ['/src/index.ts','/src/index.tsx','/app/server.ts']");export{We as default};
+        `).bind(s,r).run();return e.json({success:!0,message:"تم تحديث الصلاحيات بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});const We=new ut,ys=Object.assign({"/src/index.tsx":p});let bt=!1;for(const[,e]of Object.entries(ys))e&&(We.all("*",t=>{let s;try{s=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,s)}),We.notFound(t=>{let s;try{s=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,s)}),bt=!0);if(!bt)throw new Error("Can't import modules from ['/src/index.ts','/src/index.tsx','/app/server.ts']");export{We as default};

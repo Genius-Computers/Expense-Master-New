@@ -16,6 +16,7 @@ import { reportsPage } from './reports-page'
 import { customersReportPage, requestsReportPage, financialReportPage } from './advanced-reports'
 import { paymentsPage } from './payments-page'
 import { banksManagementPage } from './banks-management-page'
+import { generateAddRatePage, generateEditRatePage } from './rates-forms'
 
 type Bindings = {
   DB: D1Database;
@@ -3680,9 +3681,14 @@ app.get('/admin/reports/requests-followup', async (c) => {
             border-color: #d1d5db;
           }
           
-          /* Force scrollbar visibility */
+          /* Force scrollbar to always show */
+          .overflow-x-auto {
+            overflow-x: scroll !important; /* Always show scrollbar */
+          }
+          
           .overflow-x-auto table {
-            min-width: 100%;
+            min-width: 1200px; /* Force table to be wide enough for scrollbar */
+            width: max-content;
           }
         </style>
       </head>
@@ -6052,9 +6058,14 @@ app.get('/admin/rates', async (c) => {
             border-color: #d1d5db;
           }
           
-          /* Force scrollbar visibility */
+          /* Force scrollbar to always show */
+          .overflow-x-auto {
+            overflow-x: scroll !important; /* Always show scrollbar */
+          }
+          
           .overflow-x-auto table {
-            min-width: 100%;
+            min-width: 1200px; /* Force table to be wide enough for scrollbar */
+            width: max-content;
           }
         </style>
       </head>
@@ -6199,6 +6210,46 @@ app.get('/admin/rates', async (c) => {
   }
 });
 
+// Add Rate Page
+app.get('/admin/rates/add', async (c) => {
+  const tenantId = c.req.query('tenant_id');
+  
+  if (!tenantId) {
+    return c.html('<h1>خطأ: يجب تحديد الشركة</h1>', 400);
+  }
+  
+  const banks = await c.env.DB.prepare('SELECT * FROM banks WHERE tenant_id = ? ORDER BY bank_name').bind(tenantId).all();
+  const financingTypes = await c.env.DB.prepare('SELECT * FROM financing_types ORDER BY type_name').all();
+  
+  return c.html(generateAddRatePage(tenantId, banks.results, financingTypes.results));
+});
+
+// Edit Rate Page
+app.get('/admin/rates/edit/:id', async (c) => {
+  const rateId = c.req.param('id');
+  const tenantId = c.req.query('tenant_id');
+  
+  if (!tenantId) {
+    return c.html('<h1>خطأ: يجب تحديد الشركة</h1>', 400);
+  }
+  
+  const rate = await c.env.DB.prepare(`
+    SELECT r.*, b.bank_name, f.type_name
+    FROM bank_financing_rates r
+    LEFT JOIN banks b ON r.bank_id = b.id
+    LEFT JOIN financing_types f ON r.financing_type_id = f.id
+    WHERE r.id = ? AND r.tenant_id = ?
+  `).bind(rateId, tenantId).first();
+  
+  if (!rate) {
+    return c.html('<h1>خطأ: النسبة غير موجودة</h1>', 404);
+  }
+  
+  const banks = await c.env.DB.prepare('SELECT * FROM banks WHERE tenant_id = ? ORDER BY bank_name').bind(tenantId).all();
+  const financingTypes = await c.env.DB.prepare('SELECT * FROM financing_types ORDER BY type_name').all();
+  
+  return c.html(generateEditRatePage(tenantId, rate, banks.results, financingTypes.results));
+});
 
 app.get('/admin/customers', async (c) => {
   try {
