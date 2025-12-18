@@ -25,15 +25,27 @@ export const customersReportPage = `<!DOCTYPE html>
         </div>
 
         <div class="bg-white rounded-xl shadow-lg p-6">
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex justify-between items-center mb-6 gap-4 flex-wrap">
                 <div>
                     <h2 class="text-xl font-bold">إجمالي العملاء: <span id="totalCustomers" class="text-blue-600">0</span></h2>
                     <p class="text-gray-600 text-sm">تاريخ التقرير: <span id="reportDate"></span></p>
                 </div>
-                <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold">
-                    <i class="fas fa-file-excel ml-2"></i>
-                    تصدير Excel
-                </button>
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="بحث في العملاء..." 
+                            class="px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onkeyup="searchTable()"
+                        />
+                        <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                    </div>
+                    <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold whitespace-nowrap">
+                        <i class="fas fa-file-excel ml-2"></i>
+                        تصدير Excel
+                    </button>
+                </div>
             </div>
 
             <div id="loading" class="text-center py-12">
@@ -101,6 +113,21 @@ export const customersReportPage = `<!DOCTYPE html>
                     <td class="px-4 py-3">\${customer.assigned_employee_name || 'غير محدد'}</td>
                 </tr>
             \`).join('');
+        }
+        
+        function searchTable() {
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            const tbody = document.getElementById('reportTable');
+            const rows = tbody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         }
         
         window.exportToExcel = function() {
@@ -172,12 +199,24 @@ export const requestsReportPage = `<!DOCTYPE html>
         </div>
 
         <div class="bg-white rounded-xl shadow-lg p-6">
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex justify-between items-center mb-6 gap-4 flex-wrap">
                 <h2 class="text-xl font-bold">تفاصيل الطلبات</h2>
-                <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold">
-                    <i class="fas fa-file-excel ml-2"></i>
-                    تصدير Excel
-                </button>
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="searchInputRequests" 
+                            placeholder="بحث في الطلبات..." 
+                            class="px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            onkeyup="searchRequestsTable()"
+                        />
+                        <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                    </div>
+                    <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold whitespace-nowrap">
+                        <i class="fas fa-file-excel ml-2"></i>
+                        تصدير Excel
+                    </button>
+                </div>
             </div>
 
             <div id="loading" class="text-center py-12">
@@ -298,6 +337,21 @@ export const requestsReportPage = `<!DOCTYPE html>
                     plugins: {
                         legend: { display: false }
                     }
+                }
+            });
+        }
+        
+        function searchRequestsTable() {
+            const searchValue = document.getElementById('searchInputRequests').value.toLowerCase();
+            const tbody = document.getElementById('reportTable');
+            const rows = tbody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
                 }
             });
         }

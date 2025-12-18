@@ -6046,6 +6046,52 @@ app.get('/admin/rates', async (c) => {
             `}
           </div>
         </div>
+        
+        <script>
+          function searchInRatesTable() {
+            const searchValue = document.getElementById('searchRates').value.toLowerCase();
+            const tableBody = document.querySelector('tbody');
+            const rows = tableBody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+              const bankName = row.cells[1]?.textContent.toLowerCase() || '';
+              const financingType = row.cells[2]?.textContent.toLowerCase() || '';
+              
+              if (bankName.includes(searchValue) || financingType.includes(searchValue)) {
+                row.style.display = '';
+              } else {
+                row.style.display = 'none';
+              }
+            });
+          }
+          
+          function deleteRate(rateId) {
+            if (!confirm('هل أنت متأكد من حذف هذه النسبة؟')) return;
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const tenantId = urlParams.get('tenant_id');
+            
+            fetch(\`/api/rates/\${rateId}\`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                alert('تم حذف النسبة بنجاح');
+                window.location.reload();
+              } else {
+                alert('حدث خطأ: ' + data.message);
+              }
+            })
+            .catch(error => {
+              alert('حدث خطأ: ' + error.message);
+            });
+          }
+        </script>
       </body>
       </html>
     `);
