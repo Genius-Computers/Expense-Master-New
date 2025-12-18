@@ -1906,8 +1906,10 @@ app.get('/api/payments', async (c) => {
     
     if (token) {
       try {
-        const payload = await verify(token, c.env.JWT_SECRET)
-        tenant_id = payload.tenant_id
+        // Decode token (format: userId:tenantId:timestamp:random)
+        const decoded = atob(token)
+        const [userId, tenantId] = decoded.split(':')
+        tenant_id = tenantId === 'null' ? null : parseInt(tenantId)
       } catch (e) {
         // Token invalid or expired
       }
@@ -1951,9 +1953,11 @@ app.post('/api/payments', async (c) => {
       return c.json({ success: false, error: 'غير مصرح' }, 401)
     }
     
-    const payload = await verify(token, c.env.JWT_SECRET)
-    const tenant_id = payload.tenant_id
-    const created_by = payload.userId
+    // Decode token (format: userId:tenantId:timestamp:random)
+    const decoded = atob(token)
+    const [userId, tenantId] = decoded.split(':')
+    const tenant_id = tenantId === 'null' ? null : parseInt(tenantId)
+    const created_by = parseInt(userId)
     
     if (!tenant_id) {
       return c.json({ success: false, error: 'يجب أن تكون مرتبطاً بشركة' }, 403)
@@ -2001,8 +2005,10 @@ app.delete('/api/payments/:id', async (c) => {
       return c.json({ success: false, error: 'غير مصرح' }, 401)
     }
     
-    const payload = await verify(token, c.env.JWT_SECRET)
-    const tenant_id = payload.tenant_id
+    // Decode token (format: userId:tenantId:timestamp:random)
+    const decoded = atob(token)
+    const [userId, tenantId] = decoded.split(':')
+    const tenant_id = tenantId === 'null' ? null : parseInt(tenantId)
     const id = c.req.param('id')
     
     // Verify payment belongs to this tenant
