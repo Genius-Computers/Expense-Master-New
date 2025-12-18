@@ -1532,8 +1532,7 @@ export const fullAdminPanel = `<!DOCTYPE html>
                     'employee': [
                         '/admin/customers',
                         '/admin/requests',
-                        '/calculator',
-                        '/'
+                        '/calculator'
                     ],
                     'company': [
                         '/admin/dashboard',
@@ -1547,8 +1546,7 @@ export const fullAdminPanel = `<!DOCTYPE html>
                     'user': [
                         '/admin/customers',
                         '/admin/requests',
-                        '/calculator',
-                        '/'
+                        '/calculator'
                     ]
                 };
                 
@@ -3518,11 +3516,20 @@ export const fullAdminPanel = `<!DOCTYPE html>
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-                if (userData.role === 'company' || userData.role === 'admin' || userData.role === 'superadmin') {
-                    console.log('🔗 تحميل رابط الحاسبة للمستخدم:', userData.role);
-                    loadCalculatorLink();
+                const userRole = userData.role || userData.user_type;
+                
+                if (userRole === 'employee') {
+                    console.log('🔗 تحميل رابط الحاسبة للموظف:', userRole);
+                    if (typeof loadEmployeeCalculatorLink === 'function') {
+                        loadEmployeeCalculatorLink();
+                    }
+                } else if (userRole === 'company' || userRole === 'admin' || userRole === 'superadmin' || userRole === 'manager') {
+                    console.log('🔗 تحميل رابط الحاسبة للمستخدم:', userRole);
+                    if (typeof loadCalculatorLink === 'function') {
+                        loadCalculatorLink();
+                    }
                 } else {
-                    console.log('⚠️ دور المستخدم لا يسمح بعرض رابط الحاسبة:', userData.role);
+                    console.log('⚠️ دور المستخدم لا يسمح بعرض رابط الحاسبة:', userRole);
                 }
             }, 1000);
         });
