@@ -22,13 +22,43 @@ const getMobileResponsiveCSS = () => `
     .grid { grid-template-columns: 1fr !important; }
     .p-6 { padding: 1rem !important; }
     .p-8 { padding: 1.5rem !important; }
-    .overflow-x-auto { margin-left: -1rem !important; margin-right: -1rem !important; }
+    .overflow-x-auto { 
+      margin-left: -1rem !important; 
+      margin-right: -1rem !important;
+      padding-bottom: 1.5rem !important;
+      position: relative !important;
+    }
+    
+    /* Enhanced Mobile Scrollbar */
+    .overflow-x-auto::-webkit-scrollbar {
+      height: 14px !important;
+      -webkit-appearance: none;
+    }
+    .overflow-x-auto::-webkit-scrollbar-track {
+      background: #f1f5f9 !important;
+      border-radius: 8px !important;
+      border: 2px solid #e2e8f0 !important;
+    }
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%) !important;
+      border-radius: 8px !important;
+      border: 2px solid #e2e8f0 !important;
+      min-width: 50px !important;
+    }
+    .overflow-x-auto {
+      overflow-x: scroll !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: auto !important;
+      scrollbar-color: #3b82f6 #f1f5f9 !important;
+    }
   }
   @media (max-width: 480px) {
     body { font-size: 14px !important; }
     h1 { font-size: 1.25rem !important; }
     table { font-size: 0.75rem !important; }
     button { font-size: 0.75rem !important; padding: 0.375rem 0.75rem !important; }
+    .overflow-x-auto::-webkit-scrollbar { height: 16px !important; }
+    .overflow-x-auto::-webkit-scrollbar-thumb { min-width: 60px !important; }
   }
 `
 

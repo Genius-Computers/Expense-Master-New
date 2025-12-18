@@ -128,6 +128,66 @@ const getMobileResponsiveCSS = () => `
       margin-right: -1rem !important;
       padding-left: 1rem !important;
       padding-right: 1rem !important;
+      padding-bottom: 1.5rem !important; /* Space for scrollbar */
+    }
+    
+    /* IMPORTANT: Force scrollbar to be ALWAYS VISIBLE on mobile */
+    .overflow-x-auto::-webkit-scrollbar {
+      height: 14px !important; /* Larger scrollbar for mobile */
+      -webkit-appearance: none;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-track {
+      background: #f1f5f9 !important; /* Light background */
+      border-radius: 8px !important;
+      border: 2px solid #e2e8f0 !important; /* Border to make it stand out */
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%) !important;
+      border-radius: 8px !important;
+      border: 2px solid #e2e8f0 !important;
+      min-width: 50px !important; /* Minimum thumb width */
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-thumb:active {
+      background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%) !important;
+    }
+    
+    /* Force scrollbar to always show on mobile (iOS Safari & Chrome) */
+    .overflow-x-auto {
+      overflow-x: scroll !important; /* Always show scrollbar */
+      -webkit-overflow-scrolling: touch !important; /* Smooth scrolling on iOS */
+      scrollbar-width: auto !important; /* Firefox: show scrollbar */
+      scrollbar-color: #3b82f6 #f1f5f9 !important; /* Firefox colors */
+    }
+    
+    /* Add visual indicator for scrollable content */
+    .overflow-x-auto::after {
+      content: '← مرر للمزيد →' !important;
+      position: absolute !important;
+      bottom: 0 !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      background: rgba(59, 130, 246, 0.9) !important;
+      color: white !important;
+      padding: 0.25rem 1rem !important;
+      border-radius: 1rem !important;
+      font-size: 0.75rem !important;
+      font-weight: bold !important;
+      pointer-events: none !important;
+      opacity: 0 !important;
+      animation: fadeInOut 3s ease-in-out !important;
+    }
+    
+    @keyframes fadeInOut {
+      0%, 100% { opacity: 0; }
+      10%, 90% { opacity: 1; }
+    }
+    
+    /* Table wrapper positioning */
+    .overflow-x-auto {
+      position: relative !important;
     }
     
     /* Action buttons in table */
@@ -161,6 +221,15 @@ const getMobileResponsiveCSS = () => `
     button, .btn {
       font-size: 0.75rem !important;
       padding: 0.375rem 0.75rem !important;
+    }
+    
+    /* Even larger scrollbar for very small screens */
+    .overflow-x-auto::-webkit-scrollbar {
+      height: 16px !important;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+      min-width: 60px !important;
     }
   }
 `

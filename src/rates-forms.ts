@@ -12,10 +12,25 @@ const getMobileResponsiveCSS = () => `
     input, select, textarea { font-size: 1rem !important; }
     .p-6 { padding: 1rem !important; }
     .p-8 { padding: 1.5rem !important; }
+    
+    /* Tables in forms (if any) */
+    .overflow-x-auto::-webkit-scrollbar {
+      height: 14px !important;
+    }
+    .overflow-x-auto::-webkit-scrollbar-track {
+      background: #f1f5f9 !important;
+      border: 2px solid #e2e8f0 !important;
+    }
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+      background: #10b981 !important;
+      border-radius: 8px !important;
+      min-width: 50px !important;
+    }
   }
   @media (max-width: 480px) {
     h1 { font-size: 1.25rem !important; }
     button { font-size: 0.75rem !important; }
+    .overflow-x-auto::-webkit-scrollbar { height: 16px !important; }
   }
 `
 
