@@ -11,23 +11,39 @@ export const paymentsPage = `<!DOCTYPE html>
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* Custom Scrollbar */
-        .overflow-x-auto::-webkit-scrollbar {
-            height: 8px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-track {
-            background: #f7fafc;
-            border-radius: 10px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-thumb {
-            background: #10b981;
-            border-radius: 10px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-            background: #059669;
-        }
+        /* Custom Scrollbar - Enhanced */
         .overflow-x-auto {
+            overflow-x: auto !important;
             -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #10b981 #f7fafc;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 12px;
+            width: 12px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 10px;
+            margin: 0 10px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #059669 0%, #047857 100%);
+            border-color: #d1d5db;
+        }
+        
+        /* Force scrollbar visibility */
+        .overflow-x-auto table {
+            min-width: 100%;
         }
     </style>
 </head>

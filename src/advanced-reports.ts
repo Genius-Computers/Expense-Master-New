@@ -11,23 +11,39 @@ export const customersReportPage = `<!DOCTYPE html>
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* Custom Scrollbar */
-        .overflow-x-auto::-webkit-scrollbar {
-            height: 8px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-track {
-            background: #f7fafc;
-            border-radius: 10px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-thumb {
-            background: #3b82f6;
-            border-radius: 10px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-            background: #2563eb;
-        }
+        /* Custom Scrollbar - Enhanced */
         .overflow-x-auto {
+            overflow-x: auto !important;
             -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #3b82f6 #f7fafc;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 12px;
+            width: 12px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 10px;
+            margin: 0 10px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+            border-color: #d1d5db;
+        }
+        
+        /* Force scrollbar visibility */
+        .overflow-x-auto table {
+            min-width: 100%;
         }
     </style>
 </head>
@@ -182,23 +198,39 @@ export const requestsReportPage = `<!DOCTYPE html>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* Custom Scrollbar */
-        .overflow-x-auto::-webkit-scrollbar {
-            height: 8px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-track {
-            background: #f7fafc;
-            border-radius: 10px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-thumb {
-            background: #22c55e;
-            border-radius: 10px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-            background: #16a34a;
-        }
+        /* Custom Scrollbar - Enhanced */
         .overflow-x-auto {
+            overflow-x: auto !important;
             -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #22c55e #f7fafc;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 12px;
+            width: 12px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 10px;
+            margin: 0 10px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #16a34a 0%, #15803d 100%);
+            border-color: #d1d5db;
+        }
+        
+        /* Force scrollbar visibility */
+        .overflow-x-auto table {
+            min-width: 100%;
         }
     </style>
 </head>
