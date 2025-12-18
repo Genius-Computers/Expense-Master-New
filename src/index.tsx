@@ -2929,6 +2929,42 @@ app.post('/api/calculate', async (c) => {
 
 // DASHBOARD APIs
 
+// Temporary endpoint to create payments table
+app.post('/api/admin/init-payments-table', async (c) => {
+  try {
+    // Create payments table
+    await c.env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS payments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        financing_request_id INTEGER NOT NULL,
+        customer_id INTEGER NOT NULL,
+        tenant_id INTEGER NOT NULL,
+        employee_id INTEGER,
+        amount REAL NOT NULL,
+        payment_date TEXT NOT NULL,
+        payment_method TEXT DEFAULT 'cash',
+        receipt_number TEXT,
+        notes TEXT,
+        created_by INTEGER,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `).run()
+    
+    // Create indexes
+    await c.env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_payments_tenant ON payments(tenant_id)').run()
+    await c.env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_payments_request ON payments(financing_request_id)').run()
+    await c.env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_payments_customer ON payments(customer_id)').run()
+    await c.env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_payments_employee ON payments(employee_id)').run()
+    await c.env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_payments_date ON payments(payment_date)').run()
+    
+    return c.json({ success: true, message: 'Payments table created successfully' })
+  } catch (error: any) {
+    console.error('Error creating payments table:', error)
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
 // Get dashboard statistics
 app.get('/api/dashboard/stats', async (c) => {
   try {
