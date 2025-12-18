@@ -1480,9 +1480,12 @@ export const fullAdminPanel = `<!DOCTYPE html>
                 }
                 
                 const user = JSON.parse(userStr);
-                const userRole = user.role || user.user_type;
+                // For superadmin, use user_type; for others use role
+                const userRole = user.user_type === 'superadmin' ? 'superadmin' : (user.role || user.user_type);
                 
                 console.log('👤 دور المستخدم:', userRole);
+                console.log('📋 user_type:', user.user_type);
+                console.log('📋 role:', user.role);
                 
                 // تعريف الروابط المسموحة لكل دور
                 const allowedLinks = {

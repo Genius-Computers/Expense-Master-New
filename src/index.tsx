@@ -272,7 +272,7 @@ app.post('/api/auth/login', async (c) => {
     if (user.tenant_id && user.tenant_slug) {
       redirect = `/c/${user.tenant_slug}/admin`
     } else if (user.user_type === 'superadmin') {
-      redirect = '/admin/tenants' // Super admin goes to tenant management
+      redirect = '/admin' // Super admin goes to main admin dashboard
     }
     
     return c.json({ 
