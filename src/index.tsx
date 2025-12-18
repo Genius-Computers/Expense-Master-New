@@ -1822,11 +1822,15 @@ app.get('/api/financing-requests', async (c) => {
         c.employer_name,
         c.job_title,
         b.bank_name as selected_bank_name,
-        ft.type_name as financing_type_name
+        ft.type_name as financing_type_name,
+        ca.employee_id as assigned_employee_id,
+        u.full_name as assigned_employee_name
       FROM financing_requests f
       JOIN customers c ON f.customer_id = c.id
       LEFT JOIN banks b ON f.selected_bank_id = b.id
-      LEFT JOIN financing_types ft ON f.financing_type_id = ft.id`
+      LEFT JOIN financing_types ft ON f.financing_type_id = ft.id
+      LEFT JOIN customer_assignments ca ON c.id = ca.customer_id
+      LEFT JOIN users u ON ca.employee_id = u.id`
     
     if (tenant_id) {
       query += ` WHERE f.tenant_id = ${tenant_id}`
