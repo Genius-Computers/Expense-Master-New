@@ -6973,8 +6973,8 @@ app.get('/admin/customers', async (c) => {
                     <td class="px-6 py-4 whitespace-nowrap">${customer.phone || '-'}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${customer.email || '-'}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${new Date(customer.created_at).toLocaleDateString('ar-SA')}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                      <div class="flex items-center justify-center gap-2">
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                      <div class="flex items-center justify-end gap-2">
                         <a href="/admin/customers/${customer.id}/report" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-sm" title="تقرير العميل الكامل">
                           <i class="fas fa-file-alt"></i> تقرير
                         </a>
@@ -10209,7 +10209,7 @@ app.get('/admin/banks', async (c) => {
                   <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">اسم البنك</th>
                   <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">الوصف</th>
                   <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">الحالة</th>
-                  <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">الإجراءات</th>
+                  <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">الإجراءات</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200" id="tableBody">
