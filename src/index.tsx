@@ -8002,16 +8002,17 @@ app.get('/admin/requests', async (c) => {
           </div>
           
           <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-            <table class="min-w-full" id="dataTable">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">العميل</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">البنك</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المبلغ</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المدة</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الحالة</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">التاريخ</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الإجراءات</th>
+            <div class="overflow-x-auto">
+              <table class="min-w-full" id="dataTable">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">العميل</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">البنك</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المبلغ</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المدة</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الحالة</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">التاريخ</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الإجراءات</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
@@ -8054,7 +8055,8 @@ app.get('/admin/requests', async (c) => {
                   </tr>
                 `}).join('')}
               </tbody>
-            </table>
+              </table>
+            </div>
           </div>
         </div>
         

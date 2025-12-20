@@ -13380,8 +13380,8 @@ var P=(e,t,a)=>(s,r)=>{let l=-1;return o(0);async function o(i){if(i<=l)throw ne
                     <td class="px-6 py-4 whitespace-nowrap">${r.phone||"-"}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${r.email||"-"}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${new Date(r.created_at).toLocaleDateString("ar-SA")}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                      <div class="flex items-center justify-center gap-2">
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                      <div class="flex items-center justify-end gap-2">
                         <a href="/admin/customers/${r.id}/report" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-sm" title="تقرير العميل الكامل">
                           <i class="fas fa-file-alt"></i> تقرير
                         </a>
@@ -13399,7 +13399,8 @@ var P=(e,t,a)=>(s,r)=>{let l=-1;return o(0);async function o(i){if(i<=l)throw ne
                   </tr>
                 `).join("")}
               </tbody>
-            </table>
+              </table>
+            </div>
           </div>
         </div>
         
@@ -14355,16 +14356,17 @@ var P=(e,t,a)=>(s,r)=>{let l=-1;return o(0);async function o(i){if(i<=l)throw ne
           </div>
           
           <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-            <table class="min-w-full" id="dataTable">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">العميل</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">البنك</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المبلغ</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المدة</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الحالة</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">التاريخ</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الإجراءات</th>
+            <div class="overflow-x-auto">
+              <table class="min-w-full" id="dataTable">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">العميل</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">البنك</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المبلغ</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المدة</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الحالة</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">التاريخ</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الإجراءات</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
@@ -14405,7 +14407,8 @@ var P=(e,t,a)=>(s,r)=>{let l=-1;return o(0);async function o(i){if(i<=l)throw ne
                   </tr>
                 `}).join("")}
               </tbody>
-            </table>
+              </table>
+            </div>
           </div>
         </div>
         
@@ -16121,7 +16124,7 @@ var P=(e,t,a)=>(s,r)=>{let l=-1;return o(0);async function o(i){if(i<=l)throw ne
                   <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">اسم البنك</th>
                   <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">الوصف</th>
                   <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">الحالة</th>
-                  <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">الإجراءات</th>
+                  <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">الإجراءات</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200" id="tableBody">
@@ -16160,7 +16163,8 @@ var P=(e,t,a)=>(s,r)=>{let l=-1;return o(0);async function o(i){if(i<=l)throw ne
                   </tr>
                 `).join("")}
               </tbody>
-            </table>
+              </table>
+            </div>
           </div>
         </div>
         
@@ -16354,7 +16358,8 @@ var P=(e,t,a)=>(s,r)=>{let l=-1;return o(0);async function o(i){if(i<=l)throw ne
                   </tr>
                 `).join("")}
               </tbody>
-            </table>
+              </table>
+            </div>
           </div>
         </div>
         
@@ -16774,7 +16779,8 @@ var P=(e,t,a)=>(s,r)=>{let l=-1;return o(0);async function o(i){if(i<=l)throw ne
                   </tr>
                 `}).join("")}
               </tbody>
-            </table>
+              </table>
+            </div>
           </div>
         </div>
         
