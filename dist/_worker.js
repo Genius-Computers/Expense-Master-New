@@ -1,4 +1,4 @@
-var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in e?ht(e,t,{enumerable:!0,configurable:!0,writable:!0,value:a}):e[t]=a;var x=(e,t,a)=>yt(e,typeof t!="symbol"?t+"":t,a),qe=(e,t,a)=>t.has(e)||Ae("Cannot "+a);var u=(e,t,a)=>(qe(e,t,"read from private field"),a?a.call(e):t.get(e)),v=(e,t,a)=>t.has(e)?Ae("Cannot add the same private member more than once"):t instanceof WeakSet?t.add(e):t.set(e,a),f=(e,t,a,s)=>(qe(e,t,"write to private field"),s?s.call(e,a):t.set(e,a),a),k=(e,t,a)=>(qe(e,t,"access private method"),a);var Ne=(e,t,a,s)=>({set _(r){f(e,t,r,a)},get _(){return u(e,t,s)}});var Pe=(e,t,a)=>(s,r)=>{let l=-1;return n(0);async function n(i){if(i<=l)throw new Error("next() called multiple times");l=i;let o,c=!1,d;if(e[i]?(d=e[i][0][0],s.req.routeIndex=i):d=i===e.length&&r||void 0,d)try{o=await d(s,()=>n(i+1))}catch(m){if(m instanceof Error&&t)s.error=m,o=await t(m,s),c=!0;else throw m}else s.finalized===!1&&a&&(o=await a(s));return o&&(s.finalized===!1||c)&&(s.res=o),s}},vt=Symbol(),wt=async(e,t=Object.create(null))=>{const{all:a=!1,dot:s=!1}=t,l=(e instanceof at?e.raw.headers:e.headers).get("Content-Type");return l!=null&&l.startsWith("multipart/form-data")||l!=null&&l.startsWith("application/x-www-form-urlencoded")?_t(e,{all:a,dot:s}):{}};async function _t(e,t){const a=await e.formData();return a?kt(a,t):{}}function kt(e,t){const a=Object.create(null);return e.forEach((s,r)=>{t.all||r.endsWith("[]")?Et(a,r,s):a[r]=s}),t.dot&&Object.entries(a).forEach(([s,r])=>{s.includes(".")&&(St(a,s,r),delete a[s])}),a}var Et=(e,t,a)=>{e[t]!==void 0?Array.isArray(e[t])?e[t].push(a):e[t]=[e[t],a]:t.endsWith("[]")?e[t]=[a]:e[t]=a},St=(e,t,a)=>{let s=e;const r=t.split(".");r.forEach((l,n)=>{n===r.length-1?s[l]=a:((!s[l]||typeof s[l]!="object"||Array.isArray(s[l])||s[l]instanceof File)&&(s[l]=Object.create(null)),s=s[l])})},Xe=e=>{const t=e.split("/");return t[0]===""&&t.shift(),t},Tt=e=>{const{groups:t,path:a}=It(e),s=Xe(a);return $t(s,t)},It=e=>{const t=[];return e=e.replace(/\{[^}]+\}/g,(a,s)=>{const r=`@${s}`;return t.push([r,a]),r}),{groups:t,path:e}},$t=(e,t)=>{for(let a=t.length-1;a>=0;a--){const[s]=t[a];for(let r=e.length-1;r>=0;r--)if(e[r].includes(s)){e[r]=e[r].replace(s,t[a][1]);break}}return e},Se={},Dt=(e,t)=>{if(e==="*")return"*";const a=e.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);if(a){const s=`${e}#${t}`;return Se[s]||(a[2]?Se[s]=t&&t[0]!==":"&&t[0]!=="*"?[s,a[1],new RegExp(`^${a[2]}(?=/${t})`)]:[e,a[1],new RegExp(`^${a[2]}$`)]:Se[s]=[e,a[1],!0]),Se[s]}return null},Fe=(e,t)=>{try{return t(e)}catch{return e.replace(/(?:%[0-9A-Fa-f]{2})+/g,a=>{try{return t(a)}catch{return a}})}},Rt=e=>Fe(e,decodeURI),Ke=e=>{const t=e.url,a=t.indexOf("/",t.indexOf(":")+4);let s=a;for(;s<t.length;s++){const r=t.charCodeAt(s);if(r===37){const l=t.indexOf("?",s),n=t.slice(a,l===-1?void 0:l);return Rt(n.includes("%25")?n.replace(/%25/g,"%2525"):n)}else if(r===63)break}return t.slice(a,s)},Bt=e=>{const t=Ke(e);return t.length>1&&t.at(-1)==="/"?t.slice(0,-1):t},le=(e,t,...a)=>(a.length&&(t=le(t,...a)),`${(e==null?void 0:e[0])==="/"?"":"/"}${e}${t==="/"?"":`${(e==null?void 0:e.at(-1))==="/"?"":"/"}${(t==null?void 0:t[0])==="/"?t.slice(1):t}`}`),Ze=e=>{if(e.charCodeAt(e.length-1)!==63||!e.includes(":"))return null;const t=e.split("/"),a=[];let s="";return t.forEach(r=>{if(r!==""&&!/\:/.test(r))s+="/"+r;else if(/\:/.test(r))if(/\?/.test(r)){a.length===0&&s===""?a.push("/"):a.push(s);const l=r.replace("?","");s+="/"+l,a.push(s)}else s+="/"+r}),a.filter((r,l,n)=>n.indexOf(r)===l)},Le=e=>/[%+]/.test(e)?(e.indexOf("+")!==-1&&(e=e.replace(/\+/g," ")),e.indexOf("%")!==-1?Fe(e,tt):e):e,et=(e,t,a)=>{let s;if(!a&&t&&!/[%+]/.test(t)){let n=e.indexOf("?",8);if(n===-1)return;for(e.startsWith(t,n+1)||(n=e.indexOf(`&${t}`,n+1));n!==-1;){const i=e.charCodeAt(n+t.length+1);if(i===61){const o=n+t.length+2,c=e.indexOf("&",o);return Le(e.slice(o,c===-1?void 0:c))}else if(i==38||isNaN(i))return"";n=e.indexOf(`&${t}`,n+1)}if(s=/[%+]/.test(e),!s)return}const r={};s??(s=/[%+]/.test(e));let l=e.indexOf("?",8);for(;l!==-1;){const n=e.indexOf("&",l+1);let i=e.indexOf("=",l);i>n&&n!==-1&&(i=-1);let o=e.slice(l+1,i===-1?n===-1?void 0:n:i);if(s&&(o=Le(o)),l=n,o==="")continue;let c;i===-1?c="":(c=e.slice(i+1,n===-1?void 0:n),s&&(c=Le(c))),a?(r[o]&&Array.isArray(r[o])||(r[o]=[]),r[o].push(c)):r[o]??(r[o]=c)}return t?r[t]:r},Ct=et,qt=(e,t)=>et(e,t,!0),tt=decodeURIComponent,Ue=e=>Fe(e,tt),ie,C,U,st,rt,Oe,W,Ye,at=(Ye=class{constructor(e,t="/",a=[[]]){v(this,U);x(this,"raw");v(this,ie);v(this,C);x(this,"routeIndex",0);x(this,"path");x(this,"bodyCache",{});v(this,W,e=>{const{bodyCache:t,raw:a}=this,s=t[e];if(s)return s;const r=Object.keys(t)[0];return r?t[r].then(l=>(r==="json"&&(l=JSON.stringify(l)),new Response(l)[e]())):t[e]=a[e]()});this.raw=e,this.path=t,f(this,C,a),f(this,ie,{})}param(e){return e?k(this,U,st).call(this,e):k(this,U,rt).call(this)}query(e){return Ct(this.url,e)}queries(e){return qt(this.url,e)}header(e){if(e)return this.raw.headers.get(e)??void 0;const t={};return this.raw.headers.forEach((a,s)=>{t[s]=a}),t}async parseBody(e){var t;return(t=this.bodyCache).parsedBody??(t.parsedBody=await wt(this,e))}json(){return u(this,W).call(this,"text").then(e=>JSON.parse(e))}text(){return u(this,W).call(this,"text")}arrayBuffer(){return u(this,W).call(this,"arrayBuffer")}blob(){return u(this,W).call(this,"blob")}formData(){return u(this,W).call(this,"formData")}addValidatedData(e,t){u(this,ie)[e]=t}valid(e){return u(this,ie)[e]}get url(){return this.raw.url}get method(){return this.raw.method}get[vt](){return u(this,C)}get matchedRoutes(){return u(this,C)[0].map(([[,e]])=>e)}get routePath(){return u(this,C)[0].map(([[,e]])=>e)[this.routeIndex].path}},ie=new WeakMap,C=new WeakMap,U=new WeakSet,st=function(e){const t=u(this,C)[0][this.routeIndex][1][e],a=k(this,U,Oe).call(this,t);return a&&/\%/.test(a)?Ue(a):a},rt=function(){const e={},t=Object.keys(u(this,C)[0][this.routeIndex][1]);for(const a of t){const s=k(this,U,Oe).call(this,u(this,C)[0][this.routeIndex][1][a]);s!==void 0&&(e[a]=/\%/.test(s)?Ue(s):s)}return e},Oe=function(e){return u(this,C)[1]?u(this,C)[1][e]:e},W=new WeakMap,Ye),Lt={Stringify:1},lt=async(e,t,a,s,r)=>{typeof e=="object"&&!(e instanceof String)&&(e instanceof Promise||(e=e.toString()),e instanceof Promise&&(e=await e));const l=e.callbacks;return l!=null&&l.length?(r?r[0]+=e:r=[e],Promise.all(l.map(i=>i({phase:t,buffer:r,context:s}))).then(i=>Promise.all(i.filter(Boolean).map(o=>lt(o,t,!1,s,r))).then(()=>r[0]))):Promise.resolve(e)},jt="text/plain; charset=UTF-8",je=(e,t)=>({"Content-Type":e,...t}),ye,ve,M,de,A,R,we,ce,pe,K,_e,ke,Y,ne,ze,Ot=(ze=class{constructor(e,t){v(this,Y);v(this,ye);v(this,ve);x(this,"env",{});v(this,M);x(this,"finalized",!1);x(this,"error");v(this,de);v(this,A);v(this,R);v(this,we);v(this,ce);v(this,pe);v(this,K);v(this,_e);v(this,ke);x(this,"render",(...e)=>(u(this,ce)??f(this,ce,t=>this.html(t)),u(this,ce).call(this,...e)));x(this,"setLayout",e=>f(this,we,e));x(this,"getLayout",()=>u(this,we));x(this,"setRenderer",e=>{f(this,ce,e)});x(this,"header",(e,t,a)=>{this.finalized&&f(this,R,new Response(u(this,R).body,u(this,R)));const s=u(this,R)?u(this,R).headers:u(this,K)??f(this,K,new Headers);t===void 0?s.delete(e):a!=null&&a.append?s.append(e,t):s.set(e,t)});x(this,"status",e=>{f(this,de,e)});x(this,"set",(e,t)=>{u(this,M)??f(this,M,new Map),u(this,M).set(e,t)});x(this,"get",e=>u(this,M)?u(this,M).get(e):void 0);x(this,"newResponse",(...e)=>k(this,Y,ne).call(this,...e));x(this,"body",(e,t,a)=>k(this,Y,ne).call(this,e,t,a));x(this,"text",(e,t,a)=>!u(this,K)&&!u(this,de)&&!t&&!a&&!this.finalized?new Response(e):k(this,Y,ne).call(this,e,t,je(jt,a)));x(this,"json",(e,t,a)=>k(this,Y,ne).call(this,JSON.stringify(e),t,je("application/json",a)));x(this,"html",(e,t,a)=>{const s=r=>k(this,Y,ne).call(this,r,t,je("text/html; charset=UTF-8",a));return typeof e=="object"?lt(e,Lt.Stringify,!1,{}).then(s):s(e)});x(this,"redirect",(e,t)=>{const a=String(e);return this.header("Location",/[^\x00-\xFF]/.test(a)?encodeURI(a):a),this.newResponse(null,t??302)});x(this,"notFound",()=>(u(this,pe)??f(this,pe,()=>new Response),u(this,pe).call(this,this)));f(this,ye,e),t&&(f(this,A,t.executionCtx),this.env=t.env,f(this,pe,t.notFoundHandler),f(this,ke,t.path),f(this,_e,t.matchResult))}get req(){return u(this,ve)??f(this,ve,new at(u(this,ye),u(this,ke),u(this,_e))),u(this,ve)}get event(){if(u(this,A)&&"respondWith"in u(this,A))return u(this,A);throw Error("This context has no FetchEvent")}get executionCtx(){if(u(this,A))return u(this,A);throw Error("This context has no ExecutionContext")}get res(){return u(this,R)||f(this,R,new Response(null,{headers:u(this,K)??f(this,K,new Headers)}))}set res(e){if(u(this,R)&&e){e=new Response(e.body,e);for(const[t,a]of u(this,R).headers.entries())if(t!=="content-type")if(t==="set-cookie"){const s=u(this,R).headers.getSetCookie();e.headers.delete("set-cookie");for(const r of s)e.headers.append("set-cookie",r)}else e.headers.set(t,a)}f(this,R,e),this.finalized=!0}get var(){return u(this,M)?Object.fromEntries(u(this,M)):{}}},ye=new WeakMap,ve=new WeakMap,M=new WeakMap,de=new WeakMap,A=new WeakMap,R=new WeakMap,we=new WeakMap,ce=new WeakMap,pe=new WeakMap,K=new WeakMap,_e=new WeakMap,ke=new WeakMap,Y=new WeakSet,ne=function(e,t,a){const s=u(this,R)?new Headers(u(this,R).headers):u(this,K)??new Headers;if(typeof t=="object"&&"headers"in t){const l=t.headers instanceof Headers?t.headers:new Headers(t.headers);for(const[n,i]of l)n.toLowerCase()==="set-cookie"?s.append(n,i):s.set(n,i)}if(a)for(const[l,n]of Object.entries(a))if(typeof n=="string")s.set(l,n);else{s.delete(l);for(const i of n)s.append(l,i)}const r=typeof t=="number"?t:(t==null?void 0:t.status)??u(this,de);return new Response(e,{status:r,headers:s})},ze),E="ALL",Ft="all",Mt=["get","post","put","delete","options","patch"],nt="Can not add a route since the matcher is already built.",ot=class extends Error{},At="__COMPOSED_HANDLER",Nt=e=>e.text("404 Not Found",404),He=(e,t)=>{if("getResponse"in e){const a=e.getResponse();return t.newResponse(a.body,a)}return console.error(e),t.text("Internal Server Error",500)},L,S,it,j,Q,Te,Ie,ue,Pt=(ue=class{constructor(t={}){v(this,S);x(this,"get");x(this,"post");x(this,"put");x(this,"delete");x(this,"options");x(this,"patch");x(this,"all");x(this,"on");x(this,"use");x(this,"router");x(this,"getPath");x(this,"_basePath","/");v(this,L,"/");x(this,"routes",[]);v(this,j,Nt);x(this,"errorHandler",He);x(this,"onError",t=>(this.errorHandler=t,this));x(this,"notFound",t=>(f(this,j,t),this));x(this,"fetch",(t,...a)=>k(this,S,Ie).call(this,t,a[1],a[0],t.method));x(this,"request",(t,a,s,r)=>t instanceof Request?this.fetch(a?new Request(t,a):t,s,r):(t=t.toString(),this.fetch(new Request(/^https?:\/\//.test(t)?t:`http://localhost${le("/",t)}`,a),s,r)));x(this,"fire",()=>{addEventListener("fetch",t=>{t.respondWith(k(this,S,Ie).call(this,t.request,t,void 0,t.request.method))})});[...Mt,Ft].forEach(l=>{this[l]=(n,...i)=>(typeof n=="string"?f(this,L,n):k(this,S,Q).call(this,l,u(this,L),n),i.forEach(o=>{k(this,S,Q).call(this,l,u(this,L),o)}),this)}),this.on=(l,n,...i)=>{for(const o of[n].flat()){f(this,L,o);for(const c of[l].flat())i.map(d=>{k(this,S,Q).call(this,c.toUpperCase(),u(this,L),d)})}return this},this.use=(l,...n)=>(typeof l=="string"?f(this,L,l):(f(this,L,"*"),n.unshift(l)),n.forEach(i=>{k(this,S,Q).call(this,E,u(this,L),i)}),this);const{strict:s,...r}=t;Object.assign(this,r),this.getPath=s??!0?t.getPath??Ke:Bt}route(t,a){const s=this.basePath(t);return a.routes.map(r=>{var n;let l;a.errorHandler===He?l=r.handler:(l=async(i,o)=>(await Pe([],a.errorHandler)(i,()=>r.handler(i,o))).res,l[At]=r.handler),k(n=s,S,Q).call(n,r.method,r.path,l)}),this}basePath(t){const a=k(this,S,it).call(this);return a._basePath=le(this._basePath,t),a}mount(t,a,s){let r,l;s&&(typeof s=="function"?l=s:(l=s.optionHandler,s.replaceRequest===!1?r=o=>o:r=s.replaceRequest));const n=l?o=>{const c=l(o);return Array.isArray(c)?c:[c]}:o=>{let c;try{c=o.executionCtx}catch{}return[o.env,c]};r||(r=(()=>{const o=le(this._basePath,t),c=o==="/"?0:o.length;return d=>{const m=new URL(d.url);return m.pathname=m.pathname.slice(c)||"/",new Request(m,d)}})());const i=async(o,c)=>{const d=await a(r(o.req.raw),...n(o));if(d)return d;await c()};return k(this,S,Q).call(this,E,le(t,"*"),i),this}},L=new WeakMap,S=new WeakSet,it=function(){const t=new ue({router:this.router,getPath:this.getPath});return t.errorHandler=this.errorHandler,f(t,j,u(this,j)),t.routes=this.routes,t},j=new WeakMap,Q=function(t,a,s){t=t.toUpperCase(),a=le(this._basePath,a);const r={basePath:this._basePath,path:a,method:t,handler:s};this.router.add(t,a,[s,r]),this.routes.push(r)},Te=function(t,a){if(t instanceof Error)return this.errorHandler(t,a);throw t},Ie=function(t,a,s,r){if(r==="HEAD")return(async()=>new Response(null,await k(this,S,Ie).call(this,t,a,s,"GET")))();const l=this.getPath(t,{env:s}),n=this.router.match(r,l),i=new Ot(t,{path:l,matchResult:n,env:s,executionCtx:a,notFoundHandler:u(this,j)});if(n[0].length===1){let c;try{c=n[0][0][0][0](i,async()=>{i.res=await u(this,j).call(this,i)})}catch(d){return k(this,S,Te).call(this,d,i)}return c instanceof Promise?c.then(d=>d||(i.finalized?i.res:u(this,j).call(this,i))).catch(d=>k(this,S,Te).call(this,d,i)):c??u(this,j).call(this,i)}const o=Pe(n[0],this.errorHandler,u(this,j));return(async()=>{try{const c=await o(i);if(!c.finalized)throw new Error("Context is not finalized. Did you forget to return a Response object or `await next()`?");return c.res}catch(c){return k(this,S,Te).call(this,c,i)}})()},ue),dt=[];function Ut(e,t){const a=this.buildAllMatchers(),s=((r,l)=>{const n=a[r]||a[E],i=n[2][l];if(i)return i;const o=l.match(n[0]);if(!o)return[[],dt];const c=o.indexOf("",1);return[n[1][c],o]});return this.match=s,s(e,t)}var De="[^/]+",xe=".*",he="(?:|/.*)",oe=Symbol(),Ht=new Set(".\\+*[^]$()");function Wt(e,t){return e.length===1?t.length===1?e<t?-1:1:-1:t.length===1||e===xe||e===he?1:t===xe||t===he?-1:e===De?1:t===De?-1:e.length===t.length?e<t?-1:1:t.length-e.length}var Z,ee,O,se,Yt=(se=class{constructor(){v(this,Z);v(this,ee);v(this,O,Object.create(null))}insert(t,a,s,r,l){if(t.length===0){if(u(this,Z)!==void 0)throw oe;if(l)return;f(this,Z,a);return}const[n,...i]=t,o=n==="*"?i.length===0?["","",xe]:["","",De]:n==="/*"?["","",he]:n.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);let c;if(o){const d=o[1];let m=o[2]||De;if(d&&o[2]&&(m===".*"||(m=m.replace(/^\((?!\?:)(?=[^)]+\)$)/,"(?:"),/\((?!\?:)/.test(m))))throw oe;if(c=u(this,O)[m],!c){if(Object.keys(u(this,O)).some(g=>g!==xe&&g!==he))throw oe;if(l)return;c=u(this,O)[m]=new se,d!==""&&f(c,ee,r.varIndex++)}!l&&d!==""&&s.push([d,u(c,ee)])}else if(c=u(this,O)[n],!c){if(Object.keys(u(this,O)).some(d=>d.length>1&&d!==xe&&d!==he))throw oe;if(l)return;c=u(this,O)[n]=new se}c.insert(i,a,s,r,l)}buildRegExpStr(){const a=Object.keys(u(this,O)).sort(Wt).map(s=>{const r=u(this,O)[s];return(typeof u(r,ee)=="number"?`(${s})@${u(r,ee)}`:Ht.has(s)?`\\${s}`:s)+r.buildRegExpStr()});return typeof u(this,Z)=="number"&&a.unshift(`#${u(this,Z)}`),a.length===0?"":a.length===1?a[0]:"(?:"+a.join("|")+")"}},Z=new WeakMap,ee=new WeakMap,O=new WeakMap,se),Re,Ee,Je,zt=(Je=class{constructor(){v(this,Re,{varIndex:0});v(this,Ee,new Yt)}insert(e,t,a){const s=[],r=[];for(let n=0;;){let i=!1;if(e=e.replace(/\{[^}]+\}/g,o=>{const c=`@\\${n}`;return r[n]=[c,o],n++,i=!0,c}),!i)break}const l=e.match(/(?::[^\/]+)|(?:\/\*$)|./g)||[];for(let n=r.length-1;n>=0;n--){const[i]=r[n];for(let o=l.length-1;o>=0;o--)if(l[o].indexOf(i)!==-1){l[o]=l[o].replace(i,r[n][1]);break}}return u(this,Ee).insert(l,t,s,u(this,Re),a),s}buildRegExp(){let e=u(this,Ee).buildRegExpStr();if(e==="")return[/^$/,[],[]];let t=0;const a=[],s=[];return e=e.replace(/#(\d+)|@(\d+)|\.\*\$/g,(r,l,n)=>l!==void 0?(a[++t]=Number(l),"$()"):(n!==void 0&&(s[Number(n)]=++t),"")),[new RegExp(`^${e}`),a,s]}},Re=new WeakMap,Ee=new WeakMap,Je),Jt=[/^$/,[],Object.create(null)],$e=Object.create(null);function ct(e){return $e[e]??($e[e]=new RegExp(e==="*"?"":`^${e.replace(/\/\*$|([.\\+*[^\]$()])/g,(t,a)=>a?`\\${a}`:"(?:|/.*)")}$`))}function Vt(){$e=Object.create(null)}function Gt(e){var c;const t=new zt,a=[];if(e.length===0)return Jt;const s=e.map(d=>[!/\*|\/:/.test(d[0]),...d]).sort(([d,m],[g,b])=>d?1:g?-1:m.length-b.length),r=Object.create(null);for(let d=0,m=-1,g=s.length;d<g;d++){const[b,h,w]=s[d];b?r[h]=[w.map(([_])=>[_,Object.create(null)]),dt]:m++;let y;try{y=t.insert(h,m,b)}catch(_){throw _===oe?new ot(h):_}b||(a[m]=w.map(([_,$])=>{const B=Object.create(null);for($-=1;$>=0;$--){const[q,T]=y[$];B[q]=T}return[_,B]}))}const[l,n,i]=t.buildRegExp();for(let d=0,m=a.length;d<m;d++)for(let g=0,b=a[d].length;g<b;g++){const h=(c=a[d][g])==null?void 0:c[1];if(!h)continue;const w=Object.keys(h);for(let y=0,_=w.length;y<_;y++)h[w[y]]=i[h[w[y]]]}const o=[];for(const d in n)o[d]=a[n[d]];return[l,o,r]}function re(e,t){if(e){for(const a of Object.keys(e).sort((s,r)=>r.length-s.length))if(ct(a).test(t))return[...e[a]]}}var z,J,Be,pt,Ve,Qt=(Ve=class{constructor(){v(this,Be);x(this,"name","RegExpRouter");v(this,z);v(this,J);x(this,"match",Ut);f(this,z,{[E]:Object.create(null)}),f(this,J,{[E]:Object.create(null)})}add(e,t,a){var i;const s=u(this,z),r=u(this,J);if(!s||!r)throw new Error(nt);s[e]||[s,r].forEach(o=>{o[e]=Object.create(null),Object.keys(o[E]).forEach(c=>{o[e][c]=[...o[E][c]]})}),t==="/*"&&(t="*");const l=(t.match(/\/:/g)||[]).length;if(/\*$/.test(t)){const o=ct(t);e===E?Object.keys(s).forEach(c=>{var d;(d=s[c])[t]||(d[t]=re(s[c],t)||re(s[E],t)||[])}):(i=s[e])[t]||(i[t]=re(s[e],t)||re(s[E],t)||[]),Object.keys(s).forEach(c=>{(e===E||e===c)&&Object.keys(s[c]).forEach(d=>{o.test(d)&&s[c][d].push([a,l])})}),Object.keys(r).forEach(c=>{(e===E||e===c)&&Object.keys(r[c]).forEach(d=>o.test(d)&&r[c][d].push([a,l]))});return}const n=Ze(t)||[t];for(let o=0,c=n.length;o<c;o++){const d=n[o];Object.keys(r).forEach(m=>{var g;(e===E||e===m)&&((g=r[m])[d]||(g[d]=[...re(s[m],d)||re(s[E],d)||[]]),r[m][d].push([a,l-c+o+1]))})}}buildAllMatchers(){const e=Object.create(null);return Object.keys(u(this,J)).concat(Object.keys(u(this,z))).forEach(t=>{e[t]||(e[t]=k(this,Be,pt).call(this,t))}),f(this,z,f(this,J,void 0)),Vt(),e}},z=new WeakMap,J=new WeakMap,Be=new WeakSet,pt=function(e){const t=[];let a=e===E;return[u(this,z),u(this,J)].forEach(s=>{const r=s[e]?Object.keys(s[e]).map(l=>[l,s[e][l]]):[];r.length!==0?(a||(a=!0),t.push(...r)):e!==E&&t.push(...Object.keys(s[E]).map(l=>[l,s[E][l]]))}),a?Gt(t):null},Ve),V,N,Ge,Xt=(Ge=class{constructor(e){x(this,"name","SmartRouter");v(this,V,[]);v(this,N,[]);f(this,V,e.routers)}add(e,t,a){if(!u(this,N))throw new Error(nt);u(this,N).push([e,t,a])}match(e,t){if(!u(this,N))throw new Error("Fatal error");const a=u(this,V),s=u(this,N),r=a.length;let l=0,n;for(;l<r;l++){const i=a[l];try{for(let o=0,c=s.length;o<c;o++)i.add(...s[o]);n=i.match(e,t)}catch(o){if(o instanceof ot)continue;throw o}this.match=i.match.bind(i),f(this,V,[i]),f(this,N,void 0);break}if(l===r)throw new Error("Fatal error");return this.name=`SmartRouter + ${this.activeRouter.name}`,n}get activeRouter(){if(u(this,N)||u(this,V).length!==1)throw new Error("No active router has been determined yet.");return u(this,V)[0]}},V=new WeakMap,N=new WeakMap,Ge),fe=Object.create(null),G,D,te,me,I,P,X,ge,Kt=(ge=class{constructor(t,a,s){v(this,P);v(this,G);v(this,D);v(this,te);v(this,me,0);v(this,I,fe);if(f(this,D,s||Object.create(null)),f(this,G,[]),t&&a){const r=Object.create(null);r[t]={handler:a,possibleKeys:[],score:0},f(this,G,[r])}f(this,te,[])}insert(t,a,s){f(this,me,++Ne(this,me)._);let r=this;const l=Tt(a),n=[];for(let i=0,o=l.length;i<o;i++){const c=l[i],d=l[i+1],m=Dt(c,d),g=Array.isArray(m)?m[0]:c;if(g in u(r,D)){r=u(r,D)[g],m&&n.push(m[1]);continue}u(r,D)[g]=new ge,m&&(u(r,te).push(m),n.push(m[1])),r=u(r,D)[g]}return u(r,G).push({[t]:{handler:s,possibleKeys:n.filter((i,o,c)=>c.indexOf(i)===o),score:u(this,me)}}),r}search(t,a){var o;const s=[];f(this,I,fe);let l=[this];const n=Xe(a),i=[];for(let c=0,d=n.length;c<d;c++){const m=n[c],g=c===d-1,b=[];for(let h=0,w=l.length;h<w;h++){const y=l[h],_=u(y,D)[m];_&&(f(_,I,u(y,I)),g?(u(_,D)["*"]&&s.push(...k(this,P,X).call(this,u(_,D)["*"],t,u(y,I))),s.push(...k(this,P,X).call(this,_,t,u(y,I)))):b.push(_));for(let $=0,B=u(y,te).length;$<B;$++){const q=u(y,te)[$],T=u(y,I)===fe?{}:{...u(y,I)};if(q==="*"){const H=u(y,D)["*"];H&&(s.push(...k(this,P,X).call(this,H,t,u(y,I))),f(H,I,T),b.push(H));continue}const[ft,Me,be]=q;if(!m&&!(be instanceof RegExp))continue;const F=u(y,D)[ft],xt=n.slice(c).join("/");if(be instanceof RegExp){const H=be.exec(xt);if(H){if(T[Me]=H[0],s.push(...k(this,P,X).call(this,F,t,u(y,I),T)),Object.keys(u(F,D)).length){f(F,I,T);const Ce=((o=H[0].match(/\//))==null?void 0:o.length)??0;(i[Ce]||(i[Ce]=[])).push(F)}continue}}(be===!0||be.test(m))&&(T[Me]=m,g?(s.push(...k(this,P,X).call(this,F,t,T,u(y,I))),u(F,D)["*"]&&s.push(...k(this,P,X).call(this,u(F,D)["*"],t,T,u(y,I)))):(f(F,I,T),b.push(F)))}}l=b.concat(i.shift()??[])}return s.length>1&&s.sort((c,d)=>c.score-d.score),[s.map(({handler:c,params:d})=>[c,d])]}},G=new WeakMap,D=new WeakMap,te=new WeakMap,me=new WeakMap,I=new WeakMap,P=new WeakSet,X=function(t,a,s,r){const l=[];for(let n=0,i=u(t,G).length;n<i;n++){const o=u(t,G)[n],c=o[a]||o[E],d={};if(c!==void 0&&(c.params=Object.create(null),l.push(c),s!==fe||r&&r!==fe))for(let m=0,g=c.possibleKeys.length;m<g;m++){const b=c.possibleKeys[m],h=d[c.score];c.params[b]=r!=null&&r[b]&&!h?r[b]:s[b]??(r==null?void 0:r[b]),d[c.score]=!0}}return l},ge),ae,Qe,Zt=(Qe=class{constructor(){x(this,"name","TrieRouter");v(this,ae);f(this,ae,new Kt)}add(e,t,a){const s=Ze(t);if(s){for(let r=0,l=s.length;r<l;r++)u(this,ae).insert(e,s[r],a);return}u(this,ae).insert(e,t,a)}match(e,t){return u(this,ae).search(e,t)}},ae=new WeakMap,Qe),ut=class extends Pt{constructor(e={}){super(e),this.router=e.router??new Xt({routers:[new Qt,new Zt]})}},ea=e=>{const a={...{origin:"*",allowMethods:["GET","HEAD","PUT","POST","DELETE","PATCH"],allowHeaders:[],exposeHeaders:[]},...e},s=(l=>typeof l=="string"?l==="*"?()=>l:n=>l===n?n:null:typeof l=="function"?l:n=>l.includes(n)?n:null)(a.origin),r=(l=>typeof l=="function"?l:Array.isArray(l)?()=>l:()=>[])(a.allowMethods);return async function(n,i){var d;function o(m,g){n.res.headers.set(m,g)}const c=await s(n.req.header("origin")||"",n);if(c&&o("Access-Control-Allow-Origin",c),a.credentials&&o("Access-Control-Allow-Credentials","true"),(d=a.exposeHeaders)!=null&&d.length&&o("Access-Control-Expose-Headers",a.exposeHeaders.join(",")),n.req.method==="OPTIONS"){a.origin!=="*"&&o("Vary","Origin"),a.maxAge!=null&&o("Access-Control-Max-Age",a.maxAge.toString());const m=await r(n.req.header("origin")||"",n);m.length&&o("Access-Control-Allow-Methods",m.join(","));let g=a.allowHeaders;if(!(g!=null&&g.length)){const b=n.req.header("Access-Control-Request-Headers");b&&(g=b.split(/\s*,\s*/))}return g!=null&&g.length&&(o("Access-Control-Allow-Headers",g.join(",")),n.res.headers.append("Vary","Access-Control-Request-Headers")),n.res.headers.delete("Content-Length"),n.res.headers.delete("Content-Type"),new Response(null,{headers:n.res.headers,status:204,statusText:"No Content"})}await i(),a.origin!=="*"&&n.header("Vary","Origin",{append:!0})}};const ta=`<!DOCTYPE html>
+var P=(e,t,a)=>(s,r)=>{let l=-1;return n(0);async function n(o){if(o<=l)throw new Error("next() called multiple times");l=o;let i,d=!1,p;if(e[o]?(p=e[o][0][0],s.req.routeIndex=o):p=o===e.length&&r||void 0,p)try{i=await p(s,()=>n(o+1))}catch(u){if(u instanceof Error&&t)s.error=u,i=await t(u,s),d=!0;else throw u}else s.finalized===!1&&a&&(i=await a(s));return i&&(s.finalized===!1||d)&&(s.res=i),s}},me=Symbol(),ge=async(e,t=Object.create(null))=>{const{all:a=!1,dot:s=!1}=t,l=(e instanceof Q?e.raw.headers:e.headers).get("Content-Type");return l?.startsWith("multipart/form-data")||l?.startsWith("application/x-www-form-urlencoded")?be(e,{all:a,dot:s}):{}};async function be(e,t){const a=await e.formData();return a?fe(a,t):{}}function fe(e,t){const a=Object.create(null);return e.forEach((s,r)=>{t.all||r.endsWith("[]")?xe(a,r,s):a[r]=s}),t.dot&&Object.entries(a).forEach(([s,r])=>{s.includes(".")&&(he(a,s,r),delete a[s])}),a}var xe=(e,t,a)=>{e[t]!==void 0?Array.isArray(e[t])?e[t].push(a):e[t]=[e[t],a]:t.endsWith("[]")?e[t]=[a]:e[t]=a},he=(e,t,a)=>{let s=e;const r=t.split(".");r.forEach((l,n)=>{n===r.length-1?s[l]=a:((!s[l]||typeof s[l]!="object"||Array.isArray(s[l])||s[l]instanceof File)&&(s[l]=Object.create(null)),s=s[l])})},z=e=>{const t=e.split("/");return t[0]===""&&t.shift(),t},ye=e=>{const{groups:t,path:a}=ve(e),s=z(a);return we(s,t)},ve=e=>{const t=[];return e=e.replace(/\{[^}]+\}/g,(a,s)=>{const r=`@${s}`;return t.push([r,a]),r}),{groups:t,path:e}},we=(e,t)=>{for(let a=t.length-1;a>=0;a--){const[s]=t[a];for(let r=e.length-1;r>=0;r--)if(e[r].includes(s)){e[r]=e[r].replace(s,t[a][1]);break}}return e},L={},_e=(e,t)=>{if(e==="*")return"*";const a=e.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);if(a){const s=`${e}#${t}`;return L[s]||(a[2]?L[s]=t&&t[0]!==":"&&t[0]!=="*"?[s,a[1],new RegExp(`^${a[2]}(?=/${t})`)]:[e,a[1],new RegExp(`^${a[2]}$`)]:L[s]=[e,a[1],!0]),L[s]}return null},A=(e,t)=>{try{return t(e)}catch{return e.replace(/(?:%[0-9A-Fa-f]{2})+/g,a=>{try{return t(a)}catch{return a}})}},ke=e=>A(e,decodeURI),Y=e=>{const t=e.url,a=t.indexOf("/",t.indexOf(":")+4);let s=a;for(;s<t.length;s++){const r=t.charCodeAt(s);if(r===37){const l=t.indexOf("?",s),n=t.slice(a,l===-1?void 0:l);return ke(n.includes("%25")?n.replace(/%25/g,"%2525"):n)}else if(r===63)break}return t.slice(a,s)},Ee=e=>{const t=Y(e);return t.length>1&&t.at(-1)==="/"?t.slice(0,-1):t},$=(e,t,...a)=>(a.length&&(t=$(t,...a)),`${e?.[0]==="/"?"":"/"}${e}${t==="/"?"":`${e?.at(-1)==="/"?"":"/"}${t?.[0]==="/"?t.slice(1):t}`}`),J=e=>{if(e.charCodeAt(e.length-1)!==63||!e.includes(":"))return null;const t=e.split("/"),a=[];let s="";return t.forEach(r=>{if(r!==""&&!/\:/.test(r))s+="/"+r;else if(/\:/.test(r))if(/\?/.test(r)){a.length===0&&s===""?a.push("/"):a.push(s);const l=r.replace("?","");s+="/"+l,a.push(s)}else s+="/"+r}),a.filter((r,l,n)=>n.indexOf(r)===l)},O=e=>/[%+]/.test(e)?(e.indexOf("+")!==-1&&(e=e.replace(/\+/g," ")),e.indexOf("%")!==-1?A(e,G):e):e,V=(e,t,a)=>{let s;if(!a&&t&&!/[%+]/.test(t)){let n=e.indexOf("?",8);if(n===-1)return;for(e.startsWith(t,n+1)||(n=e.indexOf(`&${t}`,n+1));n!==-1;){const o=e.charCodeAt(n+t.length+1);if(o===61){const i=n+t.length+2,d=e.indexOf("&",i);return O(e.slice(i,d===-1?void 0:d))}else if(o==38||isNaN(o))return"";n=e.indexOf(`&${t}`,n+1)}if(s=/[%+]/.test(e),!s)return}const r={};s??=/[%+]/.test(e);let l=e.indexOf("?",8);for(;l!==-1;){const n=e.indexOf("&",l+1);let o=e.indexOf("=",l);o>n&&n!==-1&&(o=-1);let i=e.slice(l+1,o===-1?n===-1?void 0:n:o);if(s&&(i=O(i)),l=n,i==="")continue;let d;o===-1?d="":(d=e.slice(o+1,n===-1?void 0:n),s&&(d=O(d))),a?(r[i]&&Array.isArray(r[i])||(r[i]=[]),r[i].push(d)):r[i]??=d}return t?r[t]:r},Se=V,Te=(e,t)=>V(e,t,!0),G=decodeURIComponent,H=e=>A(e,G),Q=class{raw;#t;#e;routeIndex=0;path;bodyCache={};constructor(e,t="/",a=[[]]){this.raw=e,this.path=t,this.#e=a,this.#t={}}param(e){return e?this.#a(e):this.#l()}#a(e){const t=this.#e[0][this.routeIndex][1][e],a=this.#r(t);return a&&/\%/.test(a)?H(a):a}#l(){const e={},t=Object.keys(this.#e[0][this.routeIndex][1]);for(const a of t){const s=this.#r(this.#e[0][this.routeIndex][1][a]);s!==void 0&&(e[a]=/\%/.test(s)?H(s):s)}return e}#r(e){return this.#e[1]?this.#e[1][e]:e}query(e){return Se(this.url,e)}queries(e){return Te(this.url,e)}header(e){if(e)return this.raw.headers.get(e)??void 0;const t={};return this.raw.headers.forEach((a,s)=>{t[s]=a}),t}async parseBody(e){return this.bodyCache.parsedBody??=await ge(this,e)}#s=e=>{const{bodyCache:t,raw:a}=this,s=t[e];if(s)return s;const r=Object.keys(t)[0];return r?t[r].then(l=>(r==="json"&&(l=JSON.stringify(l)),new Response(l)[e]())):t[e]=a[e]()};json(){return this.#s("text").then(e=>JSON.parse(e))}text(){return this.#s("text")}arrayBuffer(){return this.#s("arrayBuffer")}blob(){return this.#s("blob")}formData(){return this.#s("formData")}addValidatedData(e,t){this.#t[e]=t}valid(e){return this.#t[e]}get url(){return this.raw.url}get method(){return this.raw.method}get[me](){return this.#e}get matchedRoutes(){return this.#e[0].map(([[,e]])=>e)}get routePath(){return this.#e[0].map(([[,e]])=>e)[this.routeIndex].path}},Ie={Stringify:1},X=async(e,t,a,s,r)=>{typeof e=="object"&&!(e instanceof String)&&(e instanceof Promise||(e=e.toString()),e instanceof Promise&&(e=await e));const l=e.callbacks;return l?.length?(r?r[0]+=e:r=[e],Promise.all(l.map(o=>o({phase:t,buffer:r,context:s}))).then(o=>Promise.all(o.filter(Boolean).map(i=>X(i,t,!1,s,r))).then(()=>r[0]))):Promise.resolve(e)},$e="text/plain; charset=UTF-8",F=(e,t)=>({"Content-Type":e,...t}),De=class{#t;#e;env={};#a;finalized=!1;error;#l;#r;#s;#c;#i;#d;#o;#p;#u;constructor(e,t){this.#t=e,t&&(this.#r=t.executionCtx,this.env=t.env,this.#d=t.notFoundHandler,this.#u=t.path,this.#p=t.matchResult)}get req(){return this.#e??=new Q(this.#t,this.#u,this.#p),this.#e}get event(){if(this.#r&&"respondWith"in this.#r)return this.#r;throw Error("This context has no FetchEvent")}get executionCtx(){if(this.#r)return this.#r;throw Error("This context has no ExecutionContext")}get res(){return this.#s||=new Response(null,{headers:this.#o??=new Headers})}set res(e){if(this.#s&&e){e=new Response(e.body,e);for(const[t,a]of this.#s.headers.entries())if(t!=="content-type")if(t==="set-cookie"){const s=this.#s.headers.getSetCookie();e.headers.delete("set-cookie");for(const r of s)e.headers.append("set-cookie",r)}else e.headers.set(t,a)}this.#s=e,this.finalized=!0}render=(...e)=>(this.#i??=t=>this.html(t),this.#i(...e));setLayout=e=>this.#c=e;getLayout=()=>this.#c;setRenderer=e=>{this.#i=e};header=(e,t,a)=>{this.finalized&&(this.#s=new Response(this.#s.body,this.#s));const s=this.#s?this.#s.headers:this.#o??=new Headers;t===void 0?s.delete(e):a?.append?s.append(e,t):s.set(e,t)};status=e=>{this.#l=e};set=(e,t)=>{this.#a??=new Map,this.#a.set(e,t)};get=e=>this.#a?this.#a.get(e):void 0;get var(){return this.#a?Object.fromEntries(this.#a):{}}#n(e,t,a){const s=this.#s?new Headers(this.#s.headers):this.#o??new Headers;if(typeof t=="object"&&"headers"in t){const l=t.headers instanceof Headers?t.headers:new Headers(t.headers);for(const[n,o]of l)n.toLowerCase()==="set-cookie"?s.append(n,o):s.set(n,o)}if(a)for(const[l,n]of Object.entries(a))if(typeof n=="string")s.set(l,n);else{s.delete(l);for(const o of n)s.append(l,o)}const r=typeof t=="number"?t:t?.status??this.#l;return new Response(e,{status:r,headers:s})}newResponse=(...e)=>this.#n(...e);body=(e,t,a)=>this.#n(e,t,a);text=(e,t,a)=>!this.#o&&!this.#l&&!t&&!a&&!this.finalized?new Response(e):this.#n(e,t,F($e,a));json=(e,t,a)=>this.#n(JSON.stringify(e),t,F("application/json",a));html=(e,t,a)=>{const s=r=>this.#n(r,t,F("text/html; charset=UTF-8",a));return typeof e=="object"?X(e,Ie.Stringify,!1,{}).then(s):s(e)};redirect=(e,t)=>{const a=String(e);return this.header("Location",/[^\x00-\xFF]/.test(a)?encodeURI(a):a),this.newResponse(null,t??302)};notFound=()=>(this.#d??=()=>new Response,this.#d(this))},y="ALL",Be="all",Re=["get","post","put","delete","options","patch"],K="Can not add a route since the matcher is already built.",Z=class extends Error{},Ce="__COMPOSED_HANDLER",qe=e=>e.text("404 Not Found",404),U=(e,t)=>{if("getResponse"in e){const a=e.getResponse();return t.newResponse(a.body,a)}return console.error(e),t.text("Internal Server Error",500)},Le=class ee{get;post;put;delete;options;patch;all;on;use;router;getPath;_basePath="/";#t="/";routes=[];constructor(t={}){[...Re,Be].forEach(l=>{this[l]=(n,...o)=>(typeof n=="string"?this.#t=n:this.#l(l,this.#t,n),o.forEach(i=>{this.#l(l,this.#t,i)}),this)}),this.on=(l,n,...o)=>{for(const i of[n].flat()){this.#t=i;for(const d of[l].flat())o.map(p=>{this.#l(d.toUpperCase(),this.#t,p)})}return this},this.use=(l,...n)=>(typeof l=="string"?this.#t=l:(this.#t="*",n.unshift(l)),n.forEach(o=>{this.#l(y,this.#t,o)}),this);const{strict:s,...r}=t;Object.assign(this,r),this.getPath=s??!0?t.getPath??Y:Ee}#e(){const t=new ee({router:this.router,getPath:this.getPath});return t.errorHandler=this.errorHandler,t.#a=this.#a,t.routes=this.routes,t}#a=qe;errorHandler=U;route(t,a){const s=this.basePath(t);return a.routes.map(r=>{let l;a.errorHandler===U?l=r.handler:(l=async(n,o)=>(await P([],a.errorHandler)(n,()=>r.handler(n,o))).res,l[Ce]=r.handler),s.#l(r.method,r.path,l)}),this}basePath(t){const a=this.#e();return a._basePath=$(this._basePath,t),a}onError=t=>(this.errorHandler=t,this);notFound=t=>(this.#a=t,this);mount(t,a,s){let r,l;s&&(typeof s=="function"?l=s:(l=s.optionHandler,s.replaceRequest===!1?r=i=>i:r=s.replaceRequest));const n=l?i=>{const d=l(i);return Array.isArray(d)?d:[d]}:i=>{let d;try{d=i.executionCtx}catch{}return[i.env,d]};r||=(()=>{const i=$(this._basePath,t),d=i==="/"?0:i.length;return p=>{const u=new URL(p.url);return u.pathname=u.pathname.slice(d)||"/",new Request(u,p)}})();const o=async(i,d)=>{const p=await a(r(i.req.raw),...n(i));if(p)return p;await d()};return this.#l(y,$(t,"*"),o),this}#l(t,a,s){t=t.toUpperCase(),a=$(this._basePath,a);const r={basePath:this._basePath,path:a,method:t,handler:s};this.router.add(t,a,[s,r]),this.routes.push(r)}#r(t,a){if(t instanceof Error)return this.errorHandler(t,a);throw t}#s(t,a,s,r){if(r==="HEAD")return(async()=>new Response(null,await this.#s(t,a,s,"GET")))();const l=this.getPath(t,{env:s}),n=this.router.match(r,l),o=new De(t,{path:l,matchResult:n,env:s,executionCtx:a,notFoundHandler:this.#a});if(n[0].length===1){let d;try{d=n[0][0][0][0](o,async()=>{o.res=await this.#a(o)})}catch(p){return this.#r(p,o)}return d instanceof Promise?d.then(p=>p||(o.finalized?o.res:this.#a(o))).catch(p=>this.#r(p,o)):d??this.#a(o)}const i=P(n[0],this.errorHandler,this.#a);return(async()=>{try{const d=await i(o);if(!d.finalized)throw new Error("Context is not finalized. Did you forget to return a Response object or `await next()`?");return d.res}catch(d){return this.#r(d,o)}})()}fetch=(t,...a)=>this.#s(t,a[1],a[0],t.method);request=(t,a,s,r)=>t instanceof Request?this.fetch(a?new Request(t,a):t,s,r):(t=t.toString(),this.fetch(new Request(/^https?:\/\//.test(t)?t:`http://localhost${$("/",t)}`,a),s,r));fire=()=>{addEventListener("fetch",t=>{t.respondWith(this.#s(t.request,t,void 0,t.request.method))})}},te=[];function je(e,t){const a=this.buildAllMatchers(),s=((r,l)=>{const n=a[r]||a[y],o=n[2][l];if(o)return o;const i=l.match(n[0]);if(!i)return[[],te];const d=i.indexOf("",1);return[n[1][d],i]});return this.match=s,s(e,t)}var j="[^/]+",C=".*",q="(?:|/.*)",D=Symbol(),Oe=new Set(".\\+*[^]$()");function Fe(e,t){return e.length===1?t.length===1?e<t?-1:1:-1:t.length===1||e===C||e===q?1:t===C||t===q?-1:e===j?1:t===j?-1:e.length===t.length?e<t?-1:1:t.length-e.length}var Me=class M{#t;#e;#a=Object.create(null);insert(t,a,s,r,l){if(t.length===0){if(this.#t!==void 0)throw D;if(l)return;this.#t=a;return}const[n,...o]=t,i=n==="*"?o.length===0?["","",C]:["","",j]:n==="/*"?["","",q]:n.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);let d;if(i){const p=i[1];let u=i[2]||j;if(p&&i[2]&&(u===".*"||(u=u.replace(/^\((?!\?:)(?=[^)]+\)$)/,"(?:"),/\((?!\?:)/.test(u))))throw D;if(d=this.#a[u],!d){if(Object.keys(this.#a).some(m=>m!==C&&m!==q))throw D;if(l)return;d=this.#a[u]=new M,p!==""&&(d.#e=r.varIndex++)}!l&&p!==""&&s.push([p,d.#e])}else if(d=this.#a[n],!d){if(Object.keys(this.#a).some(p=>p.length>1&&p!==C&&p!==q))throw D;if(l)return;d=this.#a[n]=new M}d.insert(o,a,s,r,l)}buildRegExpStr(){const a=Object.keys(this.#a).sort(Fe).map(s=>{const r=this.#a[s];return(typeof r.#e=="number"?`(${s})@${r.#e}`:Oe.has(s)?`\\${s}`:s)+r.buildRegExpStr()});return typeof this.#t=="number"&&a.unshift(`#${this.#t}`),a.length===0?"":a.length===1?a[0]:"(?:"+a.join("|")+")"}},Ae=class{#t={varIndex:0};#e=new Me;insert(e,t,a){const s=[],r=[];for(let n=0;;){let o=!1;if(e=e.replace(/\{[^}]+\}/g,i=>{const d=`@\\${n}`;return r[n]=[d,i],n++,o=!0,d}),!o)break}const l=e.match(/(?::[^\/]+)|(?:\/\*$)|./g)||[];for(let n=r.length-1;n>=0;n--){const[o]=r[n];for(let i=l.length-1;i>=0;i--)if(l[i].indexOf(o)!==-1){l[i]=l[i].replace(o,r[n][1]);break}}return this.#e.insert(l,t,s,this.#t,a),s}buildRegExp(){let e=this.#e.buildRegExpStr();if(e==="")return[/^$/,[],[]];let t=0;const a=[],s=[];return e=e.replace(/#(\d+)|@(\d+)|\.\*\$/g,(r,l,n)=>l!==void 0?(a[++t]=Number(l),"$()"):(n!==void 0&&(s[Number(n)]=++t),"")),[new RegExp(`^${e}`),a,s]}},Ne=[/^$/,[],Object.create(null)],ae=Object.create(null);function se(e){return ae[e]??=new RegExp(e==="*"?"":`^${e.replace(/\/\*$|([.\\+*[^\]$()])/g,(t,a)=>a?`\\${a}`:"(?:|/.*)")}$`)}function Pe(){ae=Object.create(null)}function He(e){const t=new Ae,a=[];if(e.length===0)return Ne;const s=e.map(d=>[!/\*|\/:/.test(d[0]),...d]).sort(([d,p],[u,m])=>d?1:u?-1:p.length-m.length),r=Object.create(null);for(let d=0,p=-1,u=s.length;d<u;d++){const[m,g,f]=s[d];m?r[g]=[f.map(([x])=>[x,Object.create(null)]),te]:p++;let b;try{b=t.insert(g,p,m)}catch(x){throw x===D?new Z(g):x}m||(a[p]=f.map(([x,h])=>{const _=Object.create(null);for(h-=1;h>=0;h--){const[w,v]=b[h];_[w]=v}return[x,_]}))}const[l,n,o]=t.buildRegExp();for(let d=0,p=a.length;d<p;d++)for(let u=0,m=a[d].length;u<m;u++){const g=a[d][u]?.[1];if(!g)continue;const f=Object.keys(g);for(let b=0,x=f.length;b<x;b++)g[f[b]]=o[g[f[b]]]}const i=[];for(const d in n)i[d]=a[n[d]];return[l,i,r]}function I(e,t){if(e){for(const a of Object.keys(e).sort((s,r)=>r.length-s.length))if(se(a).test(t))return[...e[a]]}}var Ue=class{name="RegExpRouter";#t;#e;constructor(){this.#t={[y]:Object.create(null)},this.#e={[y]:Object.create(null)}}add(e,t,a){const s=this.#t,r=this.#e;if(!s||!r)throw new Error(K);s[e]||[s,r].forEach(o=>{o[e]=Object.create(null),Object.keys(o[y]).forEach(i=>{o[e][i]=[...o[y][i]]})}),t==="/*"&&(t="*");const l=(t.match(/\/:/g)||[]).length;if(/\*$/.test(t)){const o=se(t);e===y?Object.keys(s).forEach(i=>{s[i][t]||=I(s[i],t)||I(s[y],t)||[]}):s[e][t]||=I(s[e],t)||I(s[y],t)||[],Object.keys(s).forEach(i=>{(e===y||e===i)&&Object.keys(s[i]).forEach(d=>{o.test(d)&&s[i][d].push([a,l])})}),Object.keys(r).forEach(i=>{(e===y||e===i)&&Object.keys(r[i]).forEach(d=>o.test(d)&&r[i][d].push([a,l]))});return}const n=J(t)||[t];for(let o=0,i=n.length;o<i;o++){const d=n[o];Object.keys(r).forEach(p=>{(e===y||e===p)&&(r[p][d]||=[...I(s[p],d)||I(s[y],d)||[]],r[p][d].push([a,l-i+o+1]))})}}match=je;buildAllMatchers(){const e=Object.create(null);return Object.keys(this.#e).concat(Object.keys(this.#t)).forEach(t=>{e[t]||=this.#a(t)}),this.#t=this.#e=void 0,Pe(),e}#a(e){const t=[];let a=e===y;return[this.#t,this.#e].forEach(s=>{const r=s[e]?Object.keys(s[e]).map(l=>[l,s[e][l]]):[];r.length!==0?(a||=!0,t.push(...r)):e!==y&&t.push(...Object.keys(s[y]).map(l=>[l,s[y][l]]))}),a?He(t):null}},We=class{name="SmartRouter";#t=[];#e=[];constructor(e){this.#t=e.routers}add(e,t,a){if(!this.#e)throw new Error(K);this.#e.push([e,t,a])}match(e,t){if(!this.#e)throw new Error("Fatal error");const a=this.#t,s=this.#e,r=a.length;let l=0,n;for(;l<r;l++){const o=a[l];try{for(let i=0,d=s.length;i<d;i++)o.add(...s[i]);n=o.match(e,t)}catch(i){if(i instanceof Z)continue;throw i}this.match=o.match.bind(o),this.#t=[o],this.#e=void 0;break}if(l===r)throw new Error("Fatal error");return this.name=`SmartRouter + ${this.activeRouter.name}`,n}get activeRouter(){if(this.#e||this.#t.length!==1)throw new Error("No active router has been determined yet.");return this.#t[0]}},R=Object.create(null),ze=class re{#t;#e;#a;#l=0;#r=R;constructor(t,a,s){if(this.#e=s||Object.create(null),this.#t=[],t&&a){const r=Object.create(null);r[t]={handler:a,possibleKeys:[],score:0},this.#t=[r]}this.#a=[]}insert(t,a,s){this.#l=++this.#l;let r=this;const l=ye(a),n=[];for(let o=0,i=l.length;o<i;o++){const d=l[o],p=l[o+1],u=_e(d,p),m=Array.isArray(u)?u[0]:d;if(m in r.#e){r=r.#e[m],u&&n.push(u[1]);continue}r.#e[m]=new re,u&&(r.#a.push(u),n.push(u[1])),r=r.#e[m]}return r.#t.push({[t]:{handler:s,possibleKeys:n.filter((o,i,d)=>d.indexOf(o)===i),score:this.#l}}),r}#s(t,a,s,r){const l=[];for(let n=0,o=t.#t.length;n<o;n++){const i=t.#t[n],d=i[a]||i[y],p={};if(d!==void 0&&(d.params=Object.create(null),l.push(d),s!==R||r&&r!==R))for(let u=0,m=d.possibleKeys.length;u<m;u++){const g=d.possibleKeys[u],f=p[d.score];d.params[g]=r?.[g]&&!f?r[g]:s[g]??r?.[g],p[d.score]=!0}}return l}search(t,a){const s=[];this.#r=R;let l=[this];const n=z(a),o=[];for(let i=0,d=n.length;i<d;i++){const p=n[i],u=i===d-1,m=[];for(let g=0,f=l.length;g<f;g++){const b=l[g],x=b.#e[p];x&&(x.#r=b.#r,u?(x.#e["*"]&&s.push(...this.#s(x.#e["*"],t,b.#r)),s.push(...this.#s(x,t,b.#r))):m.push(x));for(let h=0,_=b.#a.length;h<_;h++){const w=b.#a[h],v=b.#r===R?{}:{...b.#r};if(w==="*"){const T=b.#e["*"];T&&(s.push(...this.#s(T,t,b.#r)),T.#r=v,m.push(T));continue}const[E,N,B]=w;if(!p&&!(B instanceof RegExp))continue;const S=b.#e[E],pe=n.slice(i).join("/");if(B instanceof RegExp){const T=B.exec(pe);if(T){if(v[N]=T[0],s.push(...this.#s(S,t,b.#r,v)),Object.keys(S.#e).length){S.#r=v;const ue=T[0].match(/\//)?.length??0;(o[ue]||=[]).push(S)}continue}}(B===!0||B.test(p))&&(v[N]=p,u?(s.push(...this.#s(S,t,v,b.#r)),S.#e["*"]&&s.push(...this.#s(S.#e["*"],t,v,b.#r))):(S.#r=v,m.push(S)))}}l=m.concat(o.shift()??[])}return s.length>1&&s.sort((i,d)=>i.score-d.score),[s.map(({handler:i,params:d})=>[i,d])]}},Ye=class{name="TrieRouter";#t;constructor(){this.#t=new ze}add(e,t,a){const s=J(t);if(s){for(let r=0,l=s.length;r<l;r++)this.#t.insert(e,s[r],a);return}this.#t.insert(e,t,a)}match(e,t){return this.#t.search(e,t)}},le=class extends Le{constructor(e={}){super(e),this.router=e.router??new We({routers:[new Ue,new Ye]})}},Je=e=>{const a={...{origin:"*",allowMethods:["GET","HEAD","PUT","POST","DELETE","PATCH"],allowHeaders:[],exposeHeaders:[]},...e},s=(l=>typeof l=="string"?l==="*"?()=>l:n=>l===n?n:null:typeof l=="function"?l:n=>l.includes(n)?n:null)(a.origin),r=(l=>typeof l=="function"?l:Array.isArray(l)?()=>l:()=>[])(a.allowMethods);return async function(n,o){function i(p,u){n.res.headers.set(p,u)}const d=await s(n.req.header("origin")||"",n);if(d&&i("Access-Control-Allow-Origin",d),a.credentials&&i("Access-Control-Allow-Credentials","true"),a.exposeHeaders?.length&&i("Access-Control-Expose-Headers",a.exposeHeaders.join(",")),n.req.method==="OPTIONS"){a.origin!=="*"&&i("Vary","Origin"),a.maxAge!=null&&i("Access-Control-Max-Age",a.maxAge.toString());const p=await r(n.req.header("origin")||"",n);p.length&&i("Access-Control-Allow-Methods",p.join(","));let u=a.allowHeaders;if(!u?.length){const m=n.req.header("Access-Control-Request-Headers");m&&(u=m.split(/\s*,\s*/))}return u?.length&&(i("Access-Control-Allow-Headers",u.join(",")),n.res.headers.append("Vary","Access-Control-Request-Headers")),n.res.headers.delete("Content-Length"),n.res.headers.delete("Content-Type"),new Response(null,{headers:n.res.headers,status:204,statusText:"No Content"})}await o(),a.origin!=="*"&&n.header("Vary","Origin",{append:!0})}};const Ve=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -92,7 +92,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
     <\/script>
 </body>
 </html>
-`,aa=`<!DOCTYPE html>
+`,Ge=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -321,7 +321,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
     <\/script>
 </body>
 </html>
-`,mt=`<!DOCTYPE html>
+`,ne=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -1533,7 +1533,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
     <\/script>
 </body>
 </html>
-`,sa=`<!DOCTYPE html>
+`,Qe=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -1566,6 +1566,27 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         }
         .animate-slide-in {
             animation: slideIn 0.5s ease-out;
+        }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .glass-effect {
+                padding: 1.5rem !important;
+            }
+            h1 {
+                font-size: 1.75rem !important;
+            }
+            button {
+                font-size: 1rem !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .glass-effect {
+                padding: 1rem !important;
+            }
+            h1 {
+                font-size: 1.5rem !important;
+            }
         }
     </style>
 </head>
@@ -1743,7 +1764,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
     <\/script>
 </body>
 </html>
-`,ra=`<!DOCTYPE html>
+`,Xe=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -2079,7 +2100,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
     <\/script>
 </body>
 </html>
-`,la=`<!DOCTYPE html>
+`,Ke=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -2378,7 +2399,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
     <\/script>
 </body>
 </html>
-`,na=`<!DOCTYPE html>
+`,Ze=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -2867,7 +2888,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
     <\/script>
 </body>
 </html>
-`,gt=`<!DOCTYPE html>
+`,oe=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -6570,7 +6591,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
     <div id="sidebar-overlay"></div>
 </body>
 </html>
-`,oa=`<!DOCTYPE html>
+`,et=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -6782,7 +6803,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
     <\/script>
 </body>
 </html>
-`,ia=`<!DOCTYPE html>
+`,tt=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -6850,7 +6871,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
     <\/script>
 </body>
 </html>
-`,da=`<!DOCTYPE html>
+`,at=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -7087,7 +7108,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
     <\/script>
 </body>
 </html>
-`,ca=`<!DOCTYPE html>
+`,st=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -7332,7 +7353,66 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
     <\/script>
 </body>
 </html>
-`,pa=`<!DOCTYPE html>
+`,ie=()=>`
+  /* Mobile Responsive Styles */
+  @media (max-width: 768px) {
+    .max-w-7xl, .max-w-6xl, .max-w-5xl {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+    h1 { font-size: 1.5rem !important; }
+    h2 { font-size: 1.25rem !important; }
+    table { font-size: 0.875rem !important; }
+    table th, table td { padding: 0.5rem !important; }
+    .hide-on-mobile { display: none !important; }
+    button, .btn { font-size: 0.875rem !important; padding: 0.5rem 1rem !important; }
+    input, select, textarea { font-size: 1rem !important; }
+    .bg-white.rounded-xl, .bg-white.rounded-lg { padding: 1rem !important; }
+    .flex.justify-between { flex-wrap: wrap; gap: 1rem; }
+    .flex-wrap > * { width: 100%; }
+    input[type="text"], input[type="search"] { width: 100% !important; }
+    .grid { grid-template-columns: 1fr !important; }
+    .p-6 { padding: 1rem !important; }
+    .p-8 { padding: 1.5rem !important; }
+    .overflow-x-auto { 
+      margin-left: -1rem !important; 
+      margin-right: -1rem !important;
+      padding-bottom: 1.5rem !important;
+      position: relative !important;
+    }
+    
+    /* Enhanced Mobile Scrollbar */
+    .overflow-x-auto::-webkit-scrollbar {
+      height: 14px !important;
+      -webkit-appearance: none;
+    }
+    .overflow-x-auto::-webkit-scrollbar-track {
+      background: #f1f5f9 !important;
+      border-radius: 8px !important;
+      border: 2px solid #e2e8f0 !important;
+    }
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%) !important;
+      border-radius: 8px !important;
+      border: 2px solid #e2e8f0 !important;
+      min-width: 50px !important;
+    }
+    .overflow-x-auto {
+      overflow-x: scroll !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: auto !important;
+      scrollbar-color: #3b82f6 #f1f5f9 !important;
+    }
+  }
+  @media (max-width: 480px) {
+    body { font-size: 14px !important; }
+    h1 { font-size: 1.25rem !important; }
+    table { font-size: 0.75rem !important; }
+    button { font-size: 0.75rem !important; padding: 0.375rem 0.75rem !important; }
+    .overflow-x-auto::-webkit-scrollbar { height: 16px !important; }
+    .overflow-x-auto::-webkit-scrollbar-thumb { min-width: 60px !important; }
+  }
+`,rt=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -7382,6 +7462,8 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             min-width: 1200px; /* Force table to be wide enough for scrollbar */
             width: max-content;
         }
+        
+        ${ie()}
     </style>
 </head>
 <body class="bg-gray-50">
@@ -7521,7 +7603,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         document.addEventListener('DOMContentLoaded', loadReport);
     <\/script>
 </body>
-</html>`,ua=`<!DOCTYPE html>
+</html>`,lt=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -7572,6 +7654,8 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             min-width: 1200px; /* Force table to be wide enough for scrollbar */
             width: max-content;
         }
+        
+        ${ie()}
     </style>
 </head>
 <body class="bg-gray-50">
@@ -7785,7 +7869,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         document.addEventListener('DOMContentLoaded', loadReport);
     <\/script>
 </body>
-</html>`,ma=`<!DOCTYPE html>
+</html>`,nt=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -7913,7 +7997,54 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         document.addEventListener('DOMContentLoaded', loadReport);
     <\/script>
 </body>
-</html>`,ga=`<!DOCTYPE html>
+</html>`,ot=()=>`
+  @media (max-width: 768px) {
+    .max-w-7xl { padding-left: 1rem !important; padding-right: 1rem !important; }
+    h1 { font-size: 1.5rem !important; }
+    table { font-size: 0.875rem !important; }
+    table th, table td { padding: 0.5rem !important; }
+    .hide-on-mobile { display: none !important; }
+    button { font-size: 0.875rem !important; padding: 0.5rem 1rem !important; }
+    .bg-white.rounded-xl { padding: 1rem !important; }
+    .flex.justify-between { flex-wrap: wrap; gap: 1rem; }
+    input[type="text"] { width: 100% !important; }
+    .grid { grid-template-columns: 1fr !important; }
+    .p-6 { padding: 1rem !important; }
+    .overflow-x-auto { 
+      padding-bottom: 1.5rem !important;
+      position: relative !important;
+    }
+    
+    /* Enhanced Mobile Scrollbar */
+    .overflow-x-auto::-webkit-scrollbar {
+      height: 14px !important;
+      -webkit-appearance: none;
+    }
+    .overflow-x-auto::-webkit-scrollbar-track {
+      background: #f1f5f9 !important;
+      border-radius: 8px !important;
+      border: 2px solid #e2e8f0 !important;
+    }
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important;
+      border-radius: 8px !important;
+      border: 2px solid #e2e8f0 !important;
+      min-width: 50px !important;
+    }
+    .overflow-x-auto {
+      overflow-x: scroll !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: auto !important;
+      scrollbar-color: #10b981 #f1f5f9 !important;
+    }
+  }
+  @media (max-width: 480px) {
+    h1 { font-size: 1.25rem !important; }
+    table { font-size: 0.75rem !important; }
+    .overflow-x-auto::-webkit-scrollbar { height: 16px !important; }
+    .overflow-x-auto::-webkit-scrollbar-thumb { min-width: 60px !important; }
+  }
+`,it=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -7963,6 +8094,8 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             min-width: 1200px; /* Force table to be wide enough for scrollbar */
             width: max-content;
         }
+        
+        ${ot()}
     </style>
 </head>
 <body class="bg-gray-50">
@@ -8407,7 +8540,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         document.addEventListener('DOMContentLoaded', loadData);
     <\/script>
 </body>
-</html>`,ba=`<!DOCTYPE html>
+</html>`,dt=`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -8772,7 +8905,38 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
     <\/script>
 </body>
 </html>
-`;function fa(e,t,a){return`
+`,de=()=>`
+  @media (max-width: 768px) {
+    .max-w-3xl { padding-left: 1rem !important; padding-right: 1rem !important; }
+    h1 { font-size: 1.5rem !important; }
+    h2 { font-size: 1.25rem !important; }
+    .bg-white.rounded-xl { padding: 1rem !important; }
+    .grid.grid-cols-2 { grid-template-columns: 1fr !important; }
+    button { font-size: 0.875rem !important; padding: 0.5rem 1rem !important; }
+    input, select, textarea { font-size: 1rem !important; }
+    .p-6 { padding: 1rem !important; }
+    .p-8 { padding: 1.5rem !important; }
+    
+    /* Tables in forms (if any) */
+    .overflow-x-auto::-webkit-scrollbar {
+      height: 14px !important;
+    }
+    .overflow-x-auto::-webkit-scrollbar-track {
+      background: #f1f5f9 !important;
+      border: 2px solid #e2e8f0 !important;
+    }
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+      background: #10b981 !important;
+      border-radius: 8px !important;
+      min-width: 50px !important;
+    }
+  }
+  @media (max-width: 480px) {
+    h1 { font-size: 1.25rem !important; }
+    button { font-size: 0.75rem !important; }
+    .overflow-x-auto::-webkit-scrollbar { height: 16px !important; }
+  }
+`;function ct(e,t,a){return`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
     <head>
@@ -8781,6 +8945,9 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       <title>إضافة نسبة جديدة</title>
       <script src="https://cdn.tailwindcss.com"><\/script>
       <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+      <style>
+        ${de()}
+      </style>
     </head>
     <body class="bg-gray-50">
       <div class="max-w-3xl mx-auto p-6">
@@ -8927,7 +9094,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       <\/script>
     </body>
     </html>
-  `}function xa(e,t,a,s){return`
+  `}function pt(e,t,a,s){return`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
     <head>
@@ -8936,6 +9103,9 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       <title>تعديل النسبة</title>
       <script src="https://cdn.tailwindcss.com"><\/script>
       <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+      <style>
+        ${de()}
+      </style>
     </head>
     <body class="bg-gray-50">
       <div class="max-w-3xl mx-auto p-6">
@@ -9077,7 +9247,208 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       <\/script>
     </body>
     </html>
-  `}const p=new ut;p.use("*",ea());async function ha(e){const a=(e.req.header("host")||"").split(".")[0],s=e.req.path.match(/^\/c\/([^\/]+)/),r=s?s[1]:null;let l=null;return a&&a!=="localhost"&&a!=="3000-ii8t2q2dzwwe7ckmslxss-3844e1b6"&&(l=await e.env.DB.prepare(`
+  `}const c=new le,k=()=>`
+  /* Mobile Responsive Styles */
+  @media (max-width: 768px) {
+    /* Container adjustments */
+    .max-w-7xl, .max-w-6xl, .max-w-5xl {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+    
+    /* Headings */
+    h1 {
+      font-size: 1.5rem !important;
+    }
+    h2 {
+      font-size: 1.25rem !important;
+    }
+    
+    /* Tables */
+    table {
+      font-size: 0.875rem !important;
+    }
+    
+    table th, table td {
+      padding: 0.5rem !important;
+    }
+    
+    /* Hide less important columns on mobile */
+    .hide-on-mobile {
+      display: none !important;
+    }
+    
+    /* Buttons */
+    button, .btn {
+      font-size: 0.875rem !important;
+      padding: 0.5rem 1rem !important;
+    }
+    
+    /* Forms */
+    input, select, textarea {
+      font-size: 1rem !important;
+    }
+    
+    /* Cards */
+    .bg-white.rounded-xl, .bg-white.rounded-lg {
+      padding: 1rem !important;
+    }
+    
+    /* Flex wrap for header actions */
+    .flex.justify-between {
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    /* Stack items vertically on mobile */
+    .flex-wrap > * {
+      width: 100%;
+    }
+    
+    /* Search input full width */
+    input[type="text"], input[type="search"] {
+      width: 100% !important;
+    }
+    
+    /* Modal adjustments */
+    .fixed.inset-0 > div {
+      margin: 1rem !important;
+      max-height: 90vh !important;
+      overflow-y: auto !important;
+    }
+    
+    /* Sidebar adjustments */
+    aside, .sidebar {
+      width: 100% !important;
+      position: fixed !important;
+      z-index: 50 !important;
+    }
+    
+    /* Grid adjustments */
+    .grid {
+      grid-template-columns: 1fr !important;
+    }
+    
+    /* Reduce spacing */
+    .p-6 {
+      padding: 1rem !important;
+    }
+    
+    .p-8 {
+      padding: 1.5rem !important;
+    }
+    
+    /* Table container */
+    .overflow-x-auto {
+      margin-left: -1rem !important;
+      margin-right: -1rem !important;
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+      padding-bottom: 1.5rem !important; /* Space for scrollbar */
+    }
+    
+    /* IMPORTANT: Force scrollbar to be ALWAYS VISIBLE on mobile */
+    .overflow-x-auto::-webkit-scrollbar {
+      height: 14px !important; /* Larger scrollbar for mobile */
+      -webkit-appearance: none;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-track {
+      background: #f1f5f9 !important; /* Light background */
+      border-radius: 8px !important;
+      border: 2px solid #e2e8f0 !important; /* Border to make it stand out */
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%) !important;
+      border-radius: 8px !important;
+      border: 2px solid #e2e8f0 !important;
+      min-width: 50px !important; /* Minimum thumb width */
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-thumb:active {
+      background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%) !important;
+    }
+    
+    /* Force scrollbar to always show on mobile (iOS Safari & Chrome) */
+    .overflow-x-auto {
+      overflow-x: scroll !important; /* Always show scrollbar */
+      -webkit-overflow-scrolling: touch !important; /* Smooth scrolling on iOS */
+      scrollbar-width: auto !important; /* Firefox: show scrollbar */
+      scrollbar-color: #3b82f6 #f1f5f9 !important; /* Firefox colors */
+    }
+    
+    /* Add visual indicator for scrollable content */
+    .overflow-x-auto::after {
+      content: '← مرر للمزيد →' !important;
+      position: absolute !important;
+      bottom: 0 !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      background: rgba(59, 130, 246, 0.9) !important;
+      color: white !important;
+      padding: 0.25rem 1rem !important;
+      border-radius: 1rem !important;
+      font-size: 0.75rem !important;
+      font-weight: bold !important;
+      pointer-events: none !important;
+      opacity: 0 !important;
+      animation: fadeInOut 3s ease-in-out !important;
+    }
+    
+    @keyframes fadeInOut {
+      0%, 100% { opacity: 0; }
+      10%, 90% { opacity: 1; }
+    }
+    
+    /* Table wrapper positioning */
+    .overflow-x-auto {
+      position: relative !important;
+    }
+    
+    /* Action buttons in table */
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    
+    /* Status badges */
+    .badge, .status-badge {
+      font-size: 0.75rem !important;
+      padding: 0.25rem 0.5rem !important;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    /* Extra small screens */
+    body {
+      font-size: 14px !important;
+    }
+    
+    h1 {
+      font-size: 1.25rem !important;
+    }
+    
+    table {
+      font-size: 0.75rem !important;
+    }
+    
+    button, .btn {
+      font-size: 0.75rem !important;
+      padding: 0.375rem 0.75rem !important;
+    }
+    
+    /* Even larger scrollbar for very small screens */
+    .overflow-x-auto::-webkit-scrollbar {
+      height: 16px !important;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+      min-width: 60px !important;
+    }
+  }
+`;c.use("*",Je());async function ut(e){const a=(e.req.header("host")||"").split(".")[0],s=e.req.path.match(/^\/c\/([^\/]+)/),r=s?s[1]:null;let l=null;return a&&a!=="localhost"&&a!=="3000-ii8t2q2dzwwe7ckmslxss-3844e1b6"&&(l=await e.env.DB.prepare(`
       SELECT * FROM tenants 
       WHERE subdomain = ? AND status = 'active'
       LIMIT 1
@@ -9087,9 +9458,9 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       LIMIT 1
     `).bind(r).first()),l||(l=await e.env.DB.prepare(`
       SELECT * FROM tenants WHERE id = 1 LIMIT 1
-    `).bind().first()),l}p.use("/c/:tenant/*",async(e,t)=>{const a=await ha(e);if(!a)return e.json({error:"Tenant not found",message:"الشركة غير موجودة أو غير نشطة"},404);e.set("tenant",a),e.set("tenantId",a.id),await t()});p.get("/api/tenants",async e=>{try{const{results:t}=await e.env.DB.prepare(`
+    `).bind().first()),l}c.use("/c/:tenant/*",async(e,t)=>{const a=await ut(e);if(!a)return e.json({error:"Tenant not found",message:"الشركة غير موجودة أو غير نشطة"},404);e.set("tenant",a),e.set("tenantId",a.id),await t()});c.get("/api/tenants",async e=>{try{const{results:t}=await e.env.DB.prepare(`
       SELECT * FROM tenants ORDER BY created_at DESC
-    `).all();return e.json({success:!0,data:t})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/tenants",async e=>{try{const t=await e.req.json();if(!t.company_name||!t.slug)return e.json({success:!1,error:"اسم الشركة والـ Slug مطلوبان"},400);if(await e.env.DB.prepare(`
+    `).all();return e.json({success:!0,data:t})}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/tenants",async e=>{try{const t=await e.req.json();if(!t.company_name||!t.slug)return e.json({success:!1,error:"اسم الشركة والـ Slug مطلوبان"},400);if(await e.env.DB.prepare(`
       SELECT id FROM tenants WHERE slug = ?
     `).bind(t.slug).first())return e.json({success:!1,error:"الـ Slug موجود بالفعل"},400);const s=await e.env.DB.prepare(`
       INSERT INTO tenants (
@@ -9097,7 +9468,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         max_customers, max_requests, contact_email, contact_phone,
         primary_color, secondary_color
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(t.company_name,t.slug,t.subdomain||t.slug,t.status||"active",t.max_users||10,t.max_customers||500,t.max_requests||2e3,t.contact_email||"",t.contact_phone||"",t.primary_color||"#667eea",t.secondary_color||"#764ba2").run();return e.json({success:!0,data:{id:s.meta.last_row_id,...t},message:"تم إنشاء الشركة بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.put("/api/tenants/:id",async e=>{try{const t=e.req.param("id"),a=await e.req.json();return await e.env.DB.prepare(`
+    `).bind(t.company_name,t.slug,t.subdomain||t.slug,t.status||"active",t.max_users||10,t.max_customers||500,t.max_requests||2e3,t.contact_email||"",t.contact_phone||"",t.primary_color||"#667eea",t.secondary_color||"#764ba2").run();return e.json({success:!0,data:{id:s.meta.last_row_id,...t},message:"تم إنشاء الشركة بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.put("/api/tenants/:id",async e=>{try{const t=e.req.param("id"),a=await e.req.json();return await e.env.DB.prepare(`
       SELECT id FROM tenants WHERE id = ?
     `).bind(t).first()?(await e.env.DB.prepare(`
       UPDATE tenants SET
@@ -9113,23 +9484,23 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         primary_color = ?,
         secondary_color = ?
       WHERE id = ?
-    `).bind(a.company_name,a.slug,a.subdomain,a.status,a.max_users,a.max_customers,a.max_requests,a.contact_email,a.contact_phone,a.primary_color||"#667eea",a.secondary_color||"#764ba2",t).run(),e.json({success:!0,data:{id:t,...a},message:"تم تحديث الشركة بنجاح"})):e.json({success:!1,error:"الشركة غير موجودة"},404)}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/tenants/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
+    `).bind(a.company_name,a.slug,a.subdomain,a.status,a.max_users,a.max_customers,a.max_requests,a.contact_email,a.contact_phone,a.primary_color||"#667eea",a.secondary_color||"#764ba2",t).run(),e.json({success:!0,data:{id:t,...a},message:"تم تحديث الشركة بنجاح"})):e.json({success:!1,error:"الشركة غير موجودة"},404)}catch(t){return e.json({success:!1,error:t.message},500)}});c.delete("/api/tenants/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
       SELECT COUNT(*) as count FROM users WHERE tenant_id = ?
     `).bind(t).first();return a&&a.count>0?e.json({success:!1,error:`لا يمكن حذف الشركة لأنها تحتوي على ${a.count} مستخدم/مستخدمين`},400):(await e.env.DB.prepare(`
       DELETE FROM tenants WHERE id = ?
-    `).bind(t).run(),e.json({success:!0,message:"تم حذف الشركة بنجاح"}))}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/auth/login",async e=>{try{const{username:t,password:a}=await e.req.json(),s=await e.env.DB.prepare(`
+    `).bind(t).run(),e.json({success:!0,message:"تم حذف الشركة بنجاح"}))}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/auth/login",async e=>{try{const{username:t,password:a}=await e.req.json(),s=await e.env.DB.prepare(`
       SELECT u.*, r.role_name, s.company_name, t.id as tenant_id, t.company_name as tenant_name, t.slug as tenant_slug
       FROM users u
       LEFT JOIN roles r ON u.role_id = r.id
       LEFT JOIN subscriptions s ON u.subscription_id = s.id
       LEFT JOIN tenants t ON u.tenant_id = t.id
       WHERE u.username = ? AND u.password = ? AND u.is_active = 1
-    `).bind(t,a).first();if(!s)return e.json({success:!1,error:"اسم المستخدم أو كلمة المرور غير صحيحة"},401);await e.env.DB.prepare("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?").bind(s.id).run();const r=`${s.id}:${s.tenant_id||"null"}:${Date.now()}:${Math.random()}`,l=btoa(r);let n="/admin";return s.tenant_id&&s.tenant_slug?n=`/c/${s.tenant_slug}/admin`:s.user_type==="superadmin"&&(n="/admin"),e.json({success:!0,token:l,redirect:n,user:{id:s.id,username:s.username,full_name:s.full_name,email:s.email,role:s.role,role_name:s.role_name,user_type:s.user_type,company_name:s.company_name,subscription_id:s.subscription_id,tenant_id:s.tenant_id,tenant_name:s.tenant_name,tenant_slug:s.tenant_slug}})}catch(t){return e.json({success:!1,message:t.message},500)}});p.post("/api/auth/forgot-password",async e=>{try{const{email:t}=await e.req.json(),a=await e.env.DB.prepare(`
+    `).bind(t,a).first();if(!s)return e.json({success:!1,error:"اسم المستخدم أو كلمة المرور غير صحيحة"},401);await e.env.DB.prepare("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?").bind(s.id).run();const r=`${s.id}:${s.tenant_id||"null"}:${Date.now()}:${Math.random()}`,l=btoa(r);let n="/admin";return s.tenant_id&&s.tenant_slug?n=`/c/${s.tenant_slug}/admin`:s.user_type==="superadmin"&&(n="/admin"),e.json({success:!0,token:l,redirect:n,user:{id:s.id,username:s.username,full_name:s.full_name,email:s.email,role:s.role,role_name:s.role_name,user_type:s.user_type,company_name:s.company_name,subscription_id:s.subscription_id,tenant_id:s.tenant_id,tenant_name:s.tenant_name,tenant_slug:s.tenant_slug}})}catch(t){return e.json({success:!1,message:t.message},500)}});c.post("/api/auth/forgot-password",async e=>{try{const{email:t}=await e.req.json(),a=await e.env.DB.prepare(`
       SELECT id, email, username FROM users WHERE email = ? OR username = ?
     `).bind(t,t).first();if(!a)return e.json({success:!1,message:"البريد الإلكتروني أو اسم المستخدم غير موجود"},404);const s=Math.floor(1e5+Math.random()*9e5).toString(),r=new Date(Date.now()+900*1e3);return await e.env.DB.prepare(`
       INSERT INTO password_change_notifications (user_id, verification_code, expires_at, is_used)
       VALUES (?, ?, ?, 0)
-    `).bind(a.id,s,r.toISOString()).run(),console.log(`Verification code for ${a.email}: ${s}`),e.json({success:!0,message:"تم إرسال رمز التحقق إلى بريدك الإلكتروني",devCode:s})}catch(t){return console.error("Forgot password error:",t),e.json({success:!1,message:"حدث خطأ. الرجاء المحاولة مرة أخرى."},500)}});p.post("/api/auth/verify-reset-code",async e=>{try{const{email:t,code:a}=await e.req.json(),s=await e.env.DB.prepare(`
+    `).bind(a.id,s,r.toISOString()).run(),console.log(`Verification code for ${a.email}: ${s}`),e.json({success:!0,message:"تم إرسال رمز التحقق إلى بريدك الإلكتروني",devCode:s})}catch(t){return console.error("Forgot password error:",t),e.json({success:!1,message:"حدث خطأ. الرجاء المحاولة مرة أخرى."},500)}});c.post("/api/auth/verify-reset-code",async e=>{try{const{email:t,code:a}=await e.req.json(),s=await e.env.DB.prepare(`
       SELECT id FROM users WHERE email = ? OR username = ?
     `).bind(t,t).first();if(!s)return e.json({success:!1,message:"المستخدم غير موجود"},404);const r=await e.env.DB.prepare(`
       SELECT id, verification_code, expires_at, is_used
@@ -9137,13 +9508,13 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       WHERE user_id = ? AND is_used = 0
       ORDER BY created_at DESC
       LIMIT 1
-    `).bind(s.id).first();if(!r)return e.json({success:!1,message:"لم يتم العثور على رمز التحقق"},404);if(new Date(r.expires_at)<new Date)return e.json({success:!1,message:"انتهت صلاحية رمز التحقق. الرجاء طلب رمز جديد."},400);if(r.verification_code!==a)return e.json({success:!1,message:"رمز التحقق غير صحيح"},400);const l=Math.random().toString(36).substring(2)+Date.now().toString(36);return e.json({success:!0,message:"تم التحقق بنجاح",token:l})}catch(t){return console.error("Verify code error:",t),e.json({success:!1,message:"حدث خطأ. الرجاء المحاولة مرة أخرى."},500)}});p.post("/api/auth/reset-password",async e=>{try{const{email:t,token:a,newPassword:s}=await e.req.json();if(!s||s.length<8)return e.json({success:!1,message:"كلمة السر يجب أن تكون 8 أحرف على الأقل"},400);const r=await e.env.DB.prepare(`
+    `).bind(s.id).first();if(!r)return e.json({success:!1,message:"لم يتم العثور على رمز التحقق"},404);if(new Date(r.expires_at)<new Date)return e.json({success:!1,message:"انتهت صلاحية رمز التحقق. الرجاء طلب رمز جديد."},400);if(r.verification_code!==a)return e.json({success:!1,message:"رمز التحقق غير صحيح"},400);const l=Math.random().toString(36).substring(2)+Date.now().toString(36);return e.json({success:!0,message:"تم التحقق بنجاح",token:l})}catch(t){return console.error("Verify code error:",t),e.json({success:!1,message:"حدث خطأ. الرجاء المحاولة مرة أخرى."},500)}});c.post("/api/auth/reset-password",async e=>{try{const{email:t,token:a,newPassword:s}=await e.req.json();if(!s||s.length<8)return e.json({success:!1,message:"كلمة السر يجب أن تكون 8 أحرف على الأقل"},400);const r=await e.env.DB.prepare(`
       SELECT id FROM users WHERE email = ? OR username = ?
     `).bind(t,t).first();return r?(await e.env.DB.prepare(`
       UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
     `).bind(s,r.id).run(),await e.env.DB.prepare(`
       UPDATE password_change_notifications SET is_used = 1 WHERE user_id = ? AND is_used = 0
-    `).bind(r.id).run(),e.json({success:!0,message:"تم تغيير كلمة السر بنجاح"})):e.json({success:!1,message:"المستخدم غير موجود"},404)}catch(t){return console.error("Reset password error:",t),e.json({success:!1,message:"حدث خطأ. الرجاء المحاولة مرة أخرى."},500)}});p.get("/api/banks",async e=>{try{const t=e.req.query("tenant_id");let a="SELECT * FROM banks",s;return t?(a+=" WHERE tenant_id = ? ORDER BY bank_name",s=(await e.env.DB.prepare(a).bind(parseInt(t)).all()).results):(a+=" ORDER BY bank_name",s=(await e.env.DB.prepare(a).all()).results),e.json({success:!0,data:s})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/admin/requests/:id/timeline",async e=>{const t=e.req.param("id"),a=await e.env.DB.prepare(`
+    `).bind(r.id).run(),e.json({success:!0,message:"تم تغيير كلمة السر بنجاح"})):e.json({success:!1,message:"المستخدم غير موجود"},404)}catch(t){return console.error("Reset password error:",t),e.json({success:!1,message:"حدث خطأ. الرجاء المحاولة مرة أخرى."},500)}});c.get("/api/banks",async e=>{try{const t=e.req.query("tenant_id");let a="SELECT * FROM banks",s;return t?(a+=" WHERE tenant_id = ? ORDER BY bank_name",s=(await e.env.DB.prepare(a).bind(parseInt(t)).all()).results):(a+=" ORDER BY bank_name",s=(await e.env.DB.prepare(a).all()).results),e.json({success:!0,data:s})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/admin/requests/:id/timeline",async e=>{const t=e.req.param("id"),a=await e.env.DB.prepare(`
     SELECT 
       fr.*,
       c.full_name as customer_name,
@@ -9161,7 +9532,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
     SELECT * FROM financing_request_status_history 
     WHERE request_id = ? 
     ORDER BY created_at ASC
-  `).bind(t).all();function r(d,m){const g=new Date(d),h=new Date(m).getTime()-g.getTime(),w=Math.floor(h/(1e3*60*60*24)),y=Math.floor(h%(1e3*60*60*24)/(1e3*60*60)),_=Math.floor(h%(1e3*60*60)/(1e3*60));return w>0?`${w} يوم و ${y} ساعة`:y>0?`${y} ساعة و ${_} دقيقة`:`${_} دقيقة`}function l(d){return new Date(d).toLocaleString("ar-SA",{year:"numeric",month:"long",day:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:!0})}const n=[];a.customer_created_at&&n.push({title:"📝 العميل أدخل بياناته في الحاسبة",datetime:l(a.customer_created_at),duration:"",icon:"📝",color:"#3b82f6"}),n.push({title:"📋 تم تقديم طلب التمويل الرسمي",datetime:l(a.created_at),duration:a.customer_created_at?r(a.customer_created_at,a.created_at):"",icon:"📋",color:"#8b5cf6"});let i=a.created_at;for(const d of s.results){const m=d.new_status==="pending"?"قيد الانتظار":d.new_status==="under_review"?"قيد المراجعة":d.new_status==="approved"?"✅ تمت الموافقة":d.new_status==="rejected"?"❌ تم الرفض":d.new_status,g=d.new_status==="pending"?"#f59e0b":d.new_status==="under_review"?"#3b82f6":d.new_status==="approved"?"#10b981":d.new_status==="rejected"?"#ef4444":"#6b7280";n.push({title:`تغيير الحالة إلى: ${m}`,datetime:l(d.created_at),duration:r(i,d.created_at),icon:"🔄",color:g}),i=d.created_at}const o=a.customer_created_at?r(a.customer_created_at,i):r(a.created_at,i),c=`
+  `).bind(t).all();function r(p,u){const m=new Date(p),f=new Date(u).getTime()-m.getTime(),b=Math.floor(f/(1e3*60*60*24)),x=Math.floor(f%(1e3*60*60*24)/(1e3*60*60)),h=Math.floor(f%(1e3*60*60)/(1e3*60));return b>0?`${b} يوم و ${x} ساعة`:x>0?`${x} ساعة و ${h} دقيقة`:`${h} دقيقة`}function l(p){return new Date(p).toLocaleString("ar-SA",{year:"numeric",month:"long",day:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:!0})}const n=[];a.customer_created_at&&n.push({title:"📝 العميل أدخل بياناته في الحاسبة",datetime:l(a.customer_created_at),duration:"",icon:"📝",color:"#3b82f6"}),n.push({title:"📋 تم تقديم طلب التمويل الرسمي",datetime:l(a.created_at),duration:a.customer_created_at?r(a.customer_created_at,a.created_at):"",icon:"📋",color:"#8b5cf6"});let o=a.created_at;for(const p of s.results){const u=p.new_status==="pending"?"قيد الانتظار":p.new_status==="under_review"?"قيد المراجعة":p.new_status==="approved"?"✅ تمت الموافقة":p.new_status==="rejected"?"❌ تم الرفض":p.new_status,m=p.new_status==="pending"?"#f59e0b":p.new_status==="under_review"?"#3b82f6":p.new_status==="approved"?"#10b981":p.new_status==="rejected"?"#ef4444":"#6b7280";n.push({title:`تغيير الحالة إلى: ${u}`,datetime:l(p.created_at),duration:r(o,p.created_at),icon:"🔄",color:m}),o=p.created_at}const i=a.customer_created_at?r(a.customer_created_at,o):r(a.created_at,o),d=`
     <!DOCTYPE html>
     <html dir="rtl" lang="ar">
     <head>
@@ -9380,15 +9751,15 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
 
         <div class="timeline">
-          ${n.map((d,m)=>`
+          ${n.map((p,u)=>`
             <div class="timeline-item">
-              <div class="timeline-icon" style="border-color: ${d.color}; color: ${d.color};">
-                ${d.icon}
+              <div class="timeline-icon" style="border-color: ${p.color}; color: ${p.color};">
+                ${p.icon}
               </div>
-              <div class="timeline-content" style="border-right-color: ${d.color};">
-                <div class="timeline-title">${d.title}</div>
-                <div class="timeline-datetime">📅 ${d.datetime}</div>
-                ${d.duration?`<span class="timeline-duration">⏱️ المدة: ${d.duration}</span>`:""}
+              <div class="timeline-content" style="border-right-color: ${p.color};">
+                <div class="timeline-title">${p.title}</div>
+                <div class="timeline-datetime">📅 ${p.datetime}</div>
+                ${p.duration?`<span class="timeline-duration">⏱️ المدة: ${p.duration}</span>`:""}
               </div>
             </div>
           `).join("")}
@@ -9396,7 +9767,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
 
         <div class="total-summary">
           <h2>⏰ إجمالي الوقت الكلي</h2>
-          <div class="time">${o}</div>
+          <div class="time">${i}</div>
           <p style="margin-top: 10px; opacity: 0.9;">من بداية إدخال البيانات حتى الحالة الحالية</p>
         </div>
 
@@ -9408,12 +9779,12 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       </div>
     </body>
     </html>
-  `;return e.html(c)});p.post("/api/banks",async e=>{try{const t=await e.req.json(),{bank_name:a,bank_code:s,logo_url:r,is_active:l,tenant_id:n}=t;let i=n;if(!i){const c=e.req.header("Authorization"),d=c==null?void 0:c.replace("Bearer ","");if(d){const g=atob(d).split(":");i=g[1]!=="null"?parseInt(g[1]):null}}const o=await e.env.DB.prepare(`
+  `;return e.html(d)});c.post("/api/banks",async e=>{try{const t=await e.req.json(),{bank_name:a,bank_code:s,logo_url:r,is_active:l,tenant_id:n}=t;let o=n;if(!o){const p=e.req.header("Authorization")?.replace("Bearer ","");if(p){const m=atob(p).split(":");o=m[1]!=="null"?parseInt(m[1]):null}}const i=await e.env.DB.prepare(`
       INSERT INTO banks (bank_name, bank_code, logo_url, is_active, tenant_id) 
       VALUES (?, ?, ?, ?, ?)
-    `).bind(a,s,r,l,i).run();return e.json({success:!0,id:o.meta.last_row_id})}catch(t){return e.json({success:!1,error:t.message},500)}});p.put("/api/banks/:id",async e=>{try{const t=e.req.param("id"),a=await e.req.json(),{bank_name:s,bank_code:r,logo_url:l,is_active:n}=a,i=e.req.header("Authorization"),o=i==null?void 0:i.replace("Bearer ","");let c=null;if(o){const g=atob(o).split(":");c=g[1]!=="null"?parseInt(g[1]):null}let d="UPDATE banks SET bank_name = ?, bank_code = ?, logo_url = ?, is_active = ? WHERE id = ?";return c?(d+=" AND tenant_id = ?",await e.env.DB.prepare(d).bind(s,r,l,n,t,c).run()):await e.env.DB.prepare(d).bind(s,r,l,n,t).run(),e.json({success:!0})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/banks/:id",async e=>{try{const t=e.req.param("id"),a=await e.req.formData(),s=a.get("bank_name"),r=a.get("bank_code"),l=a.get("logo_url")||null,n=parseInt(a.get("is_active")||"1");return await e.env.DB.prepare(`
+    `).bind(a,s,r,l,o).run();return e.json({success:!0,id:i.meta.last_row_id})}catch(t){return e.json({success:!1,error:t.message},500)}});c.put("/api/banks/:id",async e=>{try{const t=e.req.param("id"),a=await e.req.json(),{bank_name:s,bank_code:r,logo_url:l,is_active:n}=a,i=e.req.header("Authorization")?.replace("Bearer ","");let d=null;if(i){const m=atob(i).split(":");d=m[1]!=="null"?parseInt(m[1]):null}let p="UPDATE banks SET bank_name = ?, bank_code = ?, logo_url = ?, is_active = ? WHERE id = ?";return d?(p+=" AND tenant_id = ?",await e.env.DB.prepare(p).bind(s,r,l,n,t,d).run()):await e.env.DB.prepare(p).bind(s,r,l,n,t).run(),e.json({success:!0})}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/banks/:id",async e=>{try{const t=e.req.param("id"),a=await e.req.formData(),s=a.get("bank_name"),r=a.get("bank_code"),l=a.get("logo_url")||null,n=parseInt(a.get("is_active")||"1");return await e.env.DB.prepare(`
       UPDATE banks SET bank_name = ?, bank_code = ?, logo_url = ?, is_active = ? WHERE id = ?
-    `).bind(s,r,l,n,t).run(),e.redirect("/admin/banks")}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/banks/:id",async e=>{try{const t=e.req.param("id"),a=e.req.header("Authorization"),s=a==null?void 0:a.replace("Bearer ","");let r=null;if(s){const o=atob(s).split(":");r=o[1]!=="null"?parseInt(o[1]):null}let l="SELECT id FROM banks WHERE id = ?";return r&&(l+=" AND tenant_id = ?"),(r?await e.env.DB.prepare(l).bind(t,r).first():await e.env.DB.prepare(l).bind(t).first())?(await e.env.DB.prepare("DELETE FROM banks WHERE id = ?").bind(t).run(),e.json({success:!0})):e.json({success:!1,error:"البنك غير موجود أو لا يمكنك حذفه"},404)}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/financing-types",async e=>{try{const t=e.req.query("tenant_id");let a="SELECT * FROM financing_types",s;return t?(a+=" WHERE tenant_id = ? OR tenant_id IS NULL ORDER BY type_name",s=(await e.env.DB.prepare(a).bind(parseInt(t)).all()).results):(a+=" ORDER BY type_name",s=(await e.env.DB.prepare(a).all()).results),e.json({success:!0,data:s})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/rates",async e=>{try{const t=e.req.header("Authorization"),a=t==null?void 0:t.replace("Bearer ","");let s=null;if(a){const i=atob(a).split(":");s=i[1]!=="null"?parseInt(i[1]):null}let r=`
+    `).bind(s,r,l,n,t).run(),e.redirect("/admin/banks")}catch(t){return e.json({success:!1,error:t.message},500)}});c.delete("/api/banks/:id",async e=>{try{const t=e.req.param("id"),s=e.req.header("Authorization")?.replace("Bearer ","");let r=null;if(s){const i=atob(s).split(":");r=i[1]!=="null"?parseInt(i[1]):null}let l="SELECT id FROM banks WHERE id = ?";return r&&(l+=" AND tenant_id = ?"),(r?await e.env.DB.prepare(l).bind(t,r).first():await e.env.DB.prepare(l).bind(t).first())?(await e.env.DB.prepare("DELETE FROM banks WHERE id = ?").bind(t).run(),e.json({success:!0})):e.json({success:!1,error:"البنك غير موجود أو لا يمكنك حذفه"},404)}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/api/financing-types",async e=>{try{const t=e.req.query("tenant_id");let a="SELECT * FROM financing_types",s;return t?(a+=" WHERE tenant_id = ? OR tenant_id IS NULL ORDER BY type_name",s=(await e.env.DB.prepare(a).bind(parseInt(t)).all()).results):(a+=" ORDER BY type_name",s=(await e.env.DB.prepare(a).all()).results),e.json({success:!0,data:s})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/api/rates",async e=>{try{const a=e.req.header("Authorization")?.replace("Bearer ","");let s=null;if(a){const o=atob(a).split(":");s=o[1]!=="null"?parseInt(o[1]):null}let r=`
       SELECT 
         r.*,
         b.bank_name,
@@ -9421,41 +9792,41 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       FROM bank_financing_rates r
       JOIN banks b ON r.bank_id = b.id
       JOIN financing_types f ON r.financing_type_id = f.id
-    `;s!==null&&(r+=" WHERE r.tenant_id = ?"),r+=" ORDER BY b.bank_name, f.type_name";const{results:l}=s!==null?await e.env.DB.prepare(r).bind(s).all():await e.env.DB.prepare(r).all();return e.json({success:!0,data:l})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/rates",async e=>{try{const t=e.req.header("Authorization"),a=t==null?void 0:t.replace("Bearer ","");let s=null;if(a){const o=atob(a).split(":");s=o[1]!=="null"?parseInt(o[1]):null}const r=await e.req.formData(),l={};r.forEach((i,o)=>{l[o]=i});const n=await e.env.DB.prepare(`
+    `;s!==null&&(r+=" WHERE r.tenant_id = ?"),r+=" ORDER BY b.bank_name, f.type_name";const{results:l}=s!==null?await e.env.DB.prepare(r).bind(s).all():await e.env.DB.prepare(r).all();return e.json({success:!0,data:l})}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/rates",async e=>{try{const a=e.req.header("Authorization")?.replace("Bearer ","");let s=null;if(a){const i=atob(a).split(":");s=i[1]!=="null"?parseInt(i[1]):null}const r=await e.req.formData(),l={};r.forEach((o,i)=>{l[i]=o});const n=await e.env.DB.prepare(`
       INSERT INTO bank_financing_rates 
       (bank_id, financing_type_id, rate, min_amount, max_amount, min_duration, max_duration, is_active, tenant_id)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(l.bank_id,l.financing_type_id,l.rate,l.min_amount||null,l.max_amount||null,l.min_duration||null,l.max_duration||null,l.is_active||1,s).run();return e.redirect("/admin/rates")}catch(t){return e.json({success:!1,error:t.message},500)}});p.put("/api/rates/:id",async e=>{try{const t=e.req.param("id"),a=await e.req.json(),s=e.req.header("Authorization"),r=s==null?void 0:s.replace("Bearer ","");let l=null;if(r){const o=atob(r).split(":");l=o[1]!=="null"?parseInt(o[1]):null}let n=`
+    `).bind(l.bank_id,l.financing_type_id,l.rate,l.min_amount||null,l.max_amount||null,l.min_duration||null,l.max_duration||null,l.is_active||1,s).run();return e.redirect("/admin/rates")}catch(t){return e.json({success:!1,error:t.message},500)}});c.put("/api/rates/:id",async e=>{try{const t=e.req.param("id"),a=await e.req.json(),r=e.req.header("Authorization")?.replace("Bearer ","");let l=null;if(r){const i=atob(r).split(":");l=i[1]!=="null"?parseInt(i[1]):null}let n=`
       UPDATE bank_financing_rates 
       SET bank_id = ?, financing_type_id = ?, rate = ?, 
           min_amount = ?, max_amount = ?, min_salary = ?, max_salary = ?,
           min_duration = ?, max_duration = ?, is_active = ?
       WHERE id = ?
-    `;return l?(n+=" AND tenant_id = ?",await e.env.DB.prepare(n).bind(a.bank_id,a.financing_type_id,a.rate,a.min_amount,a.max_amount,a.min_salary,a.max_salary,a.min_duration,a.max_duration,a.is_active,t,l).run()):await e.env.DB.prepare(n).bind(a.bank_id,a.financing_type_id,a.rate,a.min_amount,a.max_amount,a.min_salary,a.max_salary,a.min_duration,a.max_duration,a.is_active,t).run(),e.json({success:!0})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/rates/:id",async e=>{try{const t=e.req.param("id"),a=e.req.header("Authorization"),s=a==null?void 0:a.replace("Bearer ","");let r=null;if(s){const i=atob(s).split(":");r=i[1]!=="null"?parseInt(i[1]):null}let l="DELETE FROM bank_financing_rates WHERE id = ?";return r?(l+=" AND tenant_id = ?",await e.env.DB.prepare(l).bind(t,r).run()):await e.env.DB.prepare(l).bind(t).run(),e.json({success:!0})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/packages",async e=>{try{const{results:t}=await e.env.DB.prepare(`
+    `;return l?(n+=" AND tenant_id = ?",await e.env.DB.prepare(n).bind(a.bank_id,a.financing_type_id,a.rate,a.min_amount,a.max_amount,a.min_salary,a.max_salary,a.min_duration,a.max_duration,a.is_active,t,l).run()):await e.env.DB.prepare(n).bind(a.bank_id,a.financing_type_id,a.rate,a.min_amount,a.max_amount,a.min_salary,a.max_salary,a.min_duration,a.max_duration,a.is_active,t).run(),e.json({success:!0})}catch(t){return e.json({success:!1,error:t.message},500)}});c.delete("/api/rates/:id",async e=>{try{const t=e.req.param("id"),s=e.req.header("Authorization")?.replace("Bearer ","");let r=null;if(s){const o=atob(s).split(":");r=o[1]!=="null"?parseInt(o[1]):null}let l="DELETE FROM bank_financing_rates WHERE id = ?";return r?(l+=" AND tenant_id = ?",await e.env.DB.prepare(l).bind(t,r).run()):await e.env.DB.prepare(l).bind(t).run(),e.json({success:!0})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/api/packages",async e=>{try{const{results:t}=await e.env.DB.prepare(`
       SELECT * FROM packages ORDER BY price
-    `).all();return e.json({success:!0,data:t})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/packages",async e=>{try{const t=await e.req.formData(),a=t.get("package_name"),s=t.get("description"),r=t.get("price"),l=t.get("duration_months"),n=t.get("max_calculations"),i=t.get("max_users"),o=t.get("is_active")||"1",c=await e.env.DB.prepare(`
+    `).all();return e.json({success:!0,data:t})}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/packages",async e=>{try{const t=await e.req.formData(),a=t.get("package_name"),s=t.get("description"),r=t.get("price"),l=t.get("duration_months"),n=t.get("max_calculations"),o=t.get("max_users"),i=t.get("is_active")||"1",d=await e.env.DB.prepare(`
       INSERT INTO packages (package_name, description, price, duration_months, max_calculations, max_users, is_active)
       VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).bind(a,s||null,r,l,n||null,i||null,o).run();return e.redirect("/admin/packages")}catch(t){return e.json({success:!1,error:t.message},500)}});p.put("/api/packages/:id",async e=>{try{const t=e.req.param("id"),{package_name:a,description:s,price:r,duration_months:l,max_calculations:n,max_users:i,is_active:o}=await e.req.json();return await e.env.DB.prepare(`
+    `).bind(a,s||null,r,l,n||null,o||null,i).run();return e.redirect("/admin/packages")}catch(t){return e.json({success:!1,error:t.message},500)}});c.put("/api/packages/:id",async e=>{try{const t=e.req.param("id"),{package_name:a,description:s,price:r,duration_months:l,max_calculations:n,max_users:o,is_active:i}=await e.req.json();return await e.env.DB.prepare(`
       UPDATE packages 
       SET package_name = ?, description = ?, price = ?, duration_months = ?, 
           max_calculations = ?, max_users = ?, is_active = ?
       WHERE id = ?
-    `).bind(a,s,r,l,n,i,o,t).run(),e.json({success:!0,message:"تم تحديث الباقة بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/subscriptions",async e=>{try{const t=e.req.header("Authorization"),a=t==null?void 0:t.replace("Bearer ","");let s=null;if(a){const i=atob(a).split(":");s=i[1]!=="null"?parseInt(i[1]):null}let r=`
+    `).bind(a,s,r,l,n,o,i,t).run(),e.json({success:!0,message:"تم تحديث الباقة بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/api/subscriptions",async e=>{try{const a=e.req.header("Authorization")?.replace("Bearer ","");let s=null;if(a){const o=atob(a).split(":");s=o[1]!=="null"?parseInt(o[1]):null}let r=`
       SELECT 
         s.*,
         p.package_name,
         p.price,
         p.max_calculations
       FROM subscriptions s
-      JOIN packages p ON s.package_id = p.id`;s&&(r+=` WHERE s.tenant_id = ${s}`),r+=" ORDER BY s.created_at DESC";const{results:l}=await e.env.DB.prepare(r).all();return e.json({success:!0,data:l})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/subscriptions",async e=>{try{const t=await e.req.formData(),a=t.get("company_name"),s=t.get("package_id"),r=t.get("start_date"),l=t.get("end_date"),n=t.get("status")||"active",i=t.get("calculations_used")||0,o=e.req.header("Authorization"),c=o==null?void 0:o.replace("Bearer ","");let d=null;if(c){const b=atob(c).split(":");d=b[1]!=="null"?parseInt(b[1]):null}const m=await e.env.DB.prepare(`
+      JOIN packages p ON s.package_id = p.id`;s&&(r+=` WHERE s.tenant_id = ${s}`),r+=" ORDER BY s.created_at DESC";const{results:l}=await e.env.DB.prepare(r).all();return e.json({success:!0,data:l})}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/subscriptions",async e=>{try{const t=await e.req.formData(),a=t.get("company_name"),s=t.get("package_id"),r=t.get("start_date"),l=t.get("end_date"),n=t.get("status")||"active",o=t.get("calculations_used")||0,d=e.req.header("Authorization")?.replace("Bearer ","");let p=null;if(d){const g=atob(d).split(":");p=g[1]!=="null"?parseInt(g[1]):null}const u=await e.env.DB.prepare(`
       INSERT INTO subscriptions (company_name, package_id, start_date, end_date, status, calculations_used, tenant_id)
       VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).bind(a,s,r,l,n,i,d).run();return e.redirect("/admin/subscriptions")}catch(t){return e.json({success:!1,error:t.message},500)}});p.put("/api/subscriptions/:id",async e=>{try{const t=e.req.param("id"),{company_name:a,package_id:s,start_date:r,end_date:l,status:n}=await e.req.json();return await e.env.DB.prepare(`
+    `).bind(a,s,r,l,n,o,p).run();return e.redirect("/admin/subscriptions")}catch(t){return e.json({success:!1,error:t.message},500)}});c.put("/api/subscriptions/:id",async e=>{try{const t=e.req.param("id"),{company_name:a,package_id:s,start_date:r,end_date:l,status:n}=await e.req.json();return await e.env.DB.prepare(`
       UPDATE subscriptions 
       SET company_name = ?, package_id = ?, start_date = ?, end_date = ?, status = ?
       WHERE id = ?
-    `).bind(a,s,r,l,n,t).run(),e.json({success:!0})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/subscription-requests",async e=>{try{const{results:t}=await e.env.DB.prepare(`
+    `).bind(a,s,r,l,n,t).run(),e.json({success:!0})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/api/subscription-requests",async e=>{try{const{results:t}=await e.env.DB.prepare(`
       SELECT 
         sr.*,
         p.package_name,
@@ -9464,7 +9835,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       FROM subscription_requests sr
       LEFT JOIN packages p ON sr.package_id = p.id
       ORDER BY sr.created_at DESC
-    `).all();return e.json({success:!0,data:t})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/subscription-requests/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
+    `).all();return e.json({success:!0,data:t})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/api/subscription-requests/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
       SELECT 
         sr.*,
         p.package_name,
@@ -9475,37 +9846,37 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       FROM subscription_requests sr
       LEFT JOIN packages p ON sr.package_id = p.id
       WHERE sr.id = ?
-    `).bind(t).first();return a?e.json({success:!0,data:a}):e.json({success:!1,message:"الطلب غير موجود"},404)}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/subscription-requests",async e=>{try{const{company_name:t,contact_name:a,email:s,phone:r,package_id:l,notes:n}=await e.req.json();if(!t||!a||!s||!r||!l)return e.json({success:!1,message:"جميع الحقول مطلوبة"},400);if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s))return e.json({success:!1,message:"البريد الإلكتروني غير صحيح"},400);if(!/^(05|5)[0-9]{8}$/.test(r.replace(/[\s-]/g,"")))return e.json({success:!1,message:"رقم الجوال غير صحيح. يجب أن يبدأ بـ 05 ويتكون من 10 أرقام"},400);if(!await e.env.DB.prepare(`
+    `).bind(t).first();return a?e.json({success:!0,data:a}):e.json({success:!1,message:"الطلب غير موجود"},404)}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/subscription-requests",async e=>{try{const{company_name:t,contact_name:a,email:s,phone:r,package_id:l,notes:n}=await e.req.json();if(!t||!a||!s||!r||!l)return e.json({success:!1,message:"جميع الحقول مطلوبة"},400);if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s))return e.json({success:!1,message:"البريد الإلكتروني غير صحيح"},400);if(!/^(05|5)[0-9]{8}$/.test(r.replace(/[\s-]/g,"")))return e.json({success:!1,message:"رقم الجوال غير صحيح. يجب أن يبدأ بـ 05 ويتكون من 10 أرقام"},400);if(!await e.env.DB.prepare(`
       SELECT id FROM packages WHERE id = ? AND is_active = 1
-    `).bind(l).first())return e.json({success:!1,message:"الباقة غير موجودة أو غير متاحة"},400);const d=await e.env.DB.prepare(`
+    `).bind(l).first())return e.json({success:!1,message:"الباقة غير موجودة أو غير متاحة"},400);const p=await e.env.DB.prepare(`
       INSERT INTO subscription_requests 
       (company_name, contact_name, email, phone, package_id, status, notes)
       VALUES (?, ?, ?, ?, ?, 'pending', ?)
-    `).bind(t,a,s,r,l,n||null).run();return e.json({success:!0,message:"تم إرسال طلبك بنجاح. سنتواصل معك قريباً",requestId:d.meta.last_row_id})}catch(t){return console.error("Subscription request error:",t),e.json({success:!1,message:"حدث خطأ. الرجاء المحاولة مرة أخرى."},500)}});p.put("/api/subscription-requests/:id",async e=>{try{const t=e.req.param("id"),{status:a,notes:s}=await e.req.json();return await e.env.DB.prepare(`
+    `).bind(t,a,s,r,l,n||null).run();return e.json({success:!0,message:"تم إرسال طلبك بنجاح. سنتواصل معك قريباً",requestId:p.meta.last_row_id})}catch(t){return console.error("Subscription request error:",t),e.json({success:!1,message:"حدث خطأ. الرجاء المحاولة مرة أخرى."},500)}});c.put("/api/subscription-requests/:id",async e=>{try{const t=e.req.param("id"),{status:a,notes:s}=await e.req.json();return await e.env.DB.prepare(`
       UPDATE subscription_requests 
       SET status = ?, notes = ?
       WHERE id = ?
-    `).bind(a,s||null,t).run(),e.json({success:!0,message:"تم تحديث الطلب بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/subscription-requests/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare(`
+    `).bind(a,s||null,t).run(),e.json({success:!0,message:"تم تحديث الطلب بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.delete("/api/subscription-requests/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare(`
       DELETE FROM subscription_requests WHERE id = ?
-    `).bind(t).run(),e.json({success:!0,message:"تم حذف الطلب بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/users",async e=>{try{const t=e.req.header("Authorization"),a=t==null?void 0:t.replace("Bearer ","");let s=null;if(a){const i=atob(a).split(":");s=i[1]!=="null"?parseInt(i[1]):null}let r=`
+    `).bind(t).run(),e.json({success:!0,message:"تم حذف الطلب بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/api/users",async e=>{try{const a=e.req.header("Authorization")?.replace("Bearer ","");let s=null;if(a){const o=atob(a).split(":");s=o[1]!=="null"?parseInt(o[1]):null}let r=`
       SELECT u.*, r.role_name, r.description as role_description,
              COUNT(DISTINCT rp.permission_id) as permissions_count
       FROM users u
       LEFT JOIN roles r ON u.role_id = r.id
       LEFT JOIN role_permissions rp ON r.id = rp.role_id`;s&&(r+=` WHERE u.tenant_id = ${s}`),r+=`
       GROUP BY u.id
-      ORDER BY u.id DESC`;const{results:l}=await e.env.DB.prepare(r).all();return e.json({success:!0,data:l})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/users",async e=>{try{const t=await e.req.formData(),a=t.get("username"),s=t.get("password"),r=t.get("full_name"),l=t.get("email"),n=t.get("phone"),i=t.get("user_type"),o=t.get("role_id"),c=t.get("subscription_id")||null,d=t.get("is_active")||"1",m=e.req.header("Authorization"),g=m==null?void 0:m.replace("Bearer ","");let b=null;if(g){const _=atob(g).split(":");b=_[1]!=="null"?parseInt(_[1]):null}if(await e.env.DB.prepare(`
+      ORDER BY u.id DESC`;const{results:l}=await e.env.DB.prepare(r).all();return e.json({success:!0,data:l})}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/users",async e=>{try{const t=await e.req.formData(),a=t.get("username"),s=t.get("password"),r=t.get("full_name"),l=t.get("email"),n=t.get("phone"),o=t.get("user_type"),i=t.get("role_id"),d=t.get("subscription_id")||null,p=t.get("is_active")||"1",m=e.req.header("Authorization")?.replace("Bearer ","");let g=null;if(m){const h=atob(m).split(":");g=h[1]!=="null"?parseInt(h[1]):null}if(await e.env.DB.prepare(`
       SELECT id FROM users WHERE username = ?
     `).bind(a).first())return e.json({success:!1,error:"اسم المستخدم موجود مسبقاً! الرجاء اختيار اسم مستخدم آخر."},400);if(l&&await e.env.DB.prepare(`
         SELECT id FROM users WHERE email = ?
-      `).bind(l).first())return e.json({success:!1,error:"البريد الإلكتروني موجود مسبقاً! الرجاء استخدام بريد إلكتروني آخر."},400);const w=await e.env.DB.prepare(`
+      `).bind(l).first())return e.json({success:!1,error:"البريد الإلكتروني موجود مسبقاً! الرجاء استخدام بريد إلكتروني آخر."},400);const b=await e.env.DB.prepare(`
       INSERT INTO users (username, password, full_name, email, phone, user_type, role_id, subscription_id, is_active, tenant_id)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(a,s,r,l,n,i,o,c,d,b).run();return e.json({success:!0,message:"تم إضافة المستخدم بنجاح",userId:w.meta.last_row_id})}catch(t){return console.error("Error adding user:",t),e.json({success:!1,error:t.message||"حدث خطأ أثناء إضافة المستخدم"},500)}});p.put("/api/users/:id",async e=>{try{const t=e.req.param("id"),{username:a,full_name:s,email:r,phone:l,role_id:n,subscription_id:i,is_active:o}=await e.req.json();return await e.env.DB.prepare(`
+    `).bind(a,s,r,l,n,o,i,d,p,g).run();return e.json({success:!0,message:"تم إضافة المستخدم بنجاح",userId:b.meta.last_row_id})}catch(t){return console.error("Error adding user:",t),e.json({success:!1,error:t.message||"حدث خطأ أثناء إضافة المستخدم"},500)}});c.put("/api/users/:id",async e=>{try{const t=e.req.param("id"),{username:a,full_name:s,email:r,phone:l,role_id:n,subscription_id:o,is_active:i}=await e.req.json();return await e.env.DB.prepare(`
       UPDATE users 
       SET username = ?, full_name = ?, email = ?, phone = ?, role_id = ?, subscription_id = ?, is_active = ?
       WHERE id = ?
-    `).bind(a,s,r,l,n,i,o,t).run(),e.json({success:!0})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/customers",async e=>{try{const t=e.req.header("Authorization"),a=t==null?void 0:t.replace("Bearer ","");let s=null;if(a){const i=atob(a).split(":");s=i[1]!=="null"?parseInt(i[1]):null}let r=`
+    `).bind(a,s,r,l,n,o,i,t).run(),e.json({success:!0})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/api/customers",async e=>{try{const a=e.req.header("Authorization")?.replace("Bearer ","");let s=null;if(a){const o=atob(a).split(":");s=o[1]!=="null"?parseInt(o[1]):null}let r=`
       SELECT 
         c.*,
         ft.type_name as financing_type_name,
@@ -9516,7 +9887,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       LEFT JOIN financing_requests f ON c.id = f.customer_id
       LEFT JOIN financing_types ft ON c.financing_type_id = ft.id`;s&&(r+=` WHERE c.tenant_id = ${s}`),r+=`
       GROUP BY c.id
-      ORDER BY c.created_at DESC`;const{results:l}=await e.env.DB.prepare(r).all();return e.json({success:!0,data:l})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/customers",async e=>{try{const t=await e.req.formData(),a=t.get("full_name"),s=t.get("phone"),r=t.get("email")||null,l=t.get("national_id")||null,n=t.get("date_of_birth")||null,i=t.get("employer_name")||null,o=t.get("job_title")||null,c=t.get("work_start_date")||null,d=t.get("city")||null,m=parseFloat(t.get("monthly_salary")||"0"),g=e.req.header("Authorization"),b=g==null?void 0:g.replace("Bearer ","");let h=null;if(b){const q=atob(b).split(":");h=q[1]!=="null"?parseInt(q[1]):null}if(l){let B="SELECT id, full_name FROM customers WHERE national_id = ?",q=[l];h&&(B+=" AND tenant_id = ?",q.push(h));const T=await e.env.DB.prepare(B).bind(...q).first();if(T)return e.html(`
+      ORDER BY c.created_at DESC`;const{results:l}=await e.env.DB.prepare(r).all();return e.json({success:!0,data:l})}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/customers",async e=>{try{const t=await e.req.formData(),a=t.get("full_name"),s=t.get("phone"),r=t.get("email")||null,l=t.get("national_id")||null,n=t.get("date_of_birth")||null,o=t.get("employer_name")||null,i=t.get("job_title")||null,d=t.get("work_start_date")||null,p=t.get("city")||null,u=parseFloat(t.get("monthly_salary")||"0"),g=e.req.header("Authorization")?.replace("Bearer ","");let f=null;if(g){const v=atob(g).split(":");f=v[1]!=="null"?parseInt(v[1]):null}if(l){let w="SELECT id, full_name FROM customers WHERE national_id = ?",v=[l];f&&(w+=" AND tenant_id = ?",v.push(f));const E=await e.env.DB.prepare(w).bind(...v).first();if(E)return e.html(`
           <!DOCTYPE html>
           <html lang="ar" dir="rtl">
           <head>
@@ -9538,15 +9909,15 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                 </div>
                 <div class="bg-white rounded-lg p-4 mb-4">
                   <p class="text-gray-700"><strong>الرقم الوطني:</strong> ${l}</p>
-                  <p class="text-gray-700"><strong>مسجل باسم:</strong> ${T.full_name}</p>
-                  <p class="text-gray-700"><strong>رقم العميل:</strong> #${T.id}</p>
+                  <p class="text-gray-700"><strong>مسجل باسم:</strong> ${E.full_name}</p>
+                  <p class="text-gray-700"><strong>رقم العميل:</strong> #${E.id}</p>
                 </div>
                 <div class="flex gap-3">
                   <a href="/admin/customers/add" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition-all">
                     <i class="fas fa-arrow-right ml-2"></i>
                     العودة للنموذج
                   </a>
-                  <a href="/admin/customers/${T.id}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold transition-all">
+                  <a href="/admin/customers/${E.id}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold transition-all">
                     <i class="fas fa-eye ml-2"></i>
                     عرض العميل الموجود
                   </a>
@@ -9559,7 +9930,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             </div>
           </body>
           </html>
-        `)}let w="SELECT id, full_name FROM customers WHERE phone = ?",y=[s];h&&(w+=" AND tenant_id = ?",y.push(h));const _=await e.env.DB.prepare(w).bind(...y).first();if(_)return e.html(`
+        `)}let b="SELECT id, full_name FROM customers WHERE phone = ?",x=[s];f&&(b+=" AND tenant_id = ?",x.push(f));const h=await e.env.DB.prepare(b).bind(...x).first();if(h)return e.html(`
         <!DOCTYPE html>
         <html lang="ar" dir="rtl">
         <head>
@@ -9581,15 +9952,15 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
               </div>
               <div class="bg-white rounded-lg p-4 mb-4">
                 <p class="text-gray-700"><strong>رقم الهاتف:</strong> ${s}</p>
-                <p class="text-gray-700"><strong>مسجل باسم:</strong> ${_.full_name}</p>
-                <p class="text-gray-700"><strong>رقم العميل:</strong> #${_.id}</p>
+                <p class="text-gray-700"><strong>مسجل باسم:</strong> ${h.full_name}</p>
+                <p class="text-gray-700"><strong>رقم العميل:</strong> #${h.id}</p>
               </div>
               <div class="flex gap-3">
                 <a href="/admin/customers/add" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition-all">
                   <i class="fas fa-arrow-right ml-2"></i>
                   العودة للنموذج
                 </a>
-                <a href="/admin/customers/${_.id}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold transition-all">
+                <a href="/admin/customers/${h.id}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold transition-all">
                   <i class="fas fa-eye ml-2"></i>
                   عرض العميل الموجود
                 </a>
@@ -9598,10 +9969,10 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
           </div>
         </body>
         </html>
-      `);const $=await e.env.DB.prepare(`
+      `);const _=await e.env.DB.prepare(`
       INSERT INTO customers (full_name, phone, email, national_id, birthdate, employer_name, job_title, work_start_date, city, monthly_salary, tenant_id)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(a,s,r,l,n,i,o,c,d,m,h).run();return e.redirect("/admin/customers")}catch(t){return e.html(`
+    `).bind(a,s,r,l,n,o,i,d,p,u,f).run();return e.redirect("/admin/customers")}catch(t){return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -9632,12 +10003,12 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `)}});p.post("/api/customers/:id",async e=>{try{const t=e.req.param("id"),a=await e.req.formData(),s=a.get("full_name"),r=a.get("phone"),l=a.get("email")||null,n=a.get("national_id")||null,i=a.get("date_of_birth")||null,o=a.get("employer_name")||null,c=a.get("job_title")||null,d=a.get("work_start_date")||null,m=a.get("city")||null,g=parseFloat(a.get("monthly_salary")||"0");return await e.env.DB.prepare(`
+    `)}});c.post("/api/customers/:id",async e=>{try{const t=e.req.param("id"),a=await e.req.formData(),s=a.get("full_name"),r=a.get("phone"),l=a.get("email")||null,n=a.get("national_id")||null,o=a.get("date_of_birth")||null,i=a.get("employer_name")||null,d=a.get("job_title")||null,p=a.get("work_start_date")||null,u=a.get("city")||null,m=parseFloat(a.get("monthly_salary")||"0");return await e.env.DB.prepare(`
       UPDATE customers 
       SET full_name = ?, phone = ?, email = ?, national_id = ?, birthdate = ?,
           employer_name = ?, job_title = ?, work_start_date = ?, city = ?, monthly_salary = ?
       WHERE id = ?
-    `).bind(s,r,l,n,i,o,c,d,m,g,t).run(),e.redirect("/admin/customers")}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/financing-requests",async e=>{try{const t=e.req.header("Authorization"),a=t==null?void 0:t.replace("Bearer ","");let s=null;if(a){const i=atob(a).split(":");s=i[1]!=="null"?parseInt(i[1]):null}let r=`
+    `).bind(s,r,l,n,o,i,d,p,u,m,t).run(),e.redirect("/admin/customers")}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/api/financing-requests",async e=>{try{const a=e.req.header("Authorization")?.replace("Bearer ","");let s=null;if(a){const o=atob(a).split(":");s=o[1]!=="null"?parseInt(o[1]):null}let r=`
       SELECT 
         f.*,
         c.full_name as customer_name,
@@ -9654,13 +10025,13 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       LEFT JOIN banks b ON f.selected_bank_id = b.id
       LEFT JOIN financing_types ft ON f.financing_type_id = ft.id
       LEFT JOIN customer_assignments ca ON c.id = ca.customer_id
-      LEFT JOIN users u ON ca.employee_id = u.id`;s&&(r+=` WHERE f.tenant_id = ${s}`),r+=" ORDER BY f.created_at DESC";const{results:l}=await e.env.DB.prepare(r).all();return e.json({success:!0,data:l})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/requests",async e=>{try{const t=await e.req.formData(),a=t.get("customer_id"),s=t.get("financing_type_id"),r=t.get("requested_amount"),l=t.get("duration_months"),n=t.get("salary_at_request"),i=t.get("selected_bank_id")||null,o=t.get("status")||"pending",c=t.get("notes")||"",d=e.req.header("Authorization"),m=d==null?void 0:d.replace("Bearer ","");let g=null;if(m){const w=atob(m).split(":");g=w[1]!=="null"?parseInt(w[1]):null}const b=await e.env.DB.prepare(`
+      LEFT JOIN users u ON ca.employee_id = u.id`;s&&(r+=` WHERE f.tenant_id = ${s}`),r+=" ORDER BY f.created_at DESC";const{results:l}=await e.env.DB.prepare(r).all();return e.json({success:!0,data:l})}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/requests",async e=>{try{const t=await e.req.formData(),a=t.get("customer_id"),s=t.get("financing_type_id"),r=t.get("requested_amount"),l=t.get("duration_months"),n=t.get("salary_at_request"),o=t.get("selected_bank_id")||null,i=t.get("status")||"pending",d=t.get("notes")||"",u=e.req.header("Authorization")?.replace("Bearer ","");let m=null;if(u){const b=atob(u).split(":");m=b[1]!=="null"?parseInt(b[1]):null}const g=await e.env.DB.prepare(`
       INSERT INTO financing_requests (
         customer_id, financing_type_id, selected_bank_id, 
         requested_amount, salary_at_request, duration_months, 
         status, notes, tenant_id
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(a,s,i,r,n,l,o,c,g).run();return e.redirect("/admin/requests")}catch(t){return console.error("Error creating request:",t),e.json({success:!1,error:t.message,message:"حدث خطأ أثناء حفظ الطلب"},500)}});p.get("/api/payments",async e=>{try{const t=e.req.header("Authorization"),a=t==null?void 0:t.replace("Bearer ","");let s=null;if(a)try{const i=atob(a),[o,c]=i.split(":");s=c==="null"?null:parseInt(c)}catch{}let r=`
+    `).bind(a,s,o,r,n,l,i,d,m).run();return e.redirect("/admin/requests")}catch(t){return console.error("Error creating request:",t),e.json({success:!1,error:t.message,message:"حدث خطأ أثناء حفظ الطلب"},500)}});c.get("/api/payments",async e=>{try{const a=e.req.header("Authorization")?.replace("Bearer ","");let s=null;if(a)try{const o=atob(a),[i,d]=o.split(":");s=d==="null"?null:parseInt(d)}catch{}let r=`
       SELECT 
         p.*,
         c.full_name as customer_name,
@@ -9668,12 +10039,12 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       FROM payments p
       LEFT JOIN customers c ON p.customer_id = c.id
       LEFT JOIN users u ON p.employee_id = u.id
-    `;const l=[];s&&(r+=" WHERE p.tenant_id = ?",l.push(s)),r+=" ORDER BY p.created_at DESC";const{results:n}=await e.env.DB.prepare(r).bind(...l).all();return e.json({success:!0,data:n})}catch(t){return console.error("Payments API error:",t),e.json({success:!1,error:t.message},500)}});p.post("/api/payments",async e=>{try{const t=e.req.header("Authorization"),a=t==null?void 0:t.replace("Bearer ","");if(!a)return e.json({success:!1,error:"غير مصرح"},401);const s=atob(a),[r,l]=s.split(":"),n=l==="null"?null:parseInt(l),i=parseInt(r);if(!n)return e.json({success:!1,error:"يجب أن تكون مرتبطاً بشركة"},403);const o=await e.req.json();return!o.financing_request_id||!o.customer_id||!o.amount||!o.payment_date?e.json({success:!1,error:"البيانات المطلوبة ناقصة"},400):(await e.env.DB.prepare(`
+    `;const l=[];s&&(r+=" WHERE p.tenant_id = ?",l.push(s)),r+=" ORDER BY p.created_at DESC";const{results:n}=await e.env.DB.prepare(r).bind(...l).all();return e.json({success:!0,data:n})}catch(t){return console.error("Payments API error:",t),e.json({success:!1,error:t.message},500)}});c.post("/api/payments",async e=>{try{const a=e.req.header("Authorization")?.replace("Bearer ","");if(!a)return e.json({success:!1,error:"غير مصرح"},401);const s=atob(a),[r,l]=s.split(":"),n=l==="null"?null:parseInt(l),o=parseInt(r);if(!n)return e.json({success:!1,error:"يجب أن تكون مرتبطاً بشركة"},403);const i=await e.req.json();return!i.financing_request_id||!i.customer_id||!i.amount||!i.payment_date?e.json({success:!1,error:"البيانات المطلوبة ناقصة"},400):(await e.env.DB.prepare(`
       INSERT INTO payments (
         financing_request_id, customer_id, tenant_id, employee_id,
         amount, payment_date, payment_method, receipt_number, notes, created_by
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(o.financing_request_id,o.customer_id,n,o.employee_id||null,o.amount,o.payment_date,o.payment_method||"cash",o.receipt_number||null,o.notes||null,i).run(),e.json({success:!0,message:"تم حفظ سند القبض بنجاح"}))}catch(t){return console.error("Error creating payment:",t),e.json({success:!1,error:t.message},500)}});p.delete("/api/payments/:id",async e=>{try{const t=e.req.header("Authorization"),a=t==null?void 0:t.replace("Bearer ","");if(!a)return e.json({success:!1,error:"غير مصرح"},401);const s=atob(a),[r,l]=s.split(":"),n=l==="null"?null:parseInt(l),i=e.req.param("id");if(n){const o=await e.env.DB.prepare("SELECT tenant_id FROM payments WHERE id = ?").bind(i).first();if(o&&o.tenant_id!==n)return e.json({success:!1,error:"غير مصرح بحذف هذا السند"},403)}return await e.env.DB.prepare("DELETE FROM payments WHERE id = ?").bind(i).run(),e.json({success:!0,message:"تم حذف السند بنجاح"})}catch(t){return console.error("Error deleting payment:",t),e.json({success:!1,error:t.message},500)}});p.post("/api/c/:tenant/calculator/submit-request",async e=>{try{const t=e.req.param("tenant"),a=await e.req.json(),s=await e.env.DB.prepare(`
+    `).bind(i.financing_request_id,i.customer_id,n,i.employee_id||null,i.amount,i.payment_date,i.payment_method||"cash",i.receipt_number||null,i.notes||null,o).run(),e.json({success:!0,message:"تم حفظ سند القبض بنجاح"}))}catch(t){return console.error("Error creating payment:",t),e.json({success:!1,error:t.message},500)}});c.delete("/api/payments/:id",async e=>{try{const a=e.req.header("Authorization")?.replace("Bearer ","");if(!a)return e.json({success:!1,error:"غير مصرح"},401);const s=atob(a),[r,l]=s.split(":"),n=l==="null"?null:parseInt(l),o=e.req.param("id");if(n){const i=await e.env.DB.prepare("SELECT tenant_id FROM payments WHERE id = ?").bind(o).first();if(i&&i.tenant_id!==n)return e.json({success:!1,error:"غير مصرح بحذف هذا السند"},403)}return await e.env.DB.prepare("DELETE FROM payments WHERE id = ?").bind(o).run(),e.json({success:!0,message:"تم حذف السند بنجاح"})}catch(t){return console.error("Error deleting payment:",t),e.json({success:!1,error:t.message},500)}});c.post("/api/c/:tenant/calculator/submit-request",async e=>{try{const t=e.req.param("tenant"),a=await e.req.json(),s=await e.env.DB.prepare(`
       SELECT id FROM tenants WHERE slug = ? AND status = 'active'
     `).bind(t).first();if(!s)return e.json({success:!1,error:"شركة غير موجودة"},404);const r=s.id;let l=await e.env.DB.prepare(`
       SELECT id FROM customers WHERE (national_id = ? OR phone = ?) AND tenant_id = ?
@@ -9692,9 +10063,9 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             job_title, work_start_date, city, tenant_id,
             financing_amount, monthly_obligations, financing_type_id
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(a.full_name||"",a.phone||"",a.email||null,a.national_id||"",a.birthdate||null,a.monthly_salary||0,a.employer||"",a.job_title||"",a.work_start_date||null,a.city||"",r,a.requested_amount||0,a.monthly_obligations||0,a.financing_type_id||null).run()).meta.last_row_id}catch(c){if(c.message&&c.message.includes("UNIQUE")){const d=await e.env.DB.prepare(`
+        `).bind(a.full_name||"",a.phone||"",a.email||null,a.national_id||"",a.birthdate||null,a.monthly_salary||0,a.employer||"",a.job_title||"",a.work_start_date||null,a.city||"",r,a.requested_amount||0,a.monthly_obligations||0,a.financing_type_id||null).run()).meta.last_row_id}catch(d){if(d.message&&d.message.includes("UNIQUE")){const p=await e.env.DB.prepare(`
             SELECT id FROM customers WHERE (national_id = ? OR phone = ?)
-          `).bind(a.national_id||"",a.phone||"").first();if(d)n=d.id,await e.env.DB.prepare(`
+          `).bind(a.national_id||"",a.phone||"").first();if(p)n=p.id,await e.env.DB.prepare(`
               UPDATE customers 
               SET full_name = ?, phone = ?, email = ?, 
                   birthdate = ?, monthly_salary = ?,
@@ -9702,14 +10073,14 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                   work_start_date = ?, city = ?, tenant_id = ?,
                   financing_amount = ?, monthly_obligations = ?, financing_type_id = ?
               WHERE id = ?
-            `).bind(a.full_name||"",a.phone||"",a.email||null,a.birthdate||null,a.monthly_salary||0,a.employer||"",a.job_title||"",a.work_start_date||null,a.city||"",r,a.requested_amount||0,a.monthly_obligations||0,a.financing_type_id||null,n).run();else throw c}else throw c}const o=(await e.env.DB.prepare(`
+            `).bind(a.full_name||"",a.phone||"",a.email||null,a.birthdate||null,a.monthly_salary||0,a.employer||"",a.job_title||"",a.work_start_date||null,a.city||"",r,a.requested_amount||0,a.monthly_obligations||0,a.financing_type_id||null,n).run();else throw d}else throw d}const i=(await e.env.DB.prepare(`
       INSERT INTO financing_requests (
         customer_id, financing_type_id, selected_bank_id,
         requested_amount, salary_at_request, duration_months,
         monthly_obligations, monthly_payment,
         status, notes, tenant_id
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
-    `).bind(n,a.financing_type_id||null,a.bank_id||a.selected_bank_id||null,a.requested_amount||0,a.monthly_salary||0,a.duration||a.duration_months||0,a.monthly_obligations||0,a.monthly_payment||0,a.notes||null,r).run()).meta.last_row_id;return e.json({success:!0,request_id:o,message:"تم إرسال طلبك بنجاح"})}catch(t){return console.error("Calculator submit error:",t),console.error("Error details:",{message:t.message,stack:t.stack,data:t}),e.json({success:!1,error:"حدث خطأ أثناء إرسال الطلب. الرجاء المحاولة مرة أخرى.",details:t.message},500)}});p.post("/api/calculator/save-customer",async e=>{try{const t=await e.req.json(),a=t.tenant_slug||null;let s=null;if(a){const n=await e.env.DB.prepare(`
+    `).bind(n,a.financing_type_id||null,a.bank_id||a.selected_bank_id||null,a.requested_amount||0,a.monthly_salary||0,a.duration||a.duration_months||0,a.monthly_obligations||0,a.monthly_payment||0,a.notes||null,r).run()).meta.last_row_id;return e.json({success:!0,request_id:i,message:"تم إرسال طلبك بنجاح"})}catch(t){return console.error("Calculator submit error:",t),console.error("Error details:",{message:t.message,stack:t.stack,data:t}),e.json({success:!1,error:"حدث خطأ أثناء إرسال الطلب. الرجاء المحاولة مرة أخرى.",details:t.message},500)}});c.post("/api/calculator/save-customer",async e=>{try{const t=await e.req.json(),a=t.tenant_slug||null;let s=null;if(a){const n=await e.env.DB.prepare(`
         SELECT id FROM tenants WHERE slug = ? AND status = 'active'
       `).bind(a).first();n&&(s=n.id)}let r=await e.env.DB.prepare(`
       SELECT id FROM customers WHERE phone = ?
@@ -9737,7 +10108,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
           monthly_payment, total_payment, calculation_date,
           national_id, tenant_id
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)
-      `).bind(t.name,t.phone,t.birthdate,t.salary,t.amount,t.obligations||0,t.financing_type_id,t.duration_months||null,t.best_bank_id||null,t.best_rate||null,t.monthly_payment||null,t.total_payment||null,n,s).run()).meta.last_row_id}return e.json({success:!0,customer_id:l,message:"تم حفظ بيانات العميل بنجاح"})}catch(t){return console.error("Save customer error:",t),e.json({success:!1,error:t.message},500)}});p.post("/api/calculator/submit-request",async e=>{try{const t=await e.req.json();let a=await e.env.DB.prepare(`
+      `).bind(t.name,t.phone,t.birthdate,t.salary,t.amount,t.obligations||0,t.financing_type_id,t.duration_months||null,t.best_bank_id||null,t.best_rate||null,t.monthly_payment||null,t.total_payment||null,n,s).run()).meta.last_row_id}return e.json({success:!0,customer_id:l,message:"تم حفظ بيانات العميل بنجاح"})}catch(t){return console.error("Save customer error:",t),e.json({success:!1,error:t.message},500)}});c.post("/api/calculator/submit-request",async e=>{try{const t=await e.req.json();let a=await e.env.DB.prepare(`
       SELECT id FROM customers WHERE national_id = ? OR phone = ?
     `).bind(t.national_id,t.phone).first(),s;if(a)s=a.id,await e.env.DB.prepare(`
         UPDATE customers 
@@ -9752,9 +10123,9 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             birthdate, monthly_salary, employer_name, 
             job_title, work_start_date, city
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(t.full_name,t.phone,t.email||null,t.national_id,t.birthdate,t.monthly_salary,t.employer,t.job_title,t.work_start_date,t.city).run()).meta.last_row_id}catch(n){if(n.message&&n.message.includes("UNIQUE")){const i=await e.env.DB.prepare(`
+        `).bind(t.full_name,t.phone,t.email||null,t.national_id,t.birthdate,t.monthly_salary,t.employer,t.job_title,t.work_start_date,t.city).run()).meta.last_row_id}catch(n){if(n.message&&n.message.includes("UNIQUE")){const o=await e.env.DB.prepare(`
             SELECT id FROM customers WHERE national_id = ? OR phone = ?
-          `).bind(t.national_id,t.phone).first();if(i)s=i.id;else throw n}else throw n}const l=(await e.env.DB.prepare(`
+          `).bind(t.national_id,t.phone).first();if(o)s=o.id;else throw n}else throw n}const l=(await e.env.DB.prepare(`
       INSERT INTO financing_requests (
         customer_id, financing_type_id, selected_bank_id,
         requested_amount, salary_at_request, duration_months,
@@ -9764,11 +10135,11 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
     `).bind(s,t.financing_type_id,t.bank_id,t.requested_amount,t.monthly_salary,t.duration,t.monthly_obligations,t.monthly_payment,t.notes).run()).meta.last_row_id;return await e.env.DB.prepare(`
       INSERT INTO notifications (user_id, title, message, type, category, related_request_id)
       VALUES (?, ?, ?, ?, ?, ?)
-    `).bind(1,"طلب تمويل جديد",`تم استلام طلب تمويل جديد برقم #${l} بمبلغ ${t.requested_amount.toLocaleString("ar-SA")} ريال من ${t.full_name}`,"info","request",l).run(),e.json({success:!0,request_id:l,customer_id:s,message:"تم إرسال طلبك بنجاح"})}catch(t){return console.error("Calculator submit error:",t),e.json({success:!1,error:t.message,message:"حدث خطأ أثناء إرسال الطلب. الرجاء المحاولة مرة أخرى."},500)}});p.put("/api/financing-requests/:id",async e=>{try{const t=e.req.param("id"),a=e.req.header("Authorization");let s=null;if(a&&a.startsWith("Bearer ")){const $=a.substring(7).split(".");$.length===3&&(s=JSON.parse(atob($[1])).tenant_id||null)}const{requested_amount:r,duration_months:l,salary_at_request:n,monthly_obligations:i,status:o,notes:c,id_attachment_url:d,bank_statement_attachment_url:m,salary_attachment_url:g,additional_attachment_url:b}=await e.req.json();let h=["requested_amount = ?","duration_months = ?","salary_at_request = ?","monthly_obligations = ?","status = ?","notes = ?"];const w=[r,l,n||0,i||0,o||"pending",c||""];d&&(h.push("id_attachment_url = ?"),w.push(d)),m&&(h.push("bank_statement_attachment_url = ?"),w.push(m)),g&&(h.push("salary_attachment_url = ?"),w.push(g)),b&&(h.push("additional_attachment_url = ?"),w.push(b)),w.push(t);let y=`
+    `).bind(1,"طلب تمويل جديد",`تم استلام طلب تمويل جديد برقم #${l} بمبلغ ${t.requested_amount.toLocaleString("ar-SA")} ريال من ${t.full_name}`,"info","request",l).run(),e.json({success:!0,request_id:l,customer_id:s,message:"تم إرسال طلبك بنجاح"})}catch(t){return console.error("Calculator submit error:",t),e.json({success:!1,error:t.message,message:"حدث خطأ أثناء إرسال الطلب. الرجاء المحاولة مرة أخرى."},500)}});c.put("/api/financing-requests/:id",async e=>{try{const t=e.req.param("id"),a=e.req.header("Authorization");let s=null;if(a&&a.startsWith("Bearer ")){const _=a.substring(7).split(".");_.length===3&&(s=JSON.parse(atob(_[1])).tenant_id||null)}const{requested_amount:r,duration_months:l,salary_at_request:n,monthly_obligations:o,status:i,notes:d,id_attachment_url:p,bank_statement_attachment_url:u,salary_attachment_url:m,additional_attachment_url:g}=await e.req.json();let f=["requested_amount = ?","duration_months = ?","salary_at_request = ?","monthly_obligations = ?","status = ?","notes = ?"];const b=[r,l,n||0,o||0,i||"pending",d||""];p&&(f.push("id_attachment_url = ?"),b.push(p)),u&&(f.push("bank_statement_attachment_url = ?"),b.push(u)),m&&(f.push("salary_attachment_url = ?"),b.push(m)),g&&(f.push("additional_attachment_url = ?"),b.push(g)),b.push(t);let x=`
       UPDATE financing_requests 
-      SET ${h.join(", ")}
+      SET ${f.join(", ")}
       WHERE id = ?
-    `;return s!==null&&(y+=" AND tenant_id = ?",w.push(s)),await e.env.DB.prepare(y).bind(...w).run(),e.json({success:!0})}catch(t){return console.error("Update financing request error:",t),e.json({success:!1,error:t.message},500)}});p.put("/api/financing-requests/:id/status",async e=>{try{const t=e.req.param("id"),{status:a,notes:s}=await e.req.json(),r=await e.env.DB.prepare(`
+    `;return s!==null&&(x+=" AND tenant_id = ?",b.push(s)),await e.env.DB.prepare(x).bind(...b).run(),e.json({success:!0})}catch(t){return console.error("Update financing request error:",t),e.json({success:!1,error:t.message},500)}});c.put("/api/financing-requests/:id/status",async e=>{try{const t=e.req.param("id"),{status:a,notes:s}=await e.req.json(),r=await e.env.DB.prepare(`
       SELECT status FROM financing_requests WHERE id = ?
     `).bind(t).first(),n={pending:"pending_at",under_review:"under_review_at",processing:"processing_at",approved:"approved_at",rejected:"rejected_at"}[a];n?await e.env.DB.prepare(`
         UPDATE financing_requests 
@@ -9779,20 +10150,20 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       `).bind(a,s,t).run(),r&&r.status!==a&&await e.env.DB.prepare(`
         INSERT INTO financing_request_status_history (request_id, old_status, new_status, changed_by, notes)
         VALUES (?, ?, ?, 'admin', ?)
-      `).bind(t,r.status,a,s||"").run();const i=await e.env.DB.prepare(`
+      `).bind(t,r.status,a,s||"").run();const o=await e.env.DB.prepare(`
       SELECT requested_amount FROM financing_requests WHERE id = ?
-    `).bind(t).first(),o={pending:"قيد الانتظار",under_review:"قيد المراجعة",approved:"موافق عليه",rejected:"مرفوض"},c={pending:"info",under_review:"warning",approved:"success",rejected:"error"};return await e.env.DB.prepare(`
+    `).bind(t).first(),i={pending:"قيد الانتظار",under_review:"قيد المراجعة",approved:"موافق عليه",rejected:"مرفوض"},d={pending:"info",under_review:"warning",approved:"success",rejected:"error"};return await e.env.DB.prepare(`
       INSERT INTO notifications (user_id, title, message, type, category, related_request_id)
       VALUES (?, ?, ?, ?, ?, ?)
-    `).bind(1,"تحديث حالة الطلب",`تم تحديث حالة الطلب #${t} إلى: ${o[a]||a}`,c[a]||"info","status_change",t).run(),e.json({success:!0})}catch(t){return console.error("Update status error:",t),e.json({success:!1,error:t.message},500)}});p.post("/api/attachments/upload",async e=>{try{const t=await e.req.formData(),a=t.get("file"),s=t.get("request_id"),r=t.get("attachmentType")||t.get("attachment_type");if(!a)return e.json({success:!1,error:"No file provided"},400);const l=Date.now(),n=Math.random().toString(36).substring(7),i=a.name.split(".").pop(),o=s?`${s}/${r}_${l}.${i}`:`temp/${r}_${l}_${n}.${i}`,c=await a.arrayBuffer();await e.env.ATTACHMENTS.put(o,c,{httpMetadata:{contentType:a.type}});const d=`/api/attachments/view/${o}`;if(s){const m=`${r}_attachment_url`;console.log("📎 Updating attachment:",{requestId:s,attachmentType:r,columnName:m,publicUrl:d});const g=await e.env.DB.prepare(`
+    `).bind(1,"تحديث حالة الطلب",`تم تحديث حالة الطلب #${t} إلى: ${i[a]||a}`,d[a]||"info","status_change",t).run(),e.json({success:!0})}catch(t){return console.error("Update status error:",t),e.json({success:!1,error:t.message},500)}});c.post("/api/attachments/upload",async e=>{try{const t=await e.req.formData(),a=t.get("file"),s=t.get("request_id"),r=t.get("attachmentType")||t.get("attachment_type");if(!a)return e.json({success:!1,error:"No file provided"},400);const l=Date.now(),n=Math.random().toString(36).substring(7),o=a.name.split(".").pop(),i=s?`${s}/${r}_${l}.${o}`:`temp/${r}_${l}_${n}.${o}`,d=await a.arrayBuffer();await e.env.ATTACHMENTS.put(i,d,{httpMetadata:{contentType:a.type}});const p=`/api/attachments/view/${i}`;if(s){const u=`${r}_attachment_url`;console.log("📎 Updating attachment:",{requestId:s,attachmentType:r,columnName:u,publicUrl:p});const m=await e.env.DB.prepare(`
         UPDATE financing_requests 
-        SET ${m} = ? 
+        SET ${u} = ? 
         WHERE id = ?
-      `).bind(d,s).run();console.log("✅ Update result:",g)}return e.json({success:!0,url:d,filename:o})}catch(t){return console.error("Upload error:",t),e.json({success:!1,error:t.message},500)}});p.get("/api/attachments/view/:path{.+}",async e=>{try{const t=e.req.param("path"),a=await e.env.ATTACHMENTS.get(t);if(!a)return e.notFound();const s=new Headers;return a.writeHttpMetadata(s),s.set("etag",a.httpEtag),new Response(a.body,{headers:s})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/attachments/delete/:path{.+}",async e=>{try{const t=e.req.param("path");await e.env.ATTACHMENTS.delete(t);const a=t.split("/");if(a.length===2){const s=a[0],r=a[1];let l=null;r.startsWith("id_")?l="id_attachment_url":r.startsWith("salary_")?l="salary_attachment_url":r.startsWith("bank_statement_")?l="bank_statement_attachment_url":r.startsWith("additional_")&&(l="additional_attachment_url"),l&&await e.env.DB.prepare(`
+      `).bind(p,s).run();console.log("✅ Update result:",m)}return e.json({success:!0,url:p,filename:i})}catch(t){return console.error("Upload error:",t),e.json({success:!1,error:t.message},500)}});c.get("/api/attachments/view/:path{.+}",async e=>{try{const t=e.req.param("path"),a=await e.env.ATTACHMENTS.get(t);if(!a)return e.notFound();const s=new Headers;return a.writeHttpMetadata(s),s.set("etag",a.httpEtag),new Response(a.body,{headers:s})}catch(t){return e.json({success:!1,error:t.message},500)}});c.delete("/api/attachments/delete/:path{.+}",async e=>{try{const t=e.req.param("path");await e.env.ATTACHMENTS.delete(t);const a=t.split("/");if(a.length===2){const s=a[0],r=a[1];let l=null;r.startsWith("id_")?l="id_attachment_url":r.startsWith("salary_")?l="salary_attachment_url":r.startsWith("bank_statement_")?l="bank_statement_attachment_url":r.startsWith("additional_")&&(l="additional_attachment_url"),l&&await e.env.DB.prepare(`
           UPDATE financing_requests 
           SET ${l} = NULL 
           WHERE id = ?
-        `).bind(s).run()}return e.json({success:!0})}catch(t){return console.error("Delete error:",t),e.json({success:!1,error:t.message},500)}});p.get("/api/notifications",async e=>{try{const t=e.req.header("Authorization"),a=t==null?void 0:t.replace("Bearer ","");let s=null,r=1;if(a){const o=atob(a).split(":");r=parseInt(o[0]),s=o[1]!=="null"?parseInt(o[1]):null}let l=`
+        `).bind(s).run()}return e.json({success:!0})}catch(t){return console.error("Delete error:",t),e.json({success:!1,error:t.message},500)}});c.get("/api/notifications",async e=>{try{const a=e.req.header("Authorization")?.replace("Bearer ","");let s=null,r=1;if(a){const i=atob(a).split(":");r=parseInt(i[0]),s=i[1]!=="null"?parseInt(i[1]):null}let l=`
       SELECT 
         n.*,
         fr.requested_amount,
@@ -9801,21 +10172,21 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       LEFT JOIN financing_requests fr ON n.related_request_id = fr.id
       WHERE n.user_id = ?`;s&&(l+=` AND n.tenant_id = ${s}`),l+=`
       ORDER BY n.created_at DESC
-      LIMIT 50`;const{results:n}=await e.env.DB.prepare(l).bind(r).all();return e.json({success:!0,data:n})}catch(t){return console.error("Error fetching notifications:",t),e.json({success:!1,error:t.message},500)}});p.get("/api/notifications/unread-count",async e=>{try{const t=e.req.header("Authorization"),a=t==null?void 0:t.replace("Bearer ","");let s=null,r=1;if(a){const o=atob(a).split(":");r=parseInt(o[0]),s=o[1]!=="null"?parseInt(o[1]):null}let l="SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND is_read = 0";s&&(l+=` AND tenant_id = ${s}`);const n=await e.env.DB.prepare(l).bind(r).first();return e.json({success:!0,count:(n==null?void 0:n.count)||0})}catch(t){return console.error("Error fetching unread count:",t),e.json({success:!1,error:t.message},500)}});p.put("/api/notifications/:id/read",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare(`
+      LIMIT 50`;const{results:n}=await e.env.DB.prepare(l).bind(r).all();return e.json({success:!0,data:n})}catch(t){return console.error("Error fetching notifications:",t),e.json({success:!1,error:t.message},500)}});c.get("/api/notifications/unread-count",async e=>{try{const a=e.req.header("Authorization")?.replace("Bearer ","");let s=null,r=1;if(a){const i=atob(a).split(":");r=parseInt(i[0]),s=i[1]!=="null"?parseInt(i[1]):null}let l="SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND is_read = 0";s&&(l+=` AND tenant_id = ${s}`);const n=await e.env.DB.prepare(l).bind(r).first();return e.json({success:!0,count:n?.count||0})}catch(t){return console.error("Error fetching unread count:",t),e.json({success:!1,error:t.message},500)}});c.put("/api/notifications/:id/read",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare(`
       UPDATE notifications
       SET is_read = 1, read_at = CURRENT_TIMESTAMP
       WHERE id = ? AND user_id = ?
-    `).bind(t,1).run(),e.json({success:!0})}catch(t){return console.error("Error marking notification as read:",t),e.json({success:!1,error:t.message},500)}});p.put("/api/notifications/read-all",async e=>{try{return await e.env.DB.prepare(`
+    `).bind(t,1).run(),e.json({success:!0})}catch(t){return console.error("Error marking notification as read:",t),e.json({success:!1,error:t.message},500)}});c.put("/api/notifications/read-all",async e=>{try{return await e.env.DB.prepare(`
       UPDATE notifications
       SET is_read = 1, read_at = CURRENT_TIMESTAMP
       WHERE user_id = ? AND is_read = 0
-    `).bind(1).run(),e.json({success:!0})}catch(t){return console.error("Error marking all as read:",t),e.json({success:!1,error:t.message},500)}});p.delete("/api/notifications/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare(`
+    `).bind(1).run(),e.json({success:!0})}catch(t){return console.error("Error marking all as read:",t),e.json({success:!1,error:t.message},500)}});c.delete("/api/notifications/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare(`
       DELETE FROM notifications
       WHERE id = ? AND user_id = ?
-    `).bind(t,1).run(),e.json({success:!0})}catch(t){return console.error("Error deleting notification:",t),e.json({success:!1,error:t.message},500)}});p.post("/api/notifications",async e=>{try{const{user_id:t,title:a,message:s,type:r,category:l,related_request_id:n}=await e.req.json(),i=await e.env.DB.prepare(`
+    `).bind(t,1).run(),e.json({success:!0})}catch(t){return console.error("Error deleting notification:",t),e.json({success:!1,error:t.message},500)}});c.post("/api/notifications",async e=>{try{const{user_id:t,title:a,message:s,type:r,category:l,related_request_id:n}=await e.req.json(),o=await e.env.DB.prepare(`
       INSERT INTO notifications (user_id, title, message, type, category, related_request_id)
       VALUES (?, ?, ?, ?, ?, ?)
-    `).bind(t||1,a,s,r||"info",l||"general",n||null).run();return e.json({success:!0,id:i.meta.last_row_id})}catch(t){return console.error("Error creating notification:",t),e.json({success:!1,error:t.message},500)}});p.get("/api/calculations",async e=>{try{const{results:t}=await e.env.DB.prepare(`
+    `).bind(t||1,a,s,r||"info",l||"general",n||null).run();return e.json({success:!0,id:o.meta.last_row_id})}catch(t){return console.error("Error creating notification:",t),e.json({success:!1,error:t.message},500)}});c.get("/api/calculations",async e=>{try{const{results:t}=await e.env.DB.prepare(`
       SELECT 
         calc.*,
         u.full_name as user_name,
@@ -9827,15 +10198,15 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       JOIN financing_types ft ON calc.financing_type_id = ft.id
       ORDER BY calc.created_at DESC
       LIMIT 100
-    `).all();return e.json({success:!0,data:t})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/calculate",async e=>{try{const{amount:t,duration_months:a,salary:s,bank_id:r,financing_type_id:l,user_id:n,subscription_id:i}=await e.req.json(),o=await e.env.DB.prepare(`
+    `).all();return e.json({success:!0,data:t})}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/calculate",async e=>{try{const{amount:t,duration_months:a,salary:s,bank_id:r,financing_type_id:l,user_id:n,subscription_id:o}=await e.req.json(),i=await e.env.DB.prepare(`
       SELECT rate FROM bank_financing_rates 
       WHERE bank_id = ? AND financing_type_id = ? AND is_active = 1
       LIMIT 1
-    `).bind(r,l).first();if(!o)return e.json({success:!1,error:"لا توجد نسبة تمويل متاحة لهذا البنك ونوع التمويل"},400);const c=o.rate,d=c/100/12,m=t*d*Math.pow(1+d,a)/(Math.pow(1+d,a)-1),g=m*a,b=g-t,h=await e.env.DB.prepare(`
+    `).bind(r,l).first();if(!i)return e.json({success:!1,error:"لا توجد نسبة تمويل متاحة لهذا البنك ونوع التمويل"},400);const d=i.rate,p=d/100/12,u=t*p*Math.pow(1+p,a)/(Math.pow(1+p,a)-1),m=u*a,g=m-t,f=await e.env.DB.prepare(`
       INSERT INTO calculations 
       (user_id, subscription_id, financing_type_id, bank_id, amount, duration_months, salary, rate, monthly_payment, total_payment, total_interest)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(n||null,i||null,l,r,t,a,s,c,m,g,b).run();return e.json({success:!0,data:{id:h.meta.last_row_id,amount:t,duration_months:a,rate:c,monthly_payment:Math.round(m*100)/100,total_payment:Math.round(g*100)/100,total_interest:Math.round(b*100)/100}})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/admin/init-payments-table",async e=>{try{return await e.env.DB.prepare(`
+    `).bind(n||null,o||null,l,r,t,a,s,d,u,m,g).run();return e.json({success:!0,data:{id:f.meta.last_row_id,amount:t,duration_months:a,rate:d,monthly_payment:Math.round(u*100)/100,total_payment:Math.round(m*100)/100,total_interest:Math.round(g*100)/100}})}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/admin/init-payments-table",async e=>{try{return await e.env.DB.prepare(`
       CREATE TABLE IF NOT EXISTS payments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         financing_request_id INTEGER NOT NULL,
@@ -9851,47 +10222,47 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
-    `).run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_tenant ON payments(tenant_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_request ON payments(financing_request_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_customer ON payments(customer_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_employee ON payments(employee_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_date ON payments(payment_date)").run(),e.json({success:!0,message:"Payments table created successfully"})}catch(t){return console.error("Error creating payments table:",t),e.json({success:!1,error:t.message},500)}});p.get("/api/dashboard/stats",async e=>{try{const t=e.req.header("Authorization"),a=t==null?void 0:t.replace("Bearer ","");let s=null;if(a){const T=atob(a).split(":");s=T[1]!=="null"?parseInt(T[1]):null}let r="SELECT COUNT(*) as count FROM customers",l="SELECT COUNT(*) as count FROM financing_requests",n='SELECT COUNT(*) as count FROM financing_requests WHERE status = "pending"',i='SELECT COUNT(*) as count FROM financing_requests WHERE status = "approved"',o='SELECT COUNT(*) as count FROM subscriptions WHERE status = "active"',c="SELECT COUNT(*) as count FROM users WHERE is_active = 1";s!==null&&(r+=" WHERE tenant_id = ?",l+=" WHERE tenant_id = ?",n+=" AND tenant_id = ?",i+=" AND tenant_id = ?",o+=" AND tenant_id = ?",c+=" AND tenant_id = ?");const d=s!==null?await e.env.DB.prepare(r).bind(s).first():await e.env.DB.prepare(r).first(),m=s!==null?await e.env.DB.prepare(l).bind(s).first():await e.env.DB.prepare(l).first(),g=s!==null?await e.env.DB.prepare(n).bind(s).first():await e.env.DB.prepare(n).first(),b=s!==null?await e.env.DB.prepare(i).bind(s).first():await e.env.DB.prepare(i).first(),h=s!==null?await e.env.DB.prepare(o).bind(s).first():await e.env.DB.prepare(o).first(),w=s!==null?await e.env.DB.prepare(c).bind(s).first():await e.env.DB.prepare(c).first();let y="SELECT COUNT(*) as count FROM banks";s!==null&&(y+=" WHERE tenant_id = ?");const _=s!==null?await e.env.DB.prepare(y).bind(s).first():await e.env.DB.prepare(y).first(),$=await e.env.DB.prepare('SELECT COUNT(*) as count FROM tenants WHERE status = "active"').first(),B=await e.env.DB.prepare("SELECT COUNT(*) as count FROM calculations").first();return e.json({success:!0,data:{total_customers:(d==null?void 0:d.count)||0,total_requests:(m==null?void 0:m.count)||0,pending_requests:(g==null?void 0:g.count)||0,approved_requests:(b==null?void 0:b.count)||0,active_subscriptions:(h==null?void 0:h.count)||0,total_calculations:(B==null?void 0:B.count)||0,active_banks:(_==null?void 0:_.count)||0,active_tenants:($==null?void 0:$.count)||0,active_users:(w==null?void 0:w.count)||0}})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/customers/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM financing_requests WHERE customer_id = ?").bind(t).run(),await e.env.DB.prepare("DELETE FROM customers WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف العميل بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/financing-requests/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM financing_requests WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف الطلب بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/banks/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM banks WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف البنك بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/rates/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM bank_financing_rates WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف النسبة بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/subscriptions/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM subscriptions WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف الاشتراك بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/users/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM users WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف المستخدم بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/packages/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM packages WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف الباقة بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/subscription-requests",async e=>{try{const{results:t}=await e.env.DB.prepare(`
+    `).run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_tenant ON payments(tenant_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_request ON payments(financing_request_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_customer ON payments(customer_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_employee ON payments(employee_id)").run(),await e.env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_payments_date ON payments(payment_date)").run(),e.json({success:!0,message:"Payments table created successfully"})}catch(t){return console.error("Error creating payments table:",t),e.json({success:!1,error:t.message},500)}});c.get("/api/dashboard/stats",async e=>{try{const a=e.req.header("Authorization")?.replace("Bearer ","");let s=null;if(a){const E=atob(a).split(":");s=E[1]!=="null"?parseInt(E[1]):null}let r="SELECT COUNT(*) as count FROM customers",l="SELECT COUNT(*) as count FROM financing_requests",n='SELECT COUNT(*) as count FROM financing_requests WHERE status = "pending"',o='SELECT COUNT(*) as count FROM financing_requests WHERE status = "approved"',i='SELECT COUNT(*) as count FROM subscriptions WHERE status = "active"',d="SELECT COUNT(*) as count FROM users WHERE is_active = 1";s!==null&&(r+=" WHERE tenant_id = ?",l+=" WHERE tenant_id = ?",n+=" AND tenant_id = ?",o+=" AND tenant_id = ?",i+=" AND tenant_id = ?",d+=" AND tenant_id = ?");const p=s!==null?await e.env.DB.prepare(r).bind(s).first():await e.env.DB.prepare(r).first(),u=s!==null?await e.env.DB.prepare(l).bind(s).first():await e.env.DB.prepare(l).first(),m=s!==null?await e.env.DB.prepare(n).bind(s).first():await e.env.DB.prepare(n).first(),g=s!==null?await e.env.DB.prepare(o).bind(s).first():await e.env.DB.prepare(o).first(),f=s!==null?await e.env.DB.prepare(i).bind(s).first():await e.env.DB.prepare(i).first(),b=s!==null?await e.env.DB.prepare(d).bind(s).first():await e.env.DB.prepare(d).first();let x="SELECT COUNT(*) as count FROM banks";s!==null&&(x+=" WHERE tenant_id = ?");const h=s!==null?await e.env.DB.prepare(x).bind(s).first():await e.env.DB.prepare(x).first(),_=await e.env.DB.prepare('SELECT COUNT(*) as count FROM tenants WHERE status = "active"').first(),w=await e.env.DB.prepare("SELECT COUNT(*) as count FROM calculations").first();return e.json({success:!0,data:{total_customers:p?.count||0,total_requests:u?.count||0,pending_requests:m?.count||0,approved_requests:g?.count||0,active_subscriptions:f?.count||0,total_calculations:w?.count||0,active_banks:h?.count||0,active_tenants:_?.count||0,active_users:b?.count||0}})}catch(t){return e.json({success:!1,error:t.message},500)}});c.delete("/api/customers/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM financing_requests WHERE customer_id = ?").bind(t).run(),await e.env.DB.prepare("DELETE FROM customers WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف العميل بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.delete("/api/financing-requests/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM financing_requests WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف الطلب بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.delete("/api/banks/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM banks WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف البنك بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.delete("/api/rates/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM bank_financing_rates WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف النسبة بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.delete("/api/subscriptions/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM subscriptions WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف الاشتراك بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.delete("/api/users/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM users WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف المستخدم بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.delete("/api/packages/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM packages WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف الباقة بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/api/subscription-requests",async e=>{try{const{results:t}=await e.env.DB.prepare(`
       SELECT 
         sr.*,
         p.package_name
       FROM subscription_requests sr
       LEFT JOIN packages p ON sr.package_id = p.id
       ORDER BY sr.created_at DESC
-    `).all();return e.json({success:!0,data:t})}catch(t){return e.json({success:!1,error:t.message},500)}});p.put("/api/subscription-requests/:id/status",async e=>{try{const t=e.req.param("id"),{status:a,notes:s}=await e.req.json();return await e.env.DB.prepare(`
+    `).all();return e.json({success:!0,data:t})}catch(t){return e.json({success:!1,error:t.message},500)}});c.put("/api/subscription-requests/:id/status",async e=>{try{const t=e.req.param("id"),{status:a,notes:s}=await e.req.json();return await e.env.DB.prepare(`
       UPDATE subscription_requests 
       SET status = ?, notes = ?
       WHERE id = ?
-    `).bind(a,s,t).run(),e.json({success:!0,message:"تم تحديث حالة الطلب بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.delete("/api/subscription-requests/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM subscription_requests WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف طلب الاشتراك بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/permissions",async e=>{try{const t=await e.env.DB.prepare("SELECT * FROM permissions ORDER BY category, id").all();return e.json({success:!0,data:t.results})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/permissions/by-category",async e=>{try{const a=(await e.env.DB.prepare("SELECT * FROM permissions ORDER BY category, id").all()).results,s={};return a.forEach(r=>{s[r.category]||(s[r.category]=[]),s[r.category].push(r)}),e.json({success:!0,data:s})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/roles/:roleId/permissions",async e=>{try{const t=e.req.param("roleId"),a=await e.env.DB.prepare(`
+    `).bind(a,s,t).run(),e.json({success:!0,message:"تم تحديث حالة الطلب بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.delete("/api/subscription-requests/:id",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM subscription_requests WHERE id = ?").bind(t).run(),e.json({success:!0,message:"تم حذف طلب الاشتراك بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/api/permissions",async e=>{try{const t=await e.env.DB.prepare("SELECT * FROM permissions ORDER BY category, id").all();return e.json({success:!0,data:t.results})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/api/permissions/by-category",async e=>{try{const a=(await e.env.DB.prepare("SELECT * FROM permissions ORDER BY category, id").all()).results,s={};return a.forEach(r=>{s[r.category]||(s[r.category]=[]),s[r.category].push(r)}),e.json({success:!0,data:s})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/api/roles/:roleId/permissions",async e=>{try{const t=e.req.param("roleId"),a=await e.env.DB.prepare(`
       SELECT p.* FROM permissions p
       INNER JOIN role_permissions rp ON p.id = rp.permission_id
       WHERE rp.role_id = ?
       ORDER BY p.category, p.id
-    `).bind(t).all();return e.json({success:!0,data:a.results})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/users/:userId/permissions",async e=>{try{const t=e.req.param("userId"),a=await e.env.DB.prepare(`
+    `).bind(t).all();return e.json({success:!0,data:a.results})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/api/users/:userId/permissions",async e=>{try{const t=e.req.param("userId"),a=await e.env.DB.prepare(`
       SELECT p.* FROM permissions p
       INNER JOIN role_permissions rp ON p.id = rp.permission_id
       INNER JOIN users u ON u.role_id = rp.role_id
       WHERE u.id = ?
       ORDER BY p.category, p.id
-    `).bind(t).all();return e.json({success:!0,data:a.results})}catch(t){return e.json({success:!1,error:t.message},500)}});p.put("/api/roles/:roleId/permissions",async e=>{try{const t=e.req.param("roleId"),{permission_ids:a}=await e.req.json();await e.env.DB.prepare("DELETE FROM role_permissions WHERE role_id = ?").bind(t).run();for(const s of a)await e.env.DB.prepare("INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)").bind(t,s).run();return e.json({success:!0,message:"تم تحديث صلاحيات الدور بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/users/check-permission",async e=>{try{const{user_id:t,permission_key:a}=await e.req.json(),s=await e.env.DB.prepare(`
+    `).bind(t).all();return e.json({success:!0,data:a.results})}catch(t){return e.json({success:!1,error:t.message},500)}});c.put("/api/roles/:roleId/permissions",async e=>{try{const t=e.req.param("roleId"),{permission_ids:a}=await e.req.json();await e.env.DB.prepare("DELETE FROM role_permissions WHERE role_id = ?").bind(t).run();for(const s of a)await e.env.DB.prepare("INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)").bind(t,s).run();return e.json({success:!0,message:"تم تحديث صلاحيات الدور بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/users/check-permission",async e=>{try{const{user_id:t,permission_key:a}=await e.req.json(),s=await e.env.DB.prepare(`
       SELECT COUNT(*) as has_permission FROM permissions p
       INNER JOIN role_permissions rp ON p.id = rp.permission_id
       INNER JOIN users u ON u.role_id = rp.role_id
       WHERE u.id = ? AND p.permission_key = ?
-    `).bind(t,a).first();return e.json({success:!0,has_permission:(s==null?void 0:s.has_permission)>0})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/api/roles",async e=>{try{const t=await e.env.DB.prepare(`
+    `).bind(t,a).first();return e.json({success:!0,has_permission:s?.has_permission>0})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/api/roles",async e=>{try{const t=await e.env.DB.prepare(`
       SELECT r.*, 
              COUNT(rp.permission_id) as permissions_count
       FROM roles r
       LEFT JOIN role_permissions rp ON r.id = rp.role_id
       GROUP BY r.id
       ORDER BY r.id
-    `).all();return e.json({success:!0,data:t.results})}catch(t){return e.json({success:!1,error:t.message},500)}});p.put("/api/users/:id",async e=>{try{const t=e.req.param("id"),{full_name:a,email:s,phone:r,role_id:l,is_active:n}=await e.req.json();return await e.env.DB.prepare(`
+    `).all();return e.json({success:!0,data:t.results})}catch(t){return e.json({success:!1,error:t.message},500)}});c.put("/api/users/:id",async e=>{try{const t=e.req.param("id"),{full_name:a,email:s,phone:r,role_id:l,is_active:n}=await e.req.json();return await e.env.DB.prepare(`
       UPDATE users 
       SET full_name = ?, email = ?, phone = ?, role_id = ?, is_active = ?
       WHERE id = ?
-    `).bind(a,s,r,l,n,t).run(),e.json({success:!0,message:"تم تحديث بيانات المستخدم بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/",e=>e.html(ta));p.get("/calculator",e=>e.html(mt));p.get("/calculator-old",e=>e.html(aa));p.get("/c/:tenant/calculator",async e=>{const t=e.req.param("tenant"),a=await e.env.DB.prepare(`
+    `).bind(a,s,r,l,n,t).run(),e.json({success:!0,message:"تم تحديث بيانات المستخدم بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/",e=>e.html(Ve));c.get("/calculator",e=>e.html(ne));c.get("/calculator-old",e=>e.html(Ge));c.get("/c/:tenant/calculator",async e=>{const t=e.req.param("tenant"),a=await e.env.DB.prepare(`
     SELECT * FROM tenants WHERE slug = ? AND status = 'active'
-  `).bind(t).first();return a?e.html(mt.replace(/حاسبة التمويل الذكية/g,`حاسبة تمويل ${a.company_name}`).replace("/api/calculator/submit-request",`/api/c/${t}/calculator/submit-request`).replace("<script>",`<script>
+  `).bind(t).first();return a?e.html(ne.replace(/حاسبة التمويل الذكية/g,`حاسبة تمويل ${a.company_name}`).replace("/api/calculator/submit-request",`/api/c/${t}/calculator/submit-request`).replace("<script>",`<script>
         // Tenant information for company-specific calculator
         window.TENANT_NAME = '${a.company_name.replace(/'/g,"\\'")}';
     `).replace("سيتم التواصل معك قريباً من ' + selectedBestOffer.bank.bank_name",`سيتم المراجعة من شركة ${a.company_name.replace(/'/g,"\\'")} وسوف يتم التواصل معك قريباً'`)):e.html(`
@@ -9916,7 +10287,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `)});p.get("/login",e=>e.html(sa));p.get("/forgot-password",e=>e.html(ra));p.get("/packages",e=>e.html(la));p.get("/subscribe",e=>e.html(na));p.get("/admin",e=>e.html(`
+    `)});c.get("/login",e=>e.html(Qe));c.get("/forgot-password",e=>e.html(Xe));c.get("/packages",e=>e.html(Ke));c.get("/subscribe",e=>e.html(Ze));c.get("/admin",e=>e.html(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
     <head>
@@ -9966,7 +10337,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
     </body>
     </html>
-  `));p.get("/api/reports/statistics",async e=>{try{const t=e.req.query("from_date"),a=e.req.query("to_date"),s=e.req.header("Authorization"),r=s==null?void 0:s.replace("Bearer ","");let l=null;if(r){const b=atob(r).split(":");l=b[1]!=="null"?parseInt(b[1]):null}let n="1=1";const i=[];l&&(n+=" AND f.tenant_id = ?",i.push(l)),t&&(n+=" AND DATE(f.created_at) >= ?",i.push(t)),a&&(n+=" AND DATE(f.created_at) <= ?",i.push(a));const o=`
+  `));c.get("/api/reports/statistics",async e=>{try{const t=e.req.query("from_date"),a=e.req.query("to_date"),r=e.req.header("Authorization")?.replace("Bearer ","");let l=null;if(r){const g=atob(r).split(":");l=g[1]!=="null"?parseInt(g[1]):null}let n="1=1";const o=[];l&&(n+=" AND f.tenant_id = ?",o.push(l)),t&&(n+=" AND DATE(f.created_at) >= ?",o.push(t)),a&&(n+=" AND DATE(f.created_at) <= ?",o.push(a));const i=`
       SELECT 
         COUNT(*) as total_requests,
         SUM(CASE WHEN f.status = 'approved' THEN 1 ELSE 0 END) as approved_requests,
@@ -9975,7 +10346,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         SUM(f.requested_amount) as total_amount
       FROM financing_requests f
       WHERE ${n}
-    `,c=await e.env.DB.prepare(o).bind(...i).first(),d=`
+    `,d=await e.env.DB.prepare(i).bind(...o).first(),p=`
       SELECT 
         c.full_name as customer_name,
         COUNT(f.id) as request_count,
@@ -9987,7 +10358,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       GROUP BY c.id
       ORDER BY request_count DESC, total_amount DESC
       LIMIT 10
-    `,{results:m}=await e.env.DB.prepare(d).bind(...i).all();return e.json({success:!0,data:{...c,top_customers:m}})}catch(t){return console.error("Reports API error:",t),e.json({success:!1,error:t.message},500)}});p.get("/api/reports/requests-followup",async e=>{try{const t=e.req.header("Authorization"),a=t==null?void 0:t.replace("Bearer ","");let s=null;if(a){const i=atob(a).split(":");s=i[1]!=="null"?parseInt(i[1]):null}if(!s)return e.json({success:!1,error:"يجب تحديد الشركة"},400);const r=`
+    `,{results:u}=await e.env.DB.prepare(p).bind(...o).all();return e.json({success:!0,data:{...d,top_customers:u}})}catch(t){return console.error("Reports API error:",t),e.json({success:!1,error:t.message},500)}});c.get("/api/reports/requests-followup",async e=>{try{const a=e.req.header("Authorization")?.replace("Bearer ","");let s=null;if(a){const o=atob(a).split(":");s=o[1]!=="null"?parseInt(o[1]):null}if(!s)return e.json({success:!1,error:"يجب تحديد الشركة"},400);const r=`
       SELECT 
         fr.id,
         fr.created_at,
@@ -10029,7 +10400,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       LEFT JOIN users u ON ca.employee_id = u.id
       WHERE fr.tenant_id = ?
       ORDER BY fr.created_at DESC
-    `,{results:l}=await e.env.DB.prepare(r).bind(s).all();return e.json({success:!0,data:l})}catch(t){return console.error("Requests follow-up report error:",t),e.json({success:!1,error:t.message},500)}});p.get("/admin/panel",e=>e.html(gt));p.get("/admin/reports/requests-followup",async e=>{try{const t=e.req.query("tenant_id");return e.html(`
+    `,{results:l}=await e.env.DB.prepare(r).bind(s).all();return e.json({success:!0,data:l})}catch(t){return console.error("Requests follow-up report error:",t),e.json({success:!1,error:t.message},500)}});c.get("/admin/panel",e=>e.html(oe));c.get("/admin/reports/requests-followup",async e=>{try{const t=e.req.query("tenant_id");return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -10078,6 +10449,64 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
           .overflow-x-auto table {
             min-width: 1200px; /* Force table to be wide enough for scrollbar */
             width: max-content;
+          }
+          
+          ${k()}
+          
+          /* Scroll Buttons for Tables */
+          .scroll-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: 3px solid white;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s ease;
+            font-size: 18px;
+          }
+          
+          .scroll-btn:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.6);
+          }
+          
+          .scroll-btn:active {
+            transform: translateY(-50%) scale(0.95);
+          }
+          
+          .scroll-btn-right {
+            right: -20px;
+          }
+          
+          .scroll-btn-left {
+            left: -20px;
+          }
+          
+          @media (max-width: 768px) {
+            .scroll-btn {
+              width: 44px;
+              height: 44px;
+              font-size: 16px;
+              border-width: 2px;
+            }
+            
+            .scroll-btn-right {
+              right: 8px;
+            }
+            
+            .scroll-btn-left {
+              left: 8px;
+            }
           }
         </style>
       </head>
@@ -10140,9 +10569,31 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
               <p class="text-gray-600">جاري تحميل البيانات...</p>
             </div>
             
-            <!-- Table Container -->
-            <div id="tableContainer" class="hidden overflow-x-auto">
-              <table class="w-full">
+            <!-- Table Container with Scroll Buttons -->
+            <div class="hidden" id="tableWrapper">
+              <div class="relative">
+                <!-- Right Scroll Button -->
+                <button 
+                  id="scrollLeftBtn" 
+                  onclick="scrollTable('left')"
+                  class="scroll-btn scroll-btn-left hidden"
+                  aria-label="تمرير لليسار"
+                >
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                
+                <!-- Left Scroll Button -->
+                <button 
+                  id="scrollRightBtn" 
+                  onclick="scrollTable('right')"
+                  class="scroll-btn scroll-btn-right hidden"
+                  aria-label="تمرير لليمين"
+                >
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+                
+                <div id="tableContainer" class="overflow-x-auto">
+                  <table class="w-full">
                 <thead class="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
                   <tr>
                     <th class="px-4 py-3 text-right text-sm font-bold">#</th>
@@ -10160,6 +10611,8 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                 <tbody id="reportTable" class="divide-y divide-gray-200">
                 </tbody>
               </table>
+            </div>
+              </div>
             </div>
             
             <!-- Empty State -->
@@ -10215,6 +10668,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             }
             
             tableContainer.classList.remove('hidden');
+            document.getElementById('tableWrapper')?.classList.remove('hidden');
             
             tbody.innerHTML = data.map((row, index) => {
               const statusColors = {
@@ -10430,12 +10884,74 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             });
           }
           
+          // Scroll table function
+          function scrollTable(direction) {
+            const container = document.getElementById('tableContainer');
+            const scrollAmount = 300; // pixels to scroll
+            
+            if (direction === 'right') {
+              container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            } else {
+              container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            }
+            
+            // Update button visibility after scroll
+            setTimeout(checkScrollButtons, 300);
+          }
+          
+          // Check if scroll buttons should be visible
+          function checkScrollButtons() {
+            const container = document.getElementById('tableContainer');
+            const leftBtn = document.getElementById('scrollLeftBtn');
+            const rightBtn = document.getElementById('scrollRightBtn');
+            
+            if (!container || !leftBtn || !rightBtn) return;
+            
+            const canScrollLeft = container.scrollLeft > 0;
+            const canScrollRight = container.scrollLeft < (container.scrollWidth - container.clientWidth - 10);
+            
+            // Show/hide buttons based on scroll position
+            if (canScrollLeft) {
+              leftBtn.classList.remove('hidden');
+            } else {
+              leftBtn.classList.add('hidden');
+            }
+            
+            if (canScrollRight) {
+              rightBtn.classList.remove('hidden');
+            } else {
+              rightBtn.classList.add('hidden');
+            }
+          }
+          
+          // Initialize scroll buttons after table loads
+          function initScrollButtons() {
+            const container = document.getElementById('tableContainer');
+            const wrapper = document.getElementById('tableWrapper');
+            
+            if (container && wrapper) {
+              wrapper.classList.remove('hidden');
+              
+              // Check initially
+              checkScrollButtons();
+              
+              // Check on scroll
+              container.addEventListener('scroll', checkScrollButtons);
+              
+              // Check on window resize
+              window.addEventListener('resize', checkScrollButtons);
+            }
+          }
+          
           // Load report on page load
-          loadReport();
+          loadReport().then(() => {
+            // Initialize scroll buttons after data is loaded
+            setTimeout(initScrollButtons, 500);
+          });
         <\/script>
       </body>
       </html>
-    `)}catch(t){return e.html("<h1>Error: "+t.message+"</h1>",500)}});p.get("/admin/tenants/add",e=>e.html(`
+    `)}catch(t){return e.html("<h1>Error: "+t.message+"</h1>",500)}});c.get("/admin/tenants/add",e=>e.html(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
     <head>
@@ -10643,7 +11159,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
     </body>
     </html>
-  `));p.get("/admin/tenants/:id/edit",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
+  `));c.get("/admin/tenants/:id/edit",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
       SELECT * FROM tenants WHERE id = ?
     `).bind(t).first();return a?e.html(`
       <!DOCTYPE html>
@@ -10842,7 +11358,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
           <\/script>
       </body>
       </html>
-    `):e.html("<h1>الشركة غير موجودة</h1>")}catch(t){return e.html(`<h1>خطأ في تحميل الصفحة: ${t.message}</h1>`)}});p.get("/admin/tenants/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
+    `):e.html("<h1>الشركة غير موجودة</h1>")}catch(t){return e.html(`<h1>خطأ في تحميل الصفحة: ${t.message}</h1>`)}});c.get("/admin/tenants/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
       SELECT * FROM tenants WHERE id = ?
     `).bind(t).first();if(!a)return e.html("<h1>الشركة غير موجودة</h1>");const s=await e.env.DB.prepare(`
       SELECT 
@@ -10904,7 +11420,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                       <div class="flex items-center justify-between">
                           <div>
                               <p class="text-gray-600 text-sm mb-1">المستخدمين</p>
-                              <p class="text-3xl font-bold text-blue-600">${(s==null?void 0:s.total_users)||0}</p>
+                              <p class="text-3xl font-bold text-blue-600">${s?.total_users||0}</p>
                               <p class="text-gray-500 text-xs mt-1">من ${a.max_users} مسموح</p>
                           </div>
                           <i class="fas fa-users text-4xl text-blue-200"></i>
@@ -10915,7 +11431,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                       <div class="flex items-center justify-between">
                           <div>
                               <p class="text-gray-600 text-sm mb-1">العملاء</p>
-                              <p class="text-3xl font-bold text-green-600">${(s==null?void 0:s.total_customers)||0}</p>
+                              <p class="text-3xl font-bold text-green-600">${s?.total_customers||0}</p>
                           </div>
                           <i class="fas fa-user-friends text-4xl text-green-200"></i>
                       </div>
@@ -10925,7 +11441,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                       <div class="flex items-center justify-between">
                           <div>
                               <p class="text-gray-600 text-sm mb-1">طلبات التمويل</p>
-                              <p class="text-3xl font-bold text-purple-600">${(s==null?void 0:s.total_requests)||0}</p>
+                              <p class="text-3xl font-bold text-purple-600">${s?.total_requests||0}</p>
                           </div>
                           <i class="fas fa-file-invoice text-4xl text-purple-200"></i>
                       </div>
@@ -11013,9 +11529,9 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
           </div>
       </body>
       </html>
-    `)}catch(t){return e.html(`<h1>خطأ في تحميل الصفحة: ${t.message}</h1>`)}});p.get("/admin/tenants",e=>e.html(oa));p.get("/admin/tenant-calculators",e=>e.html(ia));p.get("/admin/saas-settings",e=>e.html(da));p.get("/admin/reports",e=>e.html(ca));p.get("/admin/reports/customers",e=>e.html(pa));p.get("/admin/reports/requests",e=>e.html(ua));p.get("/admin/reports/financial",e=>e.html(ma));p.get("/admin/payments",e=>e.html(ga));p.get("/admin/banks",e=>e.html(ba));p.get("/c/:tenant/admin",async e=>{const t=e.req.param("tenant"),a=await e.env.DB.prepare(`
+    `)}catch(t){return e.html(`<h1>خطأ في تحميل الصفحة: ${t.message}</h1>`)}});c.get("/admin/tenants",e=>e.html(et));c.get("/admin/tenant-calculators",e=>e.html(tt));c.get("/admin/saas-settings",e=>e.html(at));c.get("/admin/reports",e=>e.html(st));c.get("/admin/reports/customers",e=>e.html(rt));c.get("/admin/reports/requests",e=>e.html(lt));c.get("/admin/reports/financial",e=>e.html(nt));c.get("/admin/payments",e=>e.html(it));c.get("/admin/banks",e=>e.html(dt));c.get("/c/:tenant/admin",async e=>{const t=e.req.param("tenant"),a=await e.env.DB.prepare(`
     SELECT * FROM tenants WHERE slug = ? AND status = 'active'
-  `).bind(t).first();return a?e.html(gt.replace("لوحة التحكم - نظام حاسبة التمويل",`لوحة التحكم - ${a.company_name}`)):e.html(`
+  `).bind(t).first();return a?e.html(oe.replace("لوحة التحكم - نظام حاسبة التمويل",`لوحة التحكم - ${a.company_name}`)):e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -11037,7 +11553,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `)});p.get("/test",e=>e.html(`
+    `)});c.get("/test",e=>e.html(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
     <head>
@@ -11071,7 +11587,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
     </body>
     </html>
-  `));p.get("/admin/dashboard",async e=>{var t;try{const a=await e.env.DB.prepare(`
+  `));c.get("/admin/dashboard",async e=>{try{const t=await e.env.DB.prepare(`
       SELECT 
         (SELECT COUNT(*) FROM customers) as total_customers,
         (SELECT COUNT(*) FROM financing_requests) as total_requests,
@@ -11083,7 +11599,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         (SELECT SUM(requested_amount) FROM financing_requests WHERE status = 'approved') as total_approved_amount,
         (SELECT COUNT(*) FROM banks WHERE is_active = 1) as active_banks,
         (SELECT COUNT(*) FROM financing_types) as financing_types_count
-    `).first(),s=await e.env.DB.prepare(`
+    `).first(),a=await e.env.DB.prepare(`
       SELECT 
         strftime('%Y-%m', created_at) as month,
         COUNT(*) as count,
@@ -11092,7 +11608,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       WHERE created_at >= date('now', '-6 months')
       GROUP BY strftime('%Y-%m', created_at)
       ORDER BY month
-    `).all(),r=await e.env.DB.prepare(`
+    `).all(),s=await e.env.DB.prepare(`
       SELECT 
         b.bank_name,
         COUNT(fr.id) as request_count,
@@ -11103,14 +11619,14 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       GROUP BY b.id, b.bank_name
       ORDER BY request_count DESC
       LIMIT 5
-    `).all(),l=await e.env.DB.prepare(`
+    `).all(),r=await e.env.DB.prepare(`
       SELECT 
         status,
         COUNT(*) as count,
         ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM financing_requests), 2) as percentage
       FROM financing_requests
       GROUP BY status
-    `).all(),n=s.results||[],i=r.results||[],o=l.results||[];return e.html(`
+    `).all(),l=a.results||[],n=s.results||[],o=r.results||[];return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -11125,6 +11641,8 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             button, nav, .no-print { display: none; }
             .print-full-width { width: 100%; }
           }
+          
+          ${k()}
         </style>
       </head>
       <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
@@ -11160,7 +11678,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-blue-100 text-sm mb-1">إجمالي العملاء</p>
-                  <p class="text-4xl font-bold">${(a==null?void 0:a.total_customers)||0}</p>
+                  <p class="text-4xl font-bold">${t?.total_customers||0}</p>
                 </div>
                 <i class="fas fa-users text-6xl opacity-20"></i>
               </div>
@@ -11170,7 +11688,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-green-100 text-sm mb-1">إجمالي الطلبات</p>
-                  <p class="text-4xl font-bold">${(a==null?void 0:a.total_requests)||0}</p>
+                  <p class="text-4xl font-bold">${t?.total_requests||0}</p>
                 </div>
                 <i class="fas fa-file-invoice text-6xl opacity-20"></i>
               </div>
@@ -11180,7 +11698,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-yellow-100 text-sm mb-1">قيد الانتظار</p>
-                  <p class="text-4xl font-bold">${(a==null?void 0:a.pending_requests)||0}</p>
+                  <p class="text-4xl font-bold">${t?.pending_requests||0}</p>
                 </div>
                 <i class="fas fa-clock text-6xl opacity-20"></i>
               </div>
@@ -11190,7 +11708,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-purple-100 text-sm mb-1">موافق عليها</p>
-                  <p class="text-4xl font-bold">${(a==null?void 0:a.approved_requests)||0}</p>
+                  <p class="text-4xl font-bold">${t?.approved_requests||0}</p>
                 </div>
                 <i class="fas fa-check-circle text-6xl opacity-20"></i>
               </div>
@@ -11200,7 +11718,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-red-100 text-sm mb-1">مرفوضة</p>
-                  <p class="text-4xl font-bold">${(a==null?void 0:a.rejected_requests)||0}</p>
+                  <p class="text-4xl font-bold">${t?.rejected_requests||0}</p>
                 </div>
                 <i class="fas fa-times-circle text-6xl opacity-20"></i>
               </div>
@@ -11216,7 +11734,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                 </div>
                 <div>
                   <p class="text-gray-600 text-sm">إجمالي التمويل المطلوب</p>
-                  <p class="text-2xl font-bold text-gray-800">${parseFloat((a==null?void 0:a.total_requested_amount)||0).toLocaleString("ar-SA")} ر.س</p>
+                  <p class="text-2xl font-bold text-gray-800">${parseFloat(t?.total_requested_amount||0).toLocaleString("ar-SA")} ر.س</p>
                 </div>
               </div>
             </div>
@@ -11228,7 +11746,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                 </div>
                 <div>
                   <p class="text-gray-600 text-sm">التمويل الموافق عليه</p>
-                  <p class="text-2xl font-bold text-gray-800">${parseFloat((a==null?void 0:a.total_approved_amount)||0).toLocaleString("ar-SA")} ر.س</p>
+                  <p class="text-2xl font-bold text-gray-800">${parseFloat(t?.total_approved_amount||0).toLocaleString("ar-SA")} ر.س</p>
                 </div>
               </div>
             </div>
@@ -11240,7 +11758,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                 </div>
                 <div>
                   <p class="text-gray-600 text-sm">نسبة القبول</p>
-                  <p class="text-2xl font-bold text-gray-800">${(((a==null?void 0:a.approved_requests)||0)/Math.max(a==null?void 0:a.total_requests,1)*100).toFixed(1)}%</p>
+                  <p class="text-2xl font-bold text-gray-800">${((t?.approved_requests||0)/Math.max(t?.total_requests,1)*100).toFixed(1)}%</p>
                 </div>
               </div>
             </div>
@@ -11252,7 +11770,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                 </div>
                 <div>
                   <p class="text-gray-600 text-sm">متوسط المبلغ</p>
-                  <p class="text-2xl font-bold text-gray-800">${(parseFloat((a==null?void 0:a.total_requested_amount)||0)/Math.max(a==null?void 0:a.total_requests,1)).toLocaleString("ar-SA",{maximumFractionDigits:0})} ر.س</p>
+                  <p class="text-2xl font-bold text-gray-800">${(parseFloat(t?.total_requested_amount||0)/Math.max(t?.total_requests,1)).toLocaleString("ar-SA",{maximumFractionDigits:0})} ر.س</p>
                 </div>
               </div>
             </div>
@@ -11269,15 +11787,15 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                   <div class="bg-white/20 rounded-lg p-4">
                     <p class="text-sm opacity-90">أكثر البنوك طلباً</p>
-                    <p class="text-xl font-bold mt-1">${((t=i[0])==null?void 0:t.bank_name)||"لا يوجد"}</p>
+                    <p class="text-xl font-bold mt-1">${n[0]?.bank_name||"لا يوجد"}</p>
                   </div>
                   <div class="bg-white/20 rounded-lg p-4">
                     <p class="text-sm opacity-90">الطلبات النشطة</p>
-                    <p class="text-xl font-bold mt-1">${((a==null?void 0:a.pending_requests)||0)+((a==null?void 0:a.under_review_requests)||0)}</p>
+                    <p class="text-xl font-bold mt-1">${(t?.pending_requests||0)+(t?.under_review_requests||0)}</p>
                   </div>
                   <div class="bg-white/20 rounded-lg p-4">
                     <p class="text-sm opacity-90">معدل النجاح</p>
-                    <p class="text-xl font-bold mt-1">${(((a==null?void 0:a.approved_requests)||0)/Math.max(((a==null?void 0:a.approved_requests)||0)+((a==null?void 0:a.rejected_requests)||0),1)*100).toFixed(1)}%</p>
+                    <p class="text-xl font-bold mt-1">${((t?.approved_requests||0)/Math.max((t?.approved_requests||0)+(t?.rejected_requests||0),1)*100).toFixed(1)}%</p>
                   </div>
                 </div>
               </div>
@@ -11323,13 +11841,13 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                     </tr>
                   </thead>
                   <tbody>
-                    ${i.map((c,d)=>`
+                    ${n.map((i,d)=>`
                       <tr class="border-t hover:bg-gray-50">
                         <td class="px-4 py-3">
                           <span class="text-2xl">${d===0?"🥇":d===1?"🥈":d===2?"🥉":(d+1).toString()}</span>
                         </td>
-                        <td class="px-4 py-3 font-bold text-gray-800">${c.bank_name}</td>
-                        <td class="px-4 py-3 text-blue-600 font-bold">${c.request_count}</td>
+                        <td class="px-4 py-3 font-bold text-gray-800">${i.bank_name}</td>
+                        <td class="px-4 py-3 text-blue-600 font-bold">${i.request_count}</td>
                       </tr>
                       `).join("")}
                   </tbody>
@@ -11354,14 +11872,14 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
               تفاصيل حالات الطلبات
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              ${o.map(c=>{const d={pending:{color:"yellow",icon:"clock",label:"قيد الانتظار"},under_review:{color:"blue",icon:"search",label:"قيد المراجعة"},approved:{color:"green",icon:"check-circle",label:"موافق"},rejected:{color:"red",icon:"times-circle",label:"مرفوض"}}[c.status]||{color:"gray",icon:"question",label:c.status};return`
+              ${o.map(i=>{const d={pending:{color:"yellow",icon:"clock",label:"قيد الانتظار"},under_review:{color:"blue",icon:"search",label:"قيد المراجعة"},approved:{color:"green",icon:"check-circle",label:"موافق"},rejected:{color:"red",icon:"times-circle",label:"مرفوض"}}[i.status]||{color:"gray",icon:"question",label:i.status};return`
                   <div class="bg-${d.color}-50 border-2 border-${d.color}-200 rounded-lg p-4">
                     <div class="flex items-center justify-between mb-2">
                       <i class="fas fa-${d.icon} text-2xl text-${d.color}-600"></i>
-                      <span class="text-3xl font-bold text-${d.color}-600">${c.count}</span>
+                      <span class="text-3xl font-bold text-${d.color}-600">${i.count}</span>
                     </div>
                     <p class="text-sm text-gray-700 font-bold">${d.label}</p>
-                    <p class="text-xs text-gray-600">${c.percentage}% من الإجمالي</p>
+                    <p class="text-xs text-gray-600">${i.percentage}% من الإجمالي</p>
                   </div>
                 `}).join("")}
             </div>
@@ -11372,7 +11890,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <script>
           // Monthly Trend Chart
           const monthlyCtx = document.getElementById('monthlyTrendChart').getContext('2d');
-          const monthlyData = ${JSON.stringify(n)};
+          const monthlyData = ${JSON.stringify(l)};
           
           new Chart(monthlyCtx, {
             type: 'line',
@@ -11437,7 +11955,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
           
           // Banks Distribution Chart
           const banksCtx = document.getElementById('banksChart').getContext('2d');
-          const topBanksData = ${JSON.stringify(i)};
+          const topBanksData = ${JSON.stringify(n)};
           
           new Chart(banksCtx, {
             type: 'bar',
@@ -11490,7 +12008,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/customers/add",async e=>e.html(`
+    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/customers/add",async e=>e.html(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
     <head>
@@ -11636,7 +12154,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       </div>
     </body>
     </html>
-  `));p.get("/admin/customer-assignment",async e=>{const t=e.req.query("tenant_id")||1,a=await e.env.DB.prepare(`
+  `));c.get("/admin/customer-assignment",async e=>{const t=e.req.query("tenant_id")||1,a=await e.env.DB.prepare(`
     SELECT id, username, full_name, email, role 
     FROM users 
     WHERE role = 'employee' AND tenant_id = ?
@@ -11689,6 +12207,8 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         }
         .assigned { background: #d1fae5; color: #065f46; }
         .unassigned { background: #fee2e2; color: #991b1b; }
+        
+        ${k()}
       </style>
     </head>
     <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-6">
@@ -11712,8 +12232,8 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
 
         <!-- Statistics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-          ${r.results.map((n,i)=>`
-              <div class="stat-card bg-gradient-to-br ${["from-blue-500 to-blue-600","from-green-500 to-green-600","from-purple-500 to-purple-600","from-orange-500 to-orange-600","from-pink-500 to-pink-600"][i%5]} text-white rounded-xl p-5 shadow-lg">
+          ${r.results.map((n,o)=>`
+              <div class="stat-card bg-gradient-to-br ${["from-blue-500 to-blue-600","from-green-500 to-green-600","from-purple-500 to-purple-600","from-orange-500 to-orange-600","from-pink-500 to-pink-600"][o%5]} text-white rounded-xl p-5 shadow-lg">
                 <div class="text-sm opacity-90 mb-1">${n.full_name}</div>
                 <div class="text-3xl font-bold">${n.customer_count}</div>
                 <div class="text-xs opacity-80 mt-1">عميل مخصص</div>
@@ -11797,9 +12317,9 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                                 data-customer-id="${n.id}"
                                 onchange="assignCustomer(${n.id}, this.value)">
                           <option value="">اختر موظف...</option>
-                          ${a.results.map(i=>`
-                            <option value="${i.id}" ${n.employee_id==i.id?"selected":""}>
-                              ${i.full_name}
+                          ${a.results.map(o=>`
+                            <option value="${o.id}" ${n.employee_id==o.id?"selected":""}>
+                              ${o.full_name}
                             </option>
                           `).join("")}
                         </select>
@@ -11956,7 +12476,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       <\/script>
     </body>
     </html>
-  `;return e.html(l)});p.post("/api/customer-assignment",async e=>{try{const{customer_id:t,employee_id:a,notes:s}=await e.req.json();if(!a)return await e.env.DB.prepare(`
+  `;return e.html(l)});c.post("/api/customer-assignment",async e=>{try{const{customer_id:t,employee_id:a,notes:s}=await e.req.json();if(!a)return await e.env.DB.prepare(`
         DELETE FROM customer_assignments WHERE customer_id = ?
       `).bind(t).run(),e.json({success:!0,message:"تم إلغاء التخصيص"});const r=await e.env.DB.prepare(`
       SELECT * FROM customer_assignments WHERE customer_id = ?
@@ -11973,7 +12493,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       `).bind(t,a,s||"").run(),await e.env.DB.prepare(`
         INSERT INTO assignment_history (customer_id, old_employee_id, new_employee_id, changed_by, notes)
         VALUES (?, NULL, ?, 1, ?)
-      `).bind(t,a,s||"").run()),e.json({success:!0,message:"تم التخصيص بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/customer-assignment/auto-distribute",async e=>{try{const a=(await e.req.json().catch(()=>({}))).tenant_id||e.req.query("tenant_id")||1,s=await e.env.DB.prepare(`
+      `).bind(t,a,s||"").run()),e.json({success:!0,message:"تم التخصيص بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/customer-assignment/auto-distribute",async e=>{try{const a=(await e.req.json().catch(()=>({}))).tenant_id||e.req.query("tenant_id")||1,s=await e.env.DB.prepare(`
       SELECT id FROM users 
       WHERE role = 'employee' AND tenant_id = ?
       ORDER BY id
@@ -11983,12 +12503,12 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       LEFT JOIN customer_assignments ca ON c.id = ca.customer_id
       WHERE ca.customer_id IS NULL AND c.tenant_id = ?
       ORDER BY c.id
-    `).bind(a).all();let l=0;const n=s.results.length;for(let i=0;i<r.results.length;i++){const o=r.results[i],c=s.results[i%n];await e.env.DB.prepare(`
+    `).bind(a).all();let l=0;const n=s.results.length;for(let o=0;o<r.results.length;o++){const i=r.results[o],d=s.results[o%n];await e.env.DB.prepare(`
         INSERT INTO customer_assignments (customer_id, employee_id, assigned_by, notes)
         VALUES (?, ?, 1, 'توزيع تلقائي')
-      `).bind(o.id,c.id).run(),l++}return e.json({success:!0,assigned_count:l,employee_count:n})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/customer-assignment/clear-all",async e=>{try{const t=await e.env.DB.prepare(`
+      `).bind(i.id,d.id).run(),l++}return e.json({success:!0,assigned_count:l,employee_count:n})}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/customer-assignment/clear-all",async e=>{try{const t=await e.env.DB.prepare(`
       DELETE FROM customer_assignments
-    `).run();return e.json({success:!0,cleared_count:t.meta.changes})}catch(t){return e.json({success:!1,error:t.message},500)}});p.post("/api/customer-assignment/bulk",async e=>{try{const{customer_ids:t,employee_id:a}=await e.req.json();let s=0;for(const r of t)await e.env.DB.prepare(`
+    `).run();return e.json({success:!0,cleared_count:t.meta.changes})}catch(t){return e.json({success:!1,error:t.message},500)}});c.post("/api/customer-assignment/bulk",async e=>{try{const{customer_ids:t,employee_id:a}=await e.req.json();let s=0;for(const r of t)await e.env.DB.prepare(`
         SELECT * FROM customer_assignments WHERE customer_id = ?
       `).bind(r).first()?await e.env.DB.prepare(`
           UPDATE customer_assignments 
@@ -11997,7 +12517,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         `).bind(a,r).run():await e.env.DB.prepare(`
           INSERT INTO customer_assignments (customer_id, employee_id, assigned_by)
           VALUES (?, ?, 1)
-        `).bind(r,a).run(),s++;return e.json({success:!0,assigned_count:s})}catch(t){return e.json({success:!1,error:t.message},500)}});p.get("/admin/banks",async e=>{try{const t=e.req.query("tenant_id");let a=null;t&&(a=await e.env.DB.prepare("SELECT company_name FROM tenants WHERE id = ?").bind(t).first());let s="SELECT * FROM banks";t&&(s+=" WHERE tenant_id = ?"),s+=" ORDER BY bank_name";const r=t?await e.env.DB.prepare(s).bind(t).all():await e.env.DB.prepare(s).all();return e.html(`
+        `).bind(r,a).run(),s++;return e.json({success:!0,assigned_count:s})}catch(t){return e.json({success:!1,error:t.message},500)}});c.get("/admin/banks",async e=>{try{const t=e.req.query("tenant_id");let a=null;t&&(a=await e.env.DB.prepare("SELECT company_name FROM tenants WHERE id = ?").bind(t).first());let s="SELECT * FROM banks";t&&(s+=" WHERE tenant_id = ?"),s+=" ORDER BY bank_name";const r=t?await e.env.DB.prepare(s).bind(t).all():await e.env.DB.prepare(s).all();return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -12059,7 +12579,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `)}catch(t){return e.html(`<h1>Error: ${t.message}</h1>`,500)}});p.get("/admin/rates",async e=>{try{const t=e.req.query("tenant_id");let a=null;t&&(a=await e.env.DB.prepare("SELECT company_name FROM tenants WHERE id = ?").bind(t).first());let s=`
+    `)}catch(t){return e.html(`<h1>Error: ${t.message}</h1>`,500)}});c.get("/admin/rates",async e=>{try{const t=e.req.query("tenant_id");let a=null;t&&(a=await e.env.DB.prepare("SELECT company_name FROM tenants WHERE id = ?").bind(t).first());let s=`
       SELECT 
         r.*,
         b.bank_name,
@@ -12116,6 +12636,8 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             min-width: 1200px; /* Force table to be wide enough for scrollbar */
             width: max-content;
           }
+          
+          ${k()}
         </style>
       </head>
       <body class="bg-gray-50">
@@ -12253,13 +12775,13 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch(t){return e.html(`<h1>Error: ${t.message}</h1>`,500)}});p.get("/admin/rates/add",async e=>{const t=e.req.query("tenant_id");if(!t)return e.html("<h1>خطأ: يجب تحديد الشركة</h1>",400);const a=await e.env.DB.prepare("SELECT * FROM banks WHERE tenant_id = ? ORDER BY bank_name").bind(t).all(),s=await e.env.DB.prepare("SELECT * FROM financing_types ORDER BY type_name").all();return e.html(fa(t,a.results,s.results))});p.get("/admin/rates/edit/:id",async e=>{const t=e.req.param("id"),a=e.req.query("tenant_id");if(!a)return e.html("<h1>خطأ: يجب تحديد الشركة</h1>",400);const s=await e.env.DB.prepare(`
+    `)}catch(t){return e.html(`<h1>Error: ${t.message}</h1>`,500)}});c.get("/admin/rates/add",async e=>{const t=e.req.query("tenant_id");if(!t)return e.html("<h1>خطأ: يجب تحديد الشركة</h1>",400);const a=await e.env.DB.prepare("SELECT * FROM banks WHERE tenant_id = ? ORDER BY bank_name").bind(t).all(),s=await e.env.DB.prepare("SELECT * FROM financing_types ORDER BY type_name").all();return e.html(ct(t,a.results,s.results))});c.get("/admin/rates/edit/:id",async e=>{const t=e.req.param("id"),a=e.req.query("tenant_id");if(!a)return e.html("<h1>خطأ: يجب تحديد الشركة</h1>",400);const s=await e.env.DB.prepare(`
     SELECT r.*, b.bank_name, f.type_name
     FROM bank_financing_rates r
     LEFT JOIN banks b ON r.bank_id = b.id
     LEFT JOIN financing_types f ON r.financing_type_id = f.id
     WHERE r.id = ? AND r.tenant_id = ?
-  `).bind(t,a).first();if(!s)return e.html("<h1>خطأ: النسبة غير موجودة</h1>",404);const r=await e.env.DB.prepare("SELECT * FROM banks WHERE tenant_id = ? ORDER BY bank_name").bind(a).all(),l=await e.env.DB.prepare("SELECT * FROM financing_types ORDER BY type_name").all();return e.html(xa(a,s,r.results,l.results))});p.get("/admin/customers",async e=>{try{const t=e.req.query("tenant_id");let a="SELECT * FROM customers";t&&(a+=" WHERE tenant_id = ?"),a+=" ORDER BY created_at DESC";const s=t?await e.env.DB.prepare(a).bind(t).all():await e.env.DB.prepare(a).all();return e.html(`
+  `).bind(t,a).first();if(!s)return e.html("<h1>خطأ: النسبة غير موجودة</h1>",404);const r=await e.env.DB.prepare("SELECT * FROM banks WHERE tenant_id = ? ORDER BY bank_name").bind(a).all(),l=await e.env.DB.prepare("SELECT * FROM financing_types ORDER BY type_name").all();return e.html(pt(a,s,r.results,l.results))});c.get("/admin/customers",async e=>{try{const t=e.req.query("tenant_id");let a="SELECT * FROM customers";t&&(a+=" WHERE tenant_id = ?"),a+=" ORDER BY created_at DESC";const s=t?await e.env.DB.prepare(a).bind(t).all():await e.env.DB.prepare(a).all();return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -12303,6 +12825,8 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             min-width: 1200px;
             width: max-content;
           }
+          
+          ${k()}
         </style>
       </head>
       <body class="bg-gray-50">
@@ -12508,7 +13032,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/notifications",async e=>{try{return e.html(`
+    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/notifications",async e=>{try{return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -12539,6 +13063,8 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             0%, 100% { opacity: 1; }
             50% { opacity: .5; }
           }
+          
+          ${k()}
         </style>
       </head>
       <body class="bg-gray-50">
@@ -12807,7 +13333,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/requests/:id/edit",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
+    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/requests/:id/edit",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
       SELECT 
         fr.*,
         c.full_name as customer_name,
@@ -13239,7 +13765,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch(t){return console.error("Edit request page error:",t),e.html(`<h1>خطأ في تحميل الصفحة: ${t.message}</h1>`)}});p.get("/admin/requests",async e=>{try{const t=e.req.query("tenant_id");let a=`
+    `)}catch(t){return console.error("Edit request page error:",t),e.html(`<h1>خطأ في تحميل الصفحة: ${t.message}</h1>`)}});c.get("/admin/requests",async e=>{try{const t=e.req.query("tenant_id");let a=`
       SELECT 
         fr.id,
         fr.customer_id,
@@ -13297,6 +13823,8 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             min-width: 1200px;
             width: max-content;
           }
+          
+          ${k()}
         </style>
       </head>
       <body class="bg-gray-50">
@@ -13396,14 +13924,14 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
-                ${s.results.map(r=>{var n;const l=r.status==="approved"?"مقبول":r.status==="pending"?"قيد المراجعة":"مرفوض";return`
+                ${s.results.map(r=>{const l=r.status==="approved"?"مقبول":r.status==="pending"?"قيد المراجعة":"مرفوض";return`
                   <tr class="hover:bg-gray-50" 
                       data-customer="${r.customer_name||""}" 
                       data-bank="${r.bank_name||""}" 
                       data-status="${l}">
                     <td class="px-6 py-4 whitespace-nowrap font-medium">${r.customer_name||"عميل #"+r.customer_id}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${r.bank_name||"بنك #"+(r.selected_bank_id||"-")}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${(n=r.requested_amount)==null?void 0:n.toLocaleString("ar-SA")} ريال</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${r.requested_amount?.toLocaleString("ar-SA")} ريال</td>
                     <td class="px-6 py-4 whitespace-nowrap">${r.duration_months} شهر</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <span class="px-2 py-1 text-xs rounded-full ${r.status==="approved"?"bg-green-100 text-green-800":r.status==="pending"?"bg-yellow-100 text-yellow-800":"bg-red-100 text-red-800"}">
@@ -13490,7 +14018,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
           function exportToCSV() {
             const data = [
               ['العميل', 'البنك', 'المبلغ المطلوب', 'المدة (شهور)', 'الحالة', 'التاريخ'],
-              ${s.results.map(r=>{const l=r.status==="approved"?"مقبول":r.status==="pending"?"قيد المراجعة":"مرفوض",n=r.customer_name||`عميل #${r.customer_id}`,i=r.bank_name||`بنك #${r.selected_bank_id||"-"}`;return`['${n}', '${i}', '${r.requested_amount||0}', '${r.duration_months}', '${l}', '${new Date(r.created_at).toLocaleDateString("ar-SA")}']`}).join(`,
+              ${s.results.map(r=>{const l=r.status==="approved"?"مقبول":r.status==="pending"?"قيد المراجعة":"مرفوض",n=r.customer_name||`عميل #${r.customer_id}`,o=r.bank_name||`بنك #${r.selected_bank_id||"-"}`;return`['${n}', '${o}', '${r.requested_amount||0}', '${r.duration_months}', '${l}', '${new Date(r.created_at).toLocaleDateString("ar-SA")}']`}).join(`,
               `)}
             ];
             
@@ -13508,7 +14036,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/requests/new",async e=>{try{const t=await e.env.DB.prepare("SELECT id, full_name, phone FROM customers ORDER BY full_name").all(),a=await e.env.DB.prepare("SELECT id, bank_name FROM banks WHERE is_active = 1 ORDER BY bank_name").all(),s=await e.env.DB.prepare("SELECT id, type_name FROM financing_types ORDER BY type_name").all();return e.html(`
+    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/requests/new",async e=>{try{const t=await e.env.DB.prepare("SELECT id, full_name, phone FROM customers ORDER BY full_name").all(),a=await e.env.DB.prepare("SELECT id, bank_name FROM banks WHERE is_active = 1 ORDER BY bank_name").all(),s=await e.env.DB.prepare("SELECT id, type_name FROM financing_types ORDER BY type_name").all();return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -13657,7 +14185,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `)}catch{return e.html("<h1>خطأ في تحميل الصفحة</h1>")}});p.get("/admin/requests/:id",async e=>{var t,a;try{const s=e.req.param("id"),r=await e.env.DB.prepare(`
+    `)}catch{return e.html("<h1>خطأ في تحميل الصفحة</h1>")}});c.get("/admin/requests/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
       SELECT fr.*, 
              c.full_name as customer_name, c.phone as customer_phone, c.email as customer_email,
              b.bank_name, ft.type_name as financing_type_name
@@ -13666,13 +14194,13 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       LEFT JOIN banks b ON fr.selected_bank_id = b.id
       LEFT JOIN financing_types ft ON fr.financing_type_id = ft.id
       WHERE fr.id = ?
-    `).bind(s).first();return r?e.html(`
+    `).bind(t).first();return a?e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>عرض طلب التمويل #${s}</title>
+        <title>عرض طلب التمويل #${t}</title>
         <script src="https://cdn.tailwindcss.com"><\/script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
       </head>
@@ -13684,10 +14212,10 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
               العودة لقائمة الطلبات
             </a>
             <div class="flex gap-2">
-              <a href="/admin/requests/${s}/edit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded transition-all">
+              <a href="/admin/requests/${t}/edit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded transition-all">
                 <i class="fas fa-edit ml-1"></i> تعديل
               </a>
-              <a href="/admin/requests/${s}/delete" onclick="return confirm('هل أنت متأكد من الحذف؟')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition-all">
+              <a href="/admin/requests/${t}/delete" onclick="return confirm('هل أنت متأكد من الحذف؟')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition-all">
                 <i class="fas fa-trash ml-1"></i> حذف
               </a>
             </div>
@@ -13696,7 +14224,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
           <div class="bg-white rounded-xl shadow-lg p-8">
             <h1 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
               <i class="fas fa-file-invoice text-purple-600 ml-3"></i>
-              طلب التمويل #${s}
+              طلب التمويل #${t}
             </h1>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -13710,17 +14238,17 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
               
               <div>
                 <label class="block text-sm font-bold text-gray-600 mb-1">الاسم الكامل</label>
-                <p class="text-lg text-gray-900">${r.customer_name||"-"}</p>
+                <p class="text-lg text-gray-900">${a.customer_name||"-"}</p>
               </div>
               
               <div>
                 <label class="block text-sm font-bold text-gray-600 mb-1">رقم الجوال</label>
-                <p class="text-lg text-gray-900">${r.customer_phone||"-"}</p>
+                <p class="text-lg text-gray-900">${a.customer_phone||"-"}</p>
               </div>
               
               <div>
                 <label class="block text-sm font-bold text-gray-600 mb-1">البريد الإلكتروني</label>
-                <p class="text-lg text-gray-900">${r.customer_email||"-"}</p>
+                <p class="text-lg text-gray-900">${a.customer_email||"-"}</p>
               </div>
               
               <!-- معلومات التمويل -->
@@ -13733,48 +14261,48 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
               
               <div>
                 <label class="block text-sm font-bold text-gray-600 mb-1">نوع التمويل</label>
-                <p class="text-lg text-gray-900">${r.financing_type_name||"-"}</p>
+                <p class="text-lg text-gray-900">${a.financing_type_name||"-"}</p>
               </div>
               
               <div>
                 <label class="block text-sm font-bold text-gray-600 mb-1">المبلغ المطلوب</label>
-                <p class="text-lg font-bold text-green-600">${((t=r.requested_amount)==null?void 0:t.toLocaleString())||"0"} ريال</p>
+                <p class="text-lg font-bold text-green-600">${a.requested_amount?.toLocaleString()||"0"} ريال</p>
               </div>
               
               <div>
                 <label class="block text-sm font-bold text-gray-600 mb-1">مدة التمويل</label>
-                <p class="text-lg text-gray-900">${r.duration_months||"0"} شهر</p>
+                <p class="text-lg text-gray-900">${a.duration_months||"0"} شهر</p>
               </div>
               
               <div>
                 <label class="block text-sm font-bold text-gray-600 mb-1">الراتب عند الطلب</label>
-                <p class="text-lg text-gray-900">${((a=r.salary_at_request)==null?void 0:a.toLocaleString())||"0"} ريال</p>
+                <p class="text-lg text-gray-900">${a.salary_at_request?.toLocaleString()||"0"} ريال</p>
               </div>
               
               <div>
                 <label class="block text-sm font-bold text-gray-600 mb-1">البنك المختار</label>
-                <p class="text-lg text-gray-900">${r.bank_name||"غير محدد"}</p>
+                <p class="text-lg text-gray-900">${a.bank_name||"غير محدد"}</p>
               </div>
               
               <div>
                 <label class="block text-sm font-bold text-gray-600 mb-1">الحالة</label>
                 <p>
-                  <span class="px-4 py-2 rounded-full text-sm font-bold ${r.status==="approved"?"bg-green-100 text-green-800":r.status==="pending"?"bg-yellow-100 text-yellow-800":"bg-red-100 text-red-800"}">
-                    ${r.status==="approved"?"مقبول":r.status==="pending"?"قيد المراجعة":"مرفوض"}
+                  <span class="px-4 py-2 rounded-full text-sm font-bold ${a.status==="approved"?"bg-green-100 text-green-800":a.status==="pending"?"bg-yellow-100 text-yellow-800":"bg-red-100 text-red-800"}">
+                    ${a.status==="approved"?"مقبول":a.status==="pending"?"قيد المراجعة":"مرفوض"}
                   </span>
                 </p>
               </div>
               
-              ${r.notes?`
+              ${a.notes?`
                 <div class="md:col-span-2 mt-4">
                   <label class="block text-sm font-bold text-gray-600 mb-1">ملاحظات</label>
-                  <p class="text-gray-900 bg-gray-50 p-4 rounded">${r.notes}</p>
+                  <p class="text-gray-900 bg-gray-50 p-4 rounded">${a.notes}</p>
                 </div>
               `:""}
               
               <div class="md:col-span-2 mt-4">
                 <label class="block text-sm font-bold text-gray-600 mb-1">تاريخ الإنشاء</label>
-                <p class="text-gray-900">${new Date(r.created_at).toLocaleString("ar-SA")}</p>
+                <p class="text-gray-900">${new Date(a.created_at).toLocaleString("ar-SA")}</p>
               </div>
             </div>
           </div>
@@ -13787,7 +14315,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             </h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              ${r.id_attachment_url?`
+              ${a.id_attachment_url?`
                 <div class="border-2 border-blue-200 rounded-lg p-4 hover:shadow-md transition">
                   <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center">
@@ -13797,15 +14325,15 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                     <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">متوفر</span>
                   </div>
                   <div class="grid grid-cols-3 gap-2">
-                    <a href="${r.id_attachment_url}" target="_blank" 
+                    <a href="${a.id_attachment_url}" target="_blank" 
                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition text-center text-sm">
                       <i class="fas fa-eye"></i> عرض
                     </a>
-                    <a href="${r.id_attachment_url}" download 
+                    <a href="${a.id_attachment_url}" download 
                        class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded transition text-center text-sm">
                       <i class="fas fa-download"></i> تنزيل
                     </a>
-                    <button onclick="deleteAttachment('${r.id_attachment_url}', 'id')" 
+                    <button onclick="deleteAttachment('${a.id_attachment_url}', 'id')" 
                        class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded transition text-center text-sm">
                       <i class="fas fa-trash"></i> حذف
                     </button>
@@ -13821,7 +14349,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                 </div>
               `}
               
-              ${r.salary_attachment_url?`
+              ${a.salary_attachment_url?`
                 <div class="border-2 border-green-200 rounded-lg p-4 hover:shadow-md transition">
                   <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center">
@@ -13831,15 +14359,15 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                     <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">متوفر</span>
                   </div>
                   <div class="grid grid-cols-3 gap-2">
-                    <a href="${r.salary_attachment_url}" target="_blank" 
+                    <a href="${a.salary_attachment_url}" target="_blank" 
                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition text-center text-sm">
                       <i class="fas fa-eye"></i> عرض
                     </a>
-                    <a href="${r.salary_attachment_url}" download 
+                    <a href="${a.salary_attachment_url}" download 
                        class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded transition text-center text-sm">
                       <i class="fas fa-download"></i> تنزيل
                     </a>
-                    <button onclick="deleteAttachment('${r.salary_attachment_url}', 'salary')" 
+                    <button onclick="deleteAttachment('${a.salary_attachment_url}', 'salary')" 
                        class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded transition text-center text-sm">
                       <i class="fas fa-trash"></i> حذف
                     </button>
@@ -13855,7 +14383,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                 </div>
               `}
               
-              ${r.bank_statement_attachment_url?`
+              ${a.bank_statement_attachment_url?`
                 <div class="border-2 border-purple-200 rounded-lg p-4 hover:shadow-md transition">
                   <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center">
@@ -13865,15 +14393,15 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                     <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">متوفر</span>
                   </div>
                   <div class="grid grid-cols-3 gap-2">
-                    <a href="${r.bank_statement_attachment_url}" target="_blank" 
+                    <a href="${a.bank_statement_attachment_url}" target="_blank" 
                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition text-center text-sm">
                       <i class="fas fa-eye"></i> عرض
                     </a>
-                    <a href="${r.bank_statement_attachment_url}" download 
+                    <a href="${a.bank_statement_attachment_url}" download 
                        class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded transition text-center text-sm">
                       <i class="fas fa-download"></i> تنزيل
                     </a>
-                    <button onclick="deleteAttachment('${r.bank_statement_attachment_url}', 'bank_statement')" 
+                    <button onclick="deleteAttachment('${a.bank_statement_attachment_url}', 'bank_statement')" 
                        class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded transition text-center text-sm">
                       <i class="fas fa-trash"></i> حذف
                     </button>
@@ -13889,7 +14417,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                 </div>
               `}
               
-              ${r.additional_attachment_url?`
+              ${a.additional_attachment_url?`
                 <div class="border-2 border-orange-200 rounded-lg p-4 hover:shadow-md transition">
                   <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center">
@@ -13899,15 +14427,15 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                     <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">متوفر</span>
                   </div>
                   <div class="grid grid-cols-3 gap-2">
-                    <a href="${r.additional_attachment_url}" target="_blank" 
+                    <a href="${a.additional_attachment_url}" target="_blank" 
                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition text-center text-sm">
                       <i class="fas fa-eye"></i> عرض
                     </a>
-                    <a href="${r.additional_attachment_url}" download 
+                    <a href="${a.additional_attachment_url}" download 
                        class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded transition text-center text-sm">
                       <i class="fas fa-download"></i> تنزيل
                     </a>
-                    <button onclick="deleteAttachment('${r.additional_attachment_url}', 'additional')" 
+                    <button onclick="deleteAttachment('${a.additional_attachment_url}', 'additional')" 
                        class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded transition text-center text-sm">
                       <i class="fas fa-trash"></i> حذف
                     </button>
@@ -13924,7 +14452,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
               `}
             </div>
             
-            ${!r.id_attachment_url&&!r.salary_attachment_url&&!r.bank_statement_attachment_url&&!r.additional_attachment_url?`
+            ${!a.id_attachment_url&&!a.salary_attachment_url&&!a.bank_statement_attachment_url&&!a.additional_attachment_url?`
               <div class="text-center mt-6 text-gray-500">
                 <i class="fas fa-inbox text-4xl mb-2"></i>
                 <p>لا توجد مرفقات لهذا الطلب</p>
@@ -13960,7 +14488,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
       </body>
       </html>
-    `):e.html("<h1>الطلب غير موجود</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/customers/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare("SELECT * FROM customers WHERE id = ?").bind(t).first();return a?e.html(`
+    `):e.html("<h1>الطلب غير موجود</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/customers/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare("SELECT * FROM customers WHERE id = ?").bind(t).first();return a?e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -14028,7 +14556,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `):e.html("<h1>العميل غير موجود</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/customers/:id/edit",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare("SELECT * FROM customers WHERE id = ?").bind(t).first();return a?e.html(`
+    `):e.html("<h1>العميل غير موجود</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/customers/:id/edit",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare("SELECT * FROM customers WHERE id = ?").bind(t).first();return a?e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -14086,7 +14614,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `):e.html("<h1>العميل غير موجود</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/customers/:id/delete",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM customers WHERE id = ?").bind(t).run(),e.redirect("/admin/customers")}catch{return e.html("<h1>خطأ في حذف العميل</h1>")}});p.get("/admin/banks/add",async e=>e.html(`
+    `):e.html("<h1>العميل غير موجود</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/customers/:id/delete",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM customers WHERE id = ?").bind(t).run(),e.redirect("/admin/customers")}catch{return e.html("<h1>خطأ في حذف العميل</h1>")}});c.get("/admin/banks/add",async e=>e.html(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
     <head>
@@ -14137,7 +14665,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       </div>
     </body>
     </html>
-  `));p.get("/admin/customers/:id/report",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
+  `));c.get("/admin/customers/:id/report",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
       SELECT 
         c.*,
         ft.type_name as financing_type_name,
@@ -14163,6 +14691,8 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
           .report-section {
             page-break-inside: avoid;
           }
+          
+          ${k()}
         </style>
       </head>
       <body class="bg-gray-50">
@@ -14441,7 +14971,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `)}catch(t){return console.error("خطأ في عرض تقرير العميل:",t),e.html(`<h1>حدث خطأ: ${t.message}</h1>`)}});p.get("/admin/requests/:id/report",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
+    `)}catch(t){return console.error("خطأ في عرض تقرير العميل:",t),e.html(`<h1>حدث خطأ: ${t.message}</h1>`)}});c.get("/admin/requests/:id/report",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
       SELECT 
         fr.*,
         c.full_name as customer_name,
@@ -14457,7 +14987,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       LEFT JOIN banks b ON fr.selected_bank_id = b.id
       LEFT JOIN financing_types ft ON fr.financing_type_id = ft.id
       WHERE fr.id = ?
-    `).bind(t).first();if(!a)return e.html("<h1>الطلب غير موجود</h1>");const s=a,r=o=>o?new Date(o).toLocaleDateString("ar-SA",{year:"numeric",month:"long",day:"numeric"}):"غير محدد",l=o=>o?o.toLocaleString("ar-SA"):"غير محدد",n={pending:{text:"قيد المراجعة",color:"yellow",icon:"clock"},approved:{text:"مقبول",color:"green",icon:"check-circle"},rejected:{text:"مرفوض",color:"red",icon:"times-circle"}},i=n[s.status]||n.pending;return e.html(`
+    `).bind(t).first();if(!a)return e.html("<h1>الطلب غير موجود</h1>");const s=a,r=i=>i?new Date(i).toLocaleDateString("ar-SA",{year:"numeric",month:"long",day:"numeric"}):"غير محدد",l=i=>i?i.toLocaleString("ar-SA"):"غير محدد",n={pending:{text:"قيد المراجعة",color:"yellow",icon:"clock"},approved:{text:"مقبول",color:"green",icon:"check-circle"},rejected:{text:"مرفوض",color:"red",icon:"times-circle"}},o=n[s.status]||n.pending;return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -14474,6 +15004,8 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
           .report-section {
             page-break-inside: avoid;
           }
+          
+          ${k()}
         </style>
       </head>
       <body class="bg-gray-50">
@@ -14505,9 +15037,9 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
           <!-- حالة الطلب -->
           <div class="bg-white rounded-xl shadow-lg p-6 mb-6 report-section">
             <div class="flex items-center justify-center">
-              <div class="bg-${i.color}-100 border-2 border-${i.color}-300 rounded-lg p-6 text-center">
-                <i class="fas fa-${i.icon} text-${i.color}-600 text-5xl mb-3"></i>
-                <p class="text-2xl font-bold text-${i.color}-700">حالة الطلب: ${i.text}</p>
+              <div class="bg-${o.color}-100 border-2 border-${o.color}-300 rounded-lg p-6 text-center">
+                <i class="fas fa-${o.icon} text-${o.color}-600 text-5xl mb-3"></i>
+                <p class="text-2xl font-bold text-${o.color}-700">حالة الطلب: ${o.text}</p>
                 <p class="text-sm text-gray-600 mt-2">تاريخ الطلب: ${r(s.created_at)}</p>
               </div>
             </div>
@@ -14714,7 +15246,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `)}catch(t){return console.error("خطأ في عرض تقرير طلب التمويل:",t),e.html(`<h1>حدث خطأ: ${t.message}</h1>`)}});p.get("/admin/requests/:id/timeline",async e=>{var t;try{const a=e.req.param("id"),s=await e.env.DB.prepare(`
+    `)}catch(t){return console.error("خطأ في عرض تقرير طلب التمويل:",t),e.html(`<h1>حدث خطأ: ${t.message}</h1>`)}});c.get("/admin/requests/:id/timeline",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
       SELECT 
         fr.*,
         c.full_name as customer_name,
@@ -14723,17 +15255,17 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       FROM financing_requests fr
       LEFT JOIN customers c ON fr.customer_id = c.id
       WHERE fr.id = ?
-    `).bind(a).first();if(!s)return e.html("<h1>الطلب غير موجود</h1>");const r=s,l=await e.env.DB.prepare(`
+    `).bind(t).first();if(!a)return e.html("<h1>الطلب غير موجود</h1>");const s=a,r=await e.env.DB.prepare(`
       SELECT * FROM financing_request_status_history 
       WHERE request_id = ? 
       ORDER BY created_at ASC
-    `).bind(a).all(),n=(d,m)=>{if(!d||!m)return null;const g=new Date(m).getTime()-new Date(d).getTime(),b=Math.floor(g/(1e3*60*60*24)),h=Math.floor(g%(1e3*60*60*24)/(1e3*60*60)),w=Math.floor(g%(1e3*60*60)/(1e3*60));return b>0?`${b} يوم و ${h} ساعة`:h>0?`${h} ساعة و ${w} دقيقة`:`${w} دقيقة`},i=d=>d?new Date(d).toLocaleString("ar-SA",{year:"numeric",month:"long",day:"numeric",hour:"2-digit",minute:"2-digit"}):"غير محدد",o=[];if(r.customer_registration_date&&o.push({title:"تسجيل العميل",icon:"user-plus",color:"blue",date:r.customer_registration_date,description:`تم تسجيل العميل ${r.customer_name} في النظام`}),r.first_calculation_date){const d=n(r.customer_registration_date,r.first_calculation_date);o.push({title:"استخدام الحاسبة",icon:"calculator",color:"green",date:r.first_calculation_date,description:"العميل استخدم حاسبة التمويل لأول مرة",duration:d})}if(o.push({title:"تقديم طلب التمويل",icon:"file-invoice",color:"purple",date:r.created_at,description:`تم تقديم طلب تمويل بمبلغ ${(t=r.requested_amount)==null?void 0:t.toLocaleString("ar-SA")} ريال`,duration:r.first_calculation_date?n(r.first_calculation_date,r.created_at):n(r.customer_registration_date,r.created_at)}),l.results.length>0){let d=r.created_at;l.results.forEach(m=>{const b={pending:{title:"قيد الانتظار",icon:"clock",color:"yellow"},under_review:{title:"قيد المراجعة",icon:"search",color:"orange"},approved:{title:"تمت الموافقة",icon:"check-circle",color:"green"},rejected:{title:"تم الرفض",icon:"times-circle",color:"red"}}[m.new_status]||{title:m.new_status,icon:"info",color:"gray"};o.push({title:b.title,icon:b.icon,color:b.color,date:m.created_at,description:m.notes||`تغيرت الحالة إلى: ${b.title}`,duration:n(d,m.created_at)}),d=m.created_at})}else r.reviewed_at&&o.push({title:"قيد المراجعة",icon:"search",color:"orange",date:r.reviewed_at,description:"بدأت عملية المراجعة",duration:n(r.created_at,r.reviewed_at)}),r.approved_at&&o.push({title:"تمت الموافقة",icon:"check-circle",color:"green",date:r.approved_at,description:"تمت الموافقة على الطلب",duration:n(r.reviewed_at||r.created_at,r.approved_at)}),r.rejected_at&&o.push({title:"تم الرفض",icon:"times-circle",color:"red",date:r.rejected_at,description:"تم رفض الطلب",duration:n(r.reviewed_at||r.created_at,r.rejected_at)});const c=o.length>1?n(o[0].date,o[o.length-1].date):null;return e.html(`
+    `).bind(t).all(),l=(d,p)=>{if(!d||!p)return null;const u=new Date(p).getTime()-new Date(d).getTime(),m=Math.floor(u/(1e3*60*60*24)),g=Math.floor(u%(1e3*60*60*24)/(1e3*60*60)),f=Math.floor(u%(1e3*60*60)/(1e3*60));return m>0?`${m} يوم و ${g} ساعة`:g>0?`${g} ساعة و ${f} دقيقة`:`${f} دقيقة`},n=d=>d?new Date(d).toLocaleString("ar-SA",{year:"numeric",month:"long",day:"numeric",hour:"2-digit",minute:"2-digit"}):"غير محدد",o=[];if(s.customer_registration_date&&o.push({title:"تسجيل العميل",icon:"user-plus",color:"blue",date:s.customer_registration_date,description:`تم تسجيل العميل ${s.customer_name} في النظام`}),s.first_calculation_date){const d=l(s.customer_registration_date,s.first_calculation_date);o.push({title:"استخدام الحاسبة",icon:"calculator",color:"green",date:s.first_calculation_date,description:"العميل استخدم حاسبة التمويل لأول مرة",duration:d})}if(o.push({title:"تقديم طلب التمويل",icon:"file-invoice",color:"purple",date:s.created_at,description:`تم تقديم طلب تمويل بمبلغ ${s.requested_amount?.toLocaleString("ar-SA")} ريال`,duration:s.first_calculation_date?l(s.first_calculation_date,s.created_at):l(s.customer_registration_date,s.created_at)}),r.results.length>0){let d=s.created_at;r.results.forEach(p=>{const m={pending:{title:"قيد الانتظار",icon:"clock",color:"yellow"},under_review:{title:"قيد المراجعة",icon:"search",color:"orange"},approved:{title:"تمت الموافقة",icon:"check-circle",color:"green"},rejected:{title:"تم الرفض",icon:"times-circle",color:"red"}}[p.new_status]||{title:p.new_status,icon:"info",color:"gray"};o.push({title:m.title,icon:m.icon,color:m.color,date:p.created_at,description:p.notes||`تغيرت الحالة إلى: ${m.title}`,duration:l(d,p.created_at)}),d=p.created_at})}else s.reviewed_at&&o.push({title:"قيد المراجعة",icon:"search",color:"orange",date:s.reviewed_at,description:"بدأت عملية المراجعة",duration:l(s.created_at,s.reviewed_at)}),s.approved_at&&o.push({title:"تمت الموافقة",icon:"check-circle",color:"green",date:s.approved_at,description:"تمت الموافقة على الطلب",duration:l(s.reviewed_at||s.created_at,s.approved_at)}),s.rejected_at&&o.push({title:"تم الرفض",icon:"times-circle",color:"red",date:s.rejected_at,description:"تم رفض الطلب",duration:l(s.reviewed_at||s.created_at,s.rejected_at)});const i=o.length>1?l(o[0].date,o[o.length-1].date):null;return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>التقرير الزمني - طلب #${a}</title>
+        <title>التقرير الزمني - طلب #${t}</title>
         <script src="https://cdn.tailwindcss.com"><\/script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
         <style>
@@ -14761,13 +15293,15 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             z-index: 10;
           }
+          
+          ${k()}
         </style>
       </head>
       <body class="bg-gray-50">
         <div class="max-w-5xl mx-auto p-6">
           <!-- أزرار التحكم -->
           <div class="mb-6 no-print flex justify-between items-center">
-            <a href="/admin/requests/${a}/report" class="text-blue-600 hover:text-blue-800">
+            <a href="/admin/requests/${t}/report" class="text-blue-600 hover:text-blue-800">
               <i class="fas fa-arrow-right ml-2"></i>
               العودة للتقرير
             </a>
@@ -14791,7 +15325,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                 التقرير الزمني (Timeline)
               </h1>
               <p class="text-xl opacity-90">رحلة طلب التمويل</p>
-              <p class="text-sm opacity-75 mt-2">طلب رقم #${a} | ${r.customer_name}</p>
+              <p class="text-sm opacity-75 mt-2">طلب رقم #${t} | ${s.customer_name}</p>
             </div>
           </div>
           
@@ -14810,16 +15344,16 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                 <i class="fas fa-hourglass-half text-purple-600 text-2xl"></i>
               </div>
               <p class="text-sm text-gray-500">الوقت الإجمالي</p>
-              <p class="text-2xl font-bold text-purple-600">${c||"جاري..."}</p>
+              <p class="text-2xl font-bold text-purple-600">${i||"جاري..."}</p>
             </div>
             
             <div class="bg-white rounded-xl shadow-lg p-6 text-center">
-              <div class="bg-${r.status==="approved"?"green":r.status==="rejected"?"red":"yellow"}-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i class="fas fa-${r.status==="approved"?"check-circle":r.status==="rejected"?"times-circle":"clock"} text-${r.status==="approved"?"green":r.status==="rejected"?"red":"yellow"}-600 text-2xl"></i>
+              <div class="bg-${s.status==="approved"?"green":s.status==="rejected"?"red":"yellow"}-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="fas fa-${s.status==="approved"?"check-circle":s.status==="rejected"?"times-circle":"clock"} text-${s.status==="approved"?"green":s.status==="rejected"?"red":"yellow"}-600 text-2xl"></i>
               </div>
               <p class="text-sm text-gray-500">الحالة الحالية</p>
-              <p class="text-xl font-bold text-${r.status==="approved"?"green":r.status==="rejected"?"red":"yellow"}-600">
-                ${r.status==="approved"?"مقبول":r.status==="rejected"?"مرفوض":"قيد المراجعة"}
+              <p class="text-xl font-bold text-${s.status==="approved"?"green":s.status==="rejected"?"red":"yellow"}-600">
+                ${s.status==="approved"?"مقبول":s.status==="rejected"?"مرفوض":"قيد المراجعة"}
               </p>
             </div>
           </div>
@@ -14836,7 +15370,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             
             <!-- العناصر -->
             <div class="space-y-8 relative">
-              ${o.map((d,m)=>`
+              ${o.map((d,p)=>`
                 <div class="flex items-start gap-6 relative pr-20">
                   <!-- النقطة -->
                   <div class="timeline-dot bg-${d.color}-500 text-white">
@@ -14847,7 +15381,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                   <div class="flex-1 bg-${d.color}-50 border-2 border-${d.color}-200 rounded-lg p-6">
                     <div class="flex items-center justify-between mb-2">
                       <h3 class="text-xl font-bold text-${d.color}-700">
-                        ${m+1}. ${d.title}
+                        ${p+1}. ${d.title}
                       </h3>
                       ${d.duration?`
                         <span class="bg-${d.color}-200 text-${d.color}-800 px-3 py-1 rounded-full text-sm font-bold">
@@ -14859,7 +15393,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                     <p class="text-gray-700 mb-2">${d.description}</p>
                     <p class="text-sm text-gray-500">
                       <i class="fas fa-calendar ml-1"></i>
-                      ${i(d.date)}
+                      ${n(d.date)}
                     </p>
                   </div>
                 </div>
@@ -14874,7 +15408,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
               ملخص الفترات الزمنية
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              ${o.filter(d=>d.duration).map((d,m)=>{var g;return`
+              ${o.filter(d=>d.duration).map((d,p)=>`
                 <div class="bg-white rounded-lg p-4 shadow">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
@@ -14882,17 +15416,17 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                         <i class="fas fa-${d.icon} text-${d.color}-600"></i>
                       </div>
                       <div>
-                        <p class="text-sm text-gray-500">من ${((g=o[m])==null?void 0:g.title)||"البداية"}</p>
+                        <p class="text-sm text-gray-500">من ${o[p]?.title||"البداية"}</p>
                         <p class="font-bold text-gray-800">إلى ${d.title}</p>
                       </div>
                     </div>
                     <p class="text-lg font-bold text-${d.color}-600">${d.duration}</p>
                   </div>
                 </div>
-              `}).join("")}
+              `).join("")}
             </div>
             
-            ${c?`
+            ${i?`
               <div class="mt-4 bg-white rounded-lg p-4 shadow-lg border-2 border-purple-400">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-3">
@@ -14901,7 +15435,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
                     </div>
                     <p class="text-xl font-bold text-gray-800">إجمالي الوقت</p>
                   </div>
-                  <p class="text-2xl font-bold text-purple-600">${c}</p>
+                  <p class="text-2xl font-bold text-purple-600">${i}</p>
                 </div>
               </div>
             `:""}
@@ -14920,10 +15454,10 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `)}catch(a){return console.error("خطأ في عرض Timeline:",a),e.html(`<h1>حدث خطأ: ${a.message}</h1>`)}});p.post("/api/banks",async e=>{try{const t=await e.req.parseBody();return await e.env.DB.prepare(`
+    `)}catch(t){return console.error("خطأ في عرض Timeline:",t),e.html(`<h1>حدث خطأ: ${t.message}</h1>`)}});c.post("/api/banks",async e=>{try{const t=await e.req.parseBody();return await e.env.DB.prepare(`
       INSERT INTO banks (bank_name, description, is_active, created_at)
       VALUES (?, ?, 1, datetime('now'))
-    `).bind(t.bank_name,t.description||"").run(),e.redirect("/admin/banks")}catch{return e.json({error:"فشل إضافة البنك"},500)}});p.get("/admin/banks/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare("SELECT * FROM banks WHERE id = ?").bind(t).first();return a?e.html(`
+    `).bind(t.bank_name,t.description||"").run(),e.redirect("/admin/banks")}catch{return e.json({error:"فشل إضافة البنك"},500)}});c.get("/admin/banks/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare("SELECT * FROM banks WHERE id = ?").bind(t).first();return a?e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -14986,7 +15520,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `):e.html("<h1>البنك غير موجود</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/banks/:id/edit",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare("SELECT * FROM banks WHERE id = ?").bind(t).first();return a?e.html(`
+    `):e.html("<h1>البنك غير موجود</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/banks/:id/edit",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare("SELECT * FROM banks WHERE id = ?").bind(t).first();return a?e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -15037,11 +15571,11 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `):e.html("<h1>البنك غير موجود</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.post("/api/banks/:id",async e=>{try{const t=e.req.param("id"),a=await e.req.parseBody();return await e.env.DB.prepare(`
+    `):e.html("<h1>البنك غير موجود</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.post("/api/banks/:id",async e=>{try{const t=e.req.param("id"),a=await e.req.parseBody();return await e.env.DB.prepare(`
       UPDATE banks 
       SET bank_name = ?, description = ?
       WHERE id = ?
-    `).bind(a.bank_name,a.description||"",t).run(),e.redirect("/admin/banks")}catch{return e.json({error:"فشل تعديل البنك"},500)}});p.get("/admin/banks/:id/delete",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM banks WHERE id = ?").bind(t).run(),e.redirect("/admin/banks")}catch{return e.html("<h1>خطأ في حذف البنك</h1>")}});p.get("/admin/banks",async e=>{try{const t=await e.env.DB.prepare("SELECT * FROM banks ORDER BY bank_name").all();return e.html(`
+    `).bind(a.bank_name,a.description||"",t).run(),e.redirect("/admin/banks")}catch{return e.json({error:"فشل تعديل البنك"},500)}});c.get("/admin/banks/:id/delete",async e=>{try{const t=e.req.param("id");return await e.env.DB.prepare("DELETE FROM banks WHERE id = ?").bind(t).run(),e.redirect("/admin/banks")}catch{return e.html("<h1>خطأ في حذف البنك</h1>")}});c.get("/admin/banks",async e=>{try{const t=await e.env.DB.prepare("SELECT * FROM banks ORDER BY bank_name").all();return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -15231,7 +15765,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/rates",async e=>{try{const t=await e.env.DB.prepare(`
+    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/rates",async e=>{try{const t=await e.env.DB.prepare(`
       SELECT fr.*, b.bank_name, ft.type_name
       FROM bank_financing_rates fr
       LEFT JOIN banks b ON fr.bank_id = b.id
@@ -15425,7 +15959,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/rates/new",async e=>{try{const t=await e.env.DB.prepare("SELECT id, bank_name FROM banks WHERE is_active = 1 ORDER BY bank_name").all(),a=await e.env.DB.prepare("SELECT id, type_name FROM financing_types ORDER BY type_name").all();return e.html(`
+    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/rates/new",async e=>{try{const t=await e.env.DB.prepare("SELECT id, bank_name FROM banks WHERE is_active = 1 ORDER BY bank_name").all(),a=await e.env.DB.prepare("SELECT id, type_name FROM financing_types ORDER BY type_name").all();return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -15551,7 +16085,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `)}catch{return e.html("<h1>خطأ في تحميل الصفحة</h1>")}});p.get("/admin/rates/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
+    `)}catch{return e.html("<h1>خطأ في تحميل الصفحة</h1>")}});c.get("/admin/rates/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
       SELECT fr.*, b.bank_name, ft.type_name
       FROM bank_financing_rates fr
       LEFT JOIN banks b ON fr.bank_id = b.id
@@ -15644,7 +16178,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `):e.html("<h1>النسبة غير موجودة</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/subscriptions",async e=>{try{const t=await e.env.DB.prepare(`
+    `):e.html("<h1>النسبة غير موجودة</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/subscriptions",async e=>{try{const t=await e.env.DB.prepare(`
       SELECT s.*, p.package_name, p.price
       FROM subscriptions s
       LEFT JOIN packages p ON s.package_id = p.id
@@ -15850,7 +16384,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/subscriptions/new",async e=>{try{const t=await e.env.DB.prepare("SELECT id, package_name, price, duration_months FROM packages WHERE is_active = 1 ORDER BY price").all();return e.html(`
+    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/subscriptions/new",async e=>{try{const t=await e.env.DB.prepare("SELECT id, package_name, price, duration_months FROM packages WHERE is_active = 1 ORDER BY price").all();return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -15994,7 +16528,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch{return e.html("<h1>خطأ في تحميل الصفحة</h1>")}});p.get("/admin/subscriptions/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
+    `)}catch{return e.html("<h1>خطأ في تحميل الصفحة</h1>")}});c.get("/admin/subscriptions/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
       SELECT s.*, p.package_name, p.price
       FROM subscriptions s
       LEFT JOIN packages p ON s.package_id = p.id
@@ -16081,7 +16615,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `):e.html("<h1>الاشتراك غير موجود</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/packages",async e=>{try{const t=await e.env.DB.prepare(`
+    `):e.html("<h1>الاشتراك غير موجود</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/packages",async e=>{try{const t=await e.env.DB.prepare(`
       SELECT * FROM packages ORDER BY price
     `).all();return e.html(`
       <!DOCTYPE html>
@@ -16270,7 +16804,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/packages/new",async e=>e.html(`
+    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/packages/new",async e=>e.html(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
     <head>
@@ -16397,7 +16931,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       </div>
     </body>
     </html>
-  `));p.get("/admin/packages/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare("SELECT * FROM packages WHERE id = ?").bind(t).first();return a?e.html(`
+  `));c.get("/admin/packages/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare("SELECT * FROM packages WHERE id = ?").bind(t).first();return a?e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -16478,7 +17012,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `):e.html("<h1>الباقة غير موجودة</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/users",async e=>{try{return e.html(`
+    `):e.html("<h1>الباقة غير موجودة</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/users",async e=>{try{return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -16781,7 +17315,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/users/new",async e=>{try{const t=await e.env.DB.prepare("SELECT id, role_name FROM roles ORDER BY id").all(),a=await e.env.DB.prepare('SELECT id, company_name FROM subscriptions WHERE status = "active" ORDER BY company_name').all();return e.html(`
+    `)}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/users/new",async e=>{try{const t=await e.env.DB.prepare("SELECT id, role_name FROM roles ORDER BY id").all(),a=await e.env.DB.prepare('SELECT id, company_name FROM subscriptions WHERE status = "active" ORDER BY company_name').all();return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -17044,7 +17578,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch{return e.html("<h1>خطأ في تحميل الصفحة</h1>")}});p.get("/admin/users/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
+    `)}catch{return e.html("<h1>خطأ في تحميل الصفحة</h1>")}});c.get("/admin/users/:id",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
       SELECT u.*, r.role_name, s.company_name
       FROM users u
       LEFT JOIN roles r ON u.role_id = r.id
@@ -17148,7 +17682,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         </div>
       </body>
       </html>
-    `):e.html("<h1>المستخدم غير موجود</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});p.get("/admin/users/:id/permissions",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
+    `):e.html("<h1>المستخدم غير موجود</h1>")}catch{return e.html("<h1>خطأ في تحميل البيانات</h1>")}});c.get("/admin/users/:id/permissions",async e=>{try{const t=e.req.param("id"),a=await e.env.DB.prepare(`
       SELECT u.*, r.role_name 
       FROM users u
       LEFT JOIN roles r ON u.role_id = r.id
@@ -17160,7 +17694,7 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
       FROM permissions p
       JOIN role_permissions rp ON p.id = rp.permission_id
       WHERE rp.role_id = ?
-    `).bind(a.role_id).all()).results.map(o=>o.id),n={};s.results.forEach(o=>{n[o.category]||(n[o.category]=[]),n[o.category].push({...o,hasPermission:l.includes(o.id)})});const i={dashboard:"لوحة التحكم",customers:"العملاء",requests:"طلبات التمويل",banks:"البنوك",rates:"النسب التمويلية",packages:"الباقات",subscriptions:"الاشتراكات",users:"المستخدمين",calculator:"الحاسبة",reports:"التقارير"};return e.html(`
+    `).bind(a.role_id).all()).results.map(i=>i.id),n={};s.results.forEach(i=>{n[i.category]||(n[i.category]=[]),n[i.category].push({...i,hasPermission:l.includes(i.id)})});const o={dashboard:"لوحة التحكم",customers:"العملاء",requests:"طلبات التمويل",banks:"البنوك",rates:"النسب التمويلية",packages:"الباقات",subscriptions:"الاشتراكات",users:"المستخدمين",calculator:"الحاسبة",reports:"التقارير"};return e.html(`
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
       <head>
@@ -17198,27 +17732,27 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
             <input type="hidden" name="user_id" value="${t}">
             <input type="hidden" name="role_id" value="${a.role_id}">
             
-            ${Object.keys(n).map(o=>`
+            ${Object.keys(n).map(i=>`
               <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-bold text-gray-800 mb-4 border-b-2 border-indigo-600 pb-2">
                   <i class="fas fa-folder text-indigo-600 ml-2"></i>
-                  ${i[o]||o}
+                  ${o[i]||i}
                 </h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  ${n[o].map(c=>`
+                  ${n[i].map(d=>`
                     <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
                       <input 
                         type="checkbox" 
-                        id="perm_${c.id}" 
+                        id="perm_${d.id}" 
                         name="permissions[]" 
-                        value="${c.id}"
-                        ${c.hasPermission?"checked":""}
+                        value="${d.id}"
+                        ${d.hasPermission?"checked":""}
                         class="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                       >
-                      <label for="perm_${c.id}" class="mr-3 flex-1 cursor-pointer">
-                        <div class="font-semibold text-gray-800">${c.permission_name}</div>
-                        ${c.description?`<div class="text-xs text-gray-500">${c.description}</div>`:""}
+                      <label for="perm_${d.id}" class="mr-3 flex-1 cursor-pointer">
+                        <div class="font-semibold text-gray-800">${d.permission_name}</div>
+                        ${d.description?`<div class="text-xs text-gray-500">${d.description}</div>`:""}
                       </label>
                     </div>
                   `).join("")}
@@ -17286,9 +17820,9 @@ var ht=Object.defineProperty;var Ae=e=>{throw TypeError(e)};var yt=(e,t,a)=>t in
         <\/script>
       </body>
       </html>
-    `)}catch(t){return e.html("<h1>خطأ في تحميل البيانات: "+t.message+"</h1>")}});p.post("/api/users/:id/permissions",async e=>{try{const t=e.req.param("id"),{role_id:a,permission_ids:s}=await e.req.json();if(await e.env.DB.prepare(`
+    `)}catch(t){return e.html("<h1>خطأ في تحميل البيانات: "+t.message+"</h1>")}});c.post("/api/users/:id/permissions",async e=>{try{const t=e.req.param("id"),{role_id:a,permission_ids:s}=await e.req.json();if(await e.env.DB.prepare(`
       DELETE FROM role_permissions WHERE role_id = ?
     `).bind(a).run(),s&&s.length>0)for(const r of s)await e.env.DB.prepare(`
           INSERT OR IGNORE INTO role_permissions (role_id, permission_id)
           VALUES (?, ?)
-        `).bind(a,r).run();return e.json({success:!0,message:"تم تحديث الصلاحيات بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});const We=new ut,ya=Object.assign({"/src/index.tsx":p});let bt=!1;for(const[,e]of Object.entries(ya))e&&(We.all("*",t=>{let a;try{a=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,a)}),We.notFound(t=>{let a;try{a=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,a)}),bt=!0);if(!bt)throw new Error("Can't import modules from ['/src/index.ts','/src/index.tsx','/app/server.ts']");export{We as default};
+        `).bind(a,r).run();return e.json({success:!0,message:"تم تحديث الصلاحيات بنجاح"})}catch(t){return e.json({success:!1,error:t.message},500)}});const W=new le,mt=Object.assign({"/src/index.tsx":c});let ce=!1;for(const[,e]of Object.entries(mt))e&&(W.all("*",t=>{let a;try{a=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,a)}),W.notFound(t=>{let a;try{a=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,a)}),ce=!0);if(!ce)throw new Error("Can't import modules from ['/src/index.ts','/src/index.tsx','/app/server.ts']");export{W as default};

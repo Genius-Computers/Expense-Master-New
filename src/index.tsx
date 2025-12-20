@@ -17,6 +17,7 @@ import { customersReportPage, requestsReportPage, financialReportPage } from './
 import { paymentsPage } from './payments-page'
 import { banksManagementPage } from './banks-management-page'
 import { generateAddRatePage, generateEditRatePage } from './rates-forms'
+import { generateWorkflowTimelinePage } from './workflow-page'
 
 type Bindings = {
   DB: D1Database;
@@ -2097,6 +2098,201 @@ app.post('/api/requests', async (c) => {
   } catch (error: any) {
     console.error('Error creating request:', error)
     return c.json({ success: false, error: error.message, message: 'حدث خطأ أثناء حفظ الطلب' }, 500)
+  }
+})
+
+// ============= WORKFLOW APIs =============
+
+// Get all workflow stages
+app.get('/api/workflow/stages', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(`
+      SELECT * FROM workflow_stages 
+      WHERE is_active = 1 
+      ORDER BY stage_order ASC
+    `).all()
+    
+    return c.json({ success: true, data: results })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+// Get workflow timeline for a specific request
+app.get('/api/workflow/timeline/:requestId', async (c) => {
+  try {
+    const requestId = c.req.param('requestId')
+    
+    // Get all stage transitions
+    const { results: transitions } = await c.env.DB.prepare(`
+      SELECT 
+        wst.*,
+        from_stage.stage_name_ar as from_stage_name,
+        from_stage.stage_color as from_stage_color,
+        from_stage.stage_icon as from_stage_icon,
+        to_stage.stage_name_ar as to_stage_name,
+        to_stage.stage_color as to_stage_color,
+        to_stage.stage_icon as to_stage_icon,
+        u.full_name as transitioned_by_name
+      FROM workflow_stage_transitions wst
+      LEFT JOIN workflow_stages from_stage ON wst.from_stage_id = from_stage.id
+      LEFT JOIN workflow_stages to_stage ON wst.to_stage_id = to_stage.id
+      LEFT JOIN users u ON wst.transitioned_by = u.id
+      WHERE wst.request_id = ?
+      ORDER BY wst.created_at ASC
+    `).bind(requestId).all()
+    
+    // Get all actions for this request
+    const { results: actions } = await c.env.DB.prepare(`
+      SELECT 
+        wsa.*,
+        ws.stage_name_ar,
+        ws.stage_color,
+        ws.stage_icon,
+        u.full_name as performed_by_name
+      FROM workflow_stage_actions wsa
+      LEFT JOIN workflow_stages ws ON wsa.stage_id = ws.id
+      LEFT JOIN users u ON wsa.performed_by = u.id
+      WHERE wsa.request_id = ?
+      ORDER BY wsa.created_at ASC
+    `).bind(requestId).all()
+    
+    // Get all tasks for this request
+    const { results: tasks } = await c.env.DB.prepare(`
+      SELECT 
+        wst.*,
+        ws.stage_name_ar,
+        assigned_user.full_name as assigned_to_name,
+        completed_user.full_name as completed_by_name
+      FROM workflow_stage_tasks wst
+      LEFT JOIN workflow_stages ws ON wst.stage_id = ws.id
+      LEFT JOIN users assigned_user ON wst.assigned_to = assigned_user.id
+      LEFT JOIN users completed_user ON wst.completed_by = completed_user.id
+      WHERE wst.request_id = ?
+      ORDER BY wst.due_date ASC
+    `).bind(requestId).all()
+    
+    return c.json({ 
+      success: true, 
+      data: {
+        transitions,
+        actions,
+        tasks
+      }
+    })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+// Update request stage
+app.post('/api/workflow/update-stage', async (c) => {
+  try {
+    const { requestId, newStageId, notes, userId } = await c.req.json()
+    
+    // Update the request's current stage
+    await c.env.DB.prepare(`
+      UPDATE financing_requests 
+      SET current_stage_id = ?, 
+          stage_entered_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).bind(newStageId, requestId).run()
+    
+    // The trigger will automatically create a transition record
+    // But we can add notes if provided
+    if (notes) {
+      await c.env.DB.prepare(`
+        UPDATE workflow_stage_transitions 
+        SET notes = ?, transitioned_by = ?
+        WHERE request_id = ? AND to_stage_id = ?
+        ORDER BY created_at DESC
+        LIMIT 1
+      `).bind(notes, userId, requestId, newStageId).run()
+    }
+    
+    return c.json({ success: true, message: 'تم تحديث مرحلة الطلب بنجاح' })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+// Add action to a stage
+app.post('/api/workflow/add-action', async (c) => {
+  try {
+    const { requestId, stageId, actionType, actionData, performedBy, notes } = await c.req.json()
+    
+    await c.env.DB.prepare(`
+      INSERT INTO workflow_stage_actions 
+      (request_id, stage_id, action_type, action_data, performed_by, notes)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).bind(requestId, stageId, actionType, actionData, performedBy, notes).run()
+    
+    return c.json({ success: true, message: 'تم إضافة الإجراء بنجاح' })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+// Create a task
+app.post('/api/workflow/create-task', async (c) => {
+  try {
+    const { requestId, stageId, taskTitle, taskDescription, assignedTo, dueDate, priority } = await c.req.json()
+    
+    await c.env.DB.prepare(`
+      INSERT INTO workflow_stage_tasks 
+      (request_id, stage_id, task_title, task_description, assigned_to, due_date, priority)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).bind(requestId, stageId, taskTitle, taskDescription, assignedTo, dueDate, priority || 'medium').run()
+    
+    return c.json({ success: true, message: 'تم إنشاء المهمة بنجاح' })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+// Complete a task
+app.post('/api/workflow/complete-task', async (c) => {
+  try {
+    const { taskId, completedBy } = await c.req.json()
+    
+    await c.env.DB.prepare(`
+      UPDATE workflow_stage_tasks 
+      SET status = 'completed', 
+          completed_at = CURRENT_TIMESTAMP,
+          completed_by = ?
+      WHERE id = ?
+    `).bind(completedBy, taskId).run()
+    
+    return c.json({ success: true, message: 'تم إتمام المهمة بنجاح' })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+// Get pending tasks for a user
+app.get('/api/workflow/my-tasks/:userId', async (c) => {
+  try {
+    const userId = c.req.param('userId')
+    
+    const { results } = await c.env.DB.prepare(`
+      SELECT 
+        wst.*,
+        ws.stage_name_ar,
+        ws.stage_color,
+        fr.id as request_id,
+        c.full_name as customer_name,
+        fr.requested_amount
+      FROM workflow_stage_tasks wst
+      LEFT JOIN workflow_stages ws ON wst.stage_id = ws.id
+      LEFT JOIN financing_requests fr ON wst.request_id = fr.id
+      LEFT JOIN customers c ON fr.customer_id = c.id
+      WHERE wst.assigned_to = ? AND wst.status = 'pending'
+      ORDER BY wst.due_date ASC
+    `).bind(userId).all()
+    
+    return c.json({ success: true, data: results })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
   }
 })
 
@@ -9077,15 +9273,21 @@ app.get('/admin/requests/:id/report', async (c) => {
       <body class="bg-gray-50">
         <div class="max-w-5xl mx-auto p-6">
           <!-- أزرار التحكم -->
-          <div class="mb-6 no-print flex justify-between items-center">
+          <div class="mb-6 no-print flex justify-between items-center flex-wrap gap-3">
             <a href="/admin/requests" class="text-blue-600 hover:text-blue-800">
               <i class="fas fa-arrow-right ml-2"></i>
               العودة لقائمة طلبات التمويل
             </a>
-            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition-all">
-              <i class="fas fa-print ml-2"></i>
-              طباعة التقرير
-            </button>
+            <div class="flex gap-3">
+              <a href="/admin/requests/${id}/workflow" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-lg">
+                <i class="fas fa-route ml-2"></i>
+                سير العمل (Workflow)
+              </a>
+              <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition-all">
+                <i class="fas fa-print ml-2"></i>
+                طباعة التقرير
+              </button>
+            </div>
           </div>
           
           <!-- رأس التقرير -->
@@ -9675,6 +9877,58 @@ app.get('/admin/requests/:id/timeline', async (c) => {
     `)
   } catch (error: any) {
     console.error('خطأ في عرض Timeline:', error)
+    return c.html(`<h1>حدث خطأ: ${error.message}</h1>`)
+  }
+})
+
+// ============================================
+// صفحة Workflow Timeline الجديدة (نظام متقدم)
+// ============================================
+app.get('/admin/requests/:id/workflow', async (c) => {
+  try {
+    const id = c.req.param('id')
+    
+    // Get request data with current stage
+    const request = await c.env.DB.prepare(`
+      SELECT 
+        fr.*,
+        c.full_name as customer_name,
+        ws.stage_name_ar,
+        ws.stage_color,
+        ws.stage_icon
+      FROM financing_requests fr
+      LEFT JOIN customers c ON fr.customer_id = c.id
+      LEFT JOIN workflow_stages ws ON fr.current_stage_id = ws.id
+      WHERE fr.id = ?
+    `).bind(id).first()
+    
+    if (!request) {
+      return c.html('<h1>الطلب غير موجود</h1>')
+    }
+    
+    // Get all stages
+    const { results: stages } = await c.env.DB.prepare(`
+      SELECT * FROM workflow_stages 
+      WHERE is_active = 1 
+      ORDER BY stage_order ASC
+    `).all()
+    
+    // Get workflow timeline (transitions, actions, tasks)
+    const timelineResponse = await fetch(new URL(`/api/workflow/timeline/${id}`, c.req.url).toString(), {
+      headers: c.req.headers
+    })
+    const timelineData = await timelineResponse.json()
+    
+    const html = generateWorkflowTimelinePage(
+      parseInt(id),
+      request,
+      stages,
+      timelineData.data || { transitions: [], actions: [], tasks: [] }
+    )
+    
+    return c.html(html)
+  } catch (error: any) {
+    console.error('خطأ في عرض Workflow:', error)
     return c.html(`<h1>حدث خطأ: ${error.message}</h1>`)
   }
 })
