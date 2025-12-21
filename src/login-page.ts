@@ -215,13 +215,14 @@ export const loginPage = `<!DOCTYPE html>
                         window.location.href = response.data.redirect || '/admin';
                     }, 1000);
                 } else {
-                    showAlert(response.data.message || 'فشل تسجيل الدخول');
+                    showAlert(response.data.error || response.data.message || 'فشل تسجيل الدخول');
                     loginBtn.disabled = false;
                     loginBtn.innerHTML = '<i class="fas fa-sign-in-alt ml-2"></i> تسجيل الدخول';
                 }
             } catch (error) {
-                console.error('Login error:', error);
-                showAlert(error.response?.data?.message || 'حدث خطأ أثناء تسجيل الدخول. الرجاء المحاولة مرة أخرى.');
+                console.error('❌ Login error:', error);
+                const errorMsg = error.response?.data?.error || error.response?.data?.message || 'حدث خطأ أثناء تسجيل الدخول. الرجاء المحاولة مرة أخرى.';
+                showAlert(errorMsg);
                 loginBtn.disabled = false;
                 loginBtn.innerHTML = '<i class="fas fa-sign-in-alt ml-2"></i> تسجيل الدخول';
             }

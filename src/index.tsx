@@ -527,9 +527,16 @@ app.post('/api/auth/login', async (c) => {
   try {
     const { username, password } = await c.req.json()
     
+    console.log(`🔐 Login attempt: ${username}`)
+    
     // Get user with tenant information
     const user = await c.env.DB.prepare(`
-      SELECT u.*, r.role_name, s.company_name, t.id as tenant_id, t.company_name as tenant_name, t.slug as tenant_slug
+      SELECT u.id, u.username, u.password, u.full_name, u.email, u.phone,
+             u.role_id, u.user_type, u.subscription_id, u.is_active, 
+             u.tenant_id, u.role as user_role,
+             r.role_name, r.description as role_description,
+             s.company_name as subscription_company_name,
+             t.id as actual_tenant_id, t.company_name as tenant_name, t.slug as tenant_slug
       FROM users u
       LEFT JOIN roles r ON u.role_id = r.id
       LEFT JOIN subscriptions s ON u.subscription_id = s.id
@@ -538,24 +545,24 @@ app.post('/api/auth/login', async (c) => {
     `).bind(username, password).first()
     
     if (!user) {
+      console.log(`❌ Login failed: Invalid credentials for ${username}`)
       return c.json({ success: false, error: 'اسم المستخدم أو كلمة المرور غير صحيحة' }, 401)
     }
+    
+    console.log(`✅ User found: ${user.full_name} (Role ID: ${user.role_id})`)
     
     // Update last login
     await c.env.DB.prepare('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?')
       .bind(user.id).run()
     
-    // Create token with tenant_id (user_id:tenant_id:timestamp:random)
-    const tokenData = `${user.id}:${user.tenant_id || 'null'}:${Date.now()}:${Math.random()}`
+    // Create token with tenant_id (user_id:tenant_id:role_id:timestamp)
+    const tokenData = `${user.id}:${user.tenant_id || 'null'}:${user.role_id}:${Date.now()}`
     const token = btoa(tokenData)
     
-    // Determine redirect URL based on tenant and role
-    let redirect = '/admin'
-    if (user.tenant_id && user.tenant_slug) {
-      redirect = `/c/${user.tenant_slug}/admin`
-    } else if (user.user_type === 'superadmin') {
-      redirect = '/admin' // Super admin goes to main admin dashboard
-    }
+    // Determine redirect URL - always go to /admin/panel
+    const redirect = '/admin/panel'
+    
+    console.log(`🎯 Redirect to: ${redirect}`)
     
     return c.json({ 
       success: true,
@@ -566,10 +573,13 @@ app.post('/api/auth/login', async (c) => {
         username: user.username,
         full_name: user.full_name,
         email: user.email,
-        role: user.role,  // Use role column from users table (manager/employee)
-        role_name: user.role_name,  // Role name from roles table for display
+        phone: user.phone,
+        role: user.user_role || 'employee',  // Use role column from users table
+        role_id: user.role_id,  // Add role_id
+        role_name: user.role_name || 'موظف',  // Role name from roles table
+        role_description: user.role_description,
         user_type: user.user_type,
-        company_name: user.company_name,
+        company_name: user.subscription_company_name || user.tenant_name,
         subscription_id: user.subscription_id,
         tenant_id: user.tenant_id,
         tenant_name: user.tenant_name,
@@ -577,7 +587,8 @@ app.post('/api/auth/login', async (c) => {
       }
     })
   } catch (error: any) {
-    return c.json({ success: false, message: error.message }, 500)
+    console.error('❌ Login error:', error)
+    return c.json({ success: false, error: 'حدث خطأ في تسجيل الدخول: ' + error.message }, 500)
   }
 })
 
