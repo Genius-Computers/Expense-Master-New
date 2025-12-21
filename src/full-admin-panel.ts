@@ -1513,28 +1513,14 @@ export const fullAdminPanel = `<!DOCTYPE html>
                 }
                 
                 const user = JSON.parse(userStr);
-                // For superadmin, use user_type; for others use role
-                const userRole = user.user_type === 'superadmin' ? 'superadmin' : (user.role || user.user_type);
+                const roleId = user.role_id || 3; // Default to Employee (Role 3)
                 
-                console.log('👤 دور المستخدم:', userRole);
-                console.log('📋 user_type:', user.user_type);
-                console.log('📋 role:', user.role);
+                console.log('👤 role_id:', roleId);
+                console.log('📋 user data:', user);
                 
-                // Show superadmin-only stats only for superadmin
-                const superadminStats = document.querySelector('.superadmin-only-stats');
-                if (superadminStats) {
-                    if (user.user_type === 'superadmin') {
-                        console.log('✅ إظهار إحصائيات السوبر أدمن');
-                        superadminStats.style.display = 'grid';
-                    } else {
-                        console.log('❌ إخفاء إحصائيات السوبر أدمن');
-                        superadminStats.style.display = 'none';
-                    }
-                }
-                
-                // تعريف الروابط المسموحة لكل دور
+                // تعريف الروابط المسموحة لكل role_id
                 const allowedLinks = {
-                    'superadmin': [
+                    '1': [ // Super Admin
                         '/admin/dashboard',
                         '/admin/customers', 
                         '/admin/requests',
@@ -1552,57 +1538,50 @@ export const fullAdminPanel = `<!DOCTYPE html>
                         '/admin/reports',
                         '/admin/payments'
                     ],
-                    'admin': [
+                    '4': [ // Company Admin
                         '/admin/dashboard',
                         '/admin/customers',
                         '/admin/requests',
-                        '/admin/banks',
-                        '/admin/rates',
-                        '/admin/subscriptions',
-                        '/admin/packages',
-                        '/admin/users',
-                        '/admin/notifications',
-                        '/calculator',
-                        '/',
-                        '/admin/tenants',
-                        '/admin/reports',
-                        '/admin/payments'
-                    ],
-                    'manager': [
-                        '/admin/dashboard',
-                        '/admin/customers',
-                        '/admin/requests',
-                        '/admin/banks',
-                        '/admin/rates',
                         '/admin/users',
                         '/admin/reports',
-                        '/admin/payments',
+                        '/admin/banks', // Read-only
+                        '/admin/rates', // Read-only
                         '/calculator',
                         '/'
                     ],
-                    'employee': [
-                        '/admin/customers',
-                        '/admin/requests',
-                        '/calculator'
-                    ],
-                    'company': [
+                    '5': [ // Supervisor (Read-only)
                         '/admin/dashboard',
                         '/admin/customers',
                         '/admin/requests',
-                        '/admin/users',
                         '/admin/reports',
+                        '/admin/banks',
+                        '/admin/rates',
                         '/calculator',
                         '/'
                     ],
-                    'user': [
+                    '3': [ // Employee
+                        '/admin/dashboard',
                         '/admin/customers',
                         '/admin/requests',
-                        '/calculator'
+                        '/calculator',
+                        '/'
                     ]
                 };
                 
+                // Show superadmin-only stats only for Role 1 (Super Admin)
+                const superadminStats = document.querySelector('.superadmin-only-stats');
+                if (superadminStats) {
+                    if (roleId === 1) {
+                        console.log('✅ إظهار إحصائيات السوبر أدمن');
+                        superadminStats.style.display = 'grid';
+                    } else {
+                        console.log('❌ إخفاء إحصائيات السوبر أدمن');
+                        superadminStats.style.display = 'none';
+                    }
+                }
+                
                 // الحصول على الروابط المتاحة للمستخدم
-                const userAllowedLinks = allowedLinks[userRole] || allowedLinks['user'];
+                const userAllowedLinks = allowedLinks[String(roleId)] || allowedLinks['3'];
                 
                 console.log('✅ الروابط المتاحة:', userAllowedLinks);
                 
@@ -1626,28 +1605,28 @@ export const fullAdminPanel = `<!DOCTYPE html>
                     }
                 });
                 
-                console.log(\`✅ تم تطبيق الصلاحيات: \${visibleCount} أزرار ظاهرة، \${hiddenCount} أزرار مخفية\`);
+                console.log(`✅ تم تطبيق الصلاحيات: ${visibleCount} أزرار ظاهرة، ${hiddenCount} أزرار مخفية`);
                 
-                // إخفاء الكروت الإضافية للموظفين
+                // إخفاء الكروت الإضافية للموظفين والمشرفين
                 const adminOnlyStats = document.querySelector('.admin-only-stats');
                 if (adminOnlyStats) {
-                    if (userRole === 'employee') {
+                    if (roleId === 3 || roleId === 5) { // Employee or Supervisor
                         adminOnlyStats.style.display = 'none';
-                        console.log('🚫 إخفاء الكروت الإضافية للموظف');
+                        console.log('🚫 إخفاء الكروت الإضافية (موظف أو مشرف)');
                     } else {
                         adminOnlyStats.style.display = 'grid';
                         console.log('✅ عرض الكروت الإضافية');
                     }
                 }
                 
-                // إخفاء قسم رابط الحاسبة للموظفين والمستخدمين العاديين
+                // إخفاء قسم رابط الحاسبة للموظفين والمشرفين
                 const calculatorLinkSection = document.getElementById('calculatorLinkSection');
                 const employeeCalculatorSection = document.getElementById('employeeCalculatorSection');
                 
                 if (calculatorLinkSection) {
-                    if (userRole === 'user' || userRole === 'employee') {
+                    if (roleId === 3 || roleId === 5) { // Employee or Supervisor
                         calculatorLinkSection.style.display = 'none';
-                        console.log('🚫 إخفاء قسم رابط الحاسبة (موظف أو مستخدم عادي)');
+                        console.log('🚫 إخفاء قسم رابط الحاسبة (موظف أو مشرف)');
                         
                         // عرض قسم الباركود للموظفين فقط
                         if (userRole === 'employee' && employeeCalculatorSection) {
@@ -1664,7 +1643,7 @@ export const fullAdminPanel = `<!DOCTYPE html>
                     } else {
                         // عرض القسم لـ superadmin، admin، manager، company
                         calculatorLinkSection.style.display = 'block';
-                        console.log('✅ عرض قسم رابط الحاسبة لـ:', userRole);
+                        console.log('✅ عرض قسم رابط الحاسبة');
                         
                         // إخفاء قسم الموظف
                         if (employeeCalculatorSection) {
