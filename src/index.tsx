@@ -322,38 +322,9 @@ async function getUserInfo(c: any): Promise<{ userId: number | null; tenantId: n
 async function getUserTenantId(c: any): Promise<number | null> {
   const info = await getUserInfo(c)
   return info.tenantId
-  }
 }
 
 // Get user ID and role for employee-specific filtering
-async function getUserInfo(c: any): Promise<{ userId: number | null, roleId: number | null, tenantId: number | null }> {
-  try {
-    const authHeader = c.req.header('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
-    
-    if (!token) {
-      return { userId: null, roleId: null, tenantId: null }
-    }
-    
-    const decoded = atob(token)
-    const parts = decoded.split(':')
-    const userId = parseInt(parts[0])
-    
-    // Fetch user info from database
-    const user = await c.env.DB.prepare(`
-      SELECT id, role_id, tenant_id FROM users WHERE id = ?
-    `).bind(userId).first()
-    
-    return {
-      userId: user?.id || null,
-      roleId: user?.role_id || null,
-      tenantId: user?.tenant_id || null
-    }
-  } catch (error) {
-    console.error('Error getting user info:', error)
-    return { userId: null, roleId: null, tenantId: null }
-  }
-}
 
 // Middleware: Verify and set tenant
 app.use('/c/:tenant/*', async (c, next) => {
