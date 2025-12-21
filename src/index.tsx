@@ -12157,11 +12157,12 @@ app.get('/admin/users/new', async (c) => {
                     <i class="fas fa-user-tag text-orange-600 ml-1"></i>
                     نوع المستخدم *
                   </label>
-                  <select name="user_type" required id="userType" onchange="toggleSubscription()" 
+                  <select name="user_type" required id="userType" onchange="updateRoleOptions()" 
                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     <option value="">-- اختر نوع المستخدم --</option>
-                    <option value="admin">مدير النظام</option>
-                    <option value="company">شركة</option>
+                    <option value="admin">مدير النظام (Super Admin)</option>
+                    <option value="company_admin">مدير شركة (Company Admin)</option>
+                    <option value="company">حساب شركة عادي</option>
                     <option value="employee">موظف</option>
                   </select>
                 </div>
@@ -12170,12 +12171,12 @@ app.get('/admin/users/new', async (c) => {
                 <div>
                   <label class="block text-sm font-bold text-gray-700 mb-2">
                     <i class="fas fa-shield-alt text-red-600 ml-1"></i>
-                    الدور *
+                    الدور * <span id="roleHint" class="text-sm text-gray-500"></span>
                   </label>
-                  <select name="role_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                  <select name="role_id" required id="roleSelect" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     <option value="">-- اختر الدور --</option>
                     ${roles.results.map((role: any) => `
-                      <option value="${role.id}">${role.role_name}</option>
+                      <option value="${role.id}" data-role-name="${role.role_name}">${role.role_name} - ${role.description || ''}</option>
                     `).join('')}
                   </select>
                 </div>
@@ -12268,11 +12269,44 @@ app.get('/admin/users/new', async (c) => {
           loadUserData();
           document.addEventListener('DOMContentLoaded', loadUserData);
           
+          // تحديث خيارات الأدوار بناءً على نوع المستخدم
+          function updateRoleOptions() {
+            const userType = document.getElementById('userType').value;
+            const roleSelect = document.getElementById('roleSelect');
+            const roleHint = document.getElementById('roleHint');
+            const subscriptionDiv = document.getElementById('subscriptionDiv');
+            
+            // إعادة تعيين
+            roleSelect.selectedIndex = 0;
+            
+            // تحديث تلميح الدور
+            if (userType === 'admin') {
+              roleHint.textContent = '(Role ID: 1)';
+              roleSelect.value = '1'; // مدير النظام
+              subscriptionDiv.style.display = 'none';
+            } else if (userType === 'company_admin') {
+              roleHint.textContent = '(Role ID: 4) - صلاحيات كاملة لإدارة الشركة';
+              roleSelect.value = '4'; // مدير شركة
+              subscriptionDiv.style.display = 'block';
+            } else if (userType === 'company') {
+              roleHint.textContent = '(Role ID: 2) - صلاحيات محدودة';
+              roleSelect.value = '2'; // حساب شركة
+              subscriptionDiv.style.display = 'block';
+            } else if (userType === 'employee') {
+              roleHint.textContent = '(Role ID: 3) - صلاحيات أساسية';
+              roleSelect.value = '3'; // موظف
+              subscriptionDiv.style.display = 'none';
+            } else {
+              roleHint.textContent = '';
+              subscriptionDiv.style.display = 'none';
+            }
+          }
+          
           function toggleSubscription() {
             const userType = document.getElementById('userType').value;
             const subscriptionDiv = document.getElementById('subscriptionDiv');
             
-            if (userType === 'company') {
+            if (userType === 'company' || userType === 'company_admin') {
               subscriptionDiv.style.display = 'block';
             } else {
               subscriptionDiv.style.display = 'none';
