@@ -12224,7 +12224,551 @@ app.get('/admin/users', async (c) => {
   }
 })
 
-// ==================== صفحة عرض مستخدم ====================
+// ==================== عرض مستخدم محدد ====================
+app.get('/admin/users/:id', async (c) => {
+  try {
+    const id = c.req.param('id')
+    const query = `
+      SELECT u.*, r.role_name, r.description as role_description,
+             t.company_name as tenant_name
+      FROM users u
+      LEFT JOIN roles r ON u.role_id = r.id
+      LEFT JOIN tenants t ON u.tenant_id = t.id
+      WHERE u.id = ?
+    `
+    const { results } = await c.env.DB.prepare(query).bind(id).all()
+    
+    if (!results || results.length === 0) {
+      return c.html('<h1>المستخدم غير موجود</h1>')
+    }
+    
+    const user = results[0]
+    
+    return c.html(`
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>عرض مستخدم - ${user.full_name}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+      </head>
+      <body class="bg-gray-50">
+        <div class="max-w-4xl mx-auto p-6">
+          <div class="mb-6">
+            <a href="/admin/users" class="text-blue-600 hover:text-blue-800">
+              <i class="fas fa-arrow-left ml-2"></i> العودة لقائمة المستخدمين
+            </a>
+          </div>
+          
+          <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+              <div class="flex items-center">
+                <i class="fas fa-user-circle text-5xl ml-4"></i>
+                <div>
+                  <h1 class="text-3xl font-bold">${user.full_name || user.username}</h1>
+                  <p class="text-indigo-100 mt-1">${user.role_name || 'لا يوجد دور'}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="border-r border-gray-200 pr-6">
+                  <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-id-card text-indigo-600 ml-2"></i>
+                    المعلومات الأساسية
+                  </h3>
+                  
+                  <div class="space-y-3">
+                    <div>
+                      <label class="text-sm text-gray-500">الرقم التعريفي</label>
+                      <p class="font-bold text-gray-800">#${user.id}</p>
+                    </div>
+                    
+                    <div>
+                      <label class="text-sm text-gray-500">اسم المستخدم</label>
+                      <p class="font-bold text-gray-800">${user.username}</p>
+                    </div>
+                    
+                    <div>
+                      <label class="text-sm text-gray-500">الاسم الكامل</label>
+                      <p class="font-bold text-gray-800">${user.full_name || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label class="text-sm text-gray-500">البريد الإلكتروني</label>
+                      <p class="font-bold text-gray-800">${user.email || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label class="text-sm text-gray-500">رقم الجوال</label>
+                      <p class="font-bold text-gray-800">${user.phone || '-'}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-shield-alt text-indigo-600 ml-2"></i>
+                    الصلاحيات والمعلومات
+                  </h3>
+                  
+                  <div class="space-y-3">
+                    <div>
+                      <label class="text-sm text-gray-500">الدور الوظيفي</label>
+                      <p class="font-bold text-gray-800">${user.role_name || 'غير محدد'}</p>
+                      ${user.role_description ? `<p class="text-xs text-gray-500 mt-1">${user.role_description}</p>` : ''}
+                    </div>
+                    
+                    <div>
+                      <label class="text-sm text-gray-500">نوع المستخدم</label>
+                      <p class="font-bold text-gray-800">${user.user_type === 'admin' ? 'مدير نظام' : user.user_type === 'company' ? 'شركة' : user.user_type === 'employee' ? 'موظف' : 'مستخدم عادي'}</p>
+                    </div>
+                    
+                    <div>
+                      <label class="text-sm text-gray-500">الشركة</label>
+                      <p class="font-bold text-gray-800">${user.tenant_name || 'لا توجد شركة'}</p>
+                    </div>
+                    
+                    <div>
+                      <label class="text-sm text-gray-500">الحالة</label>
+                      <p class="font-bold ${user.is_active ? 'text-green-600' : 'text-red-600'}">
+                        <i class="fas ${user.is_active ? 'fa-check-circle' : 'fa-times-circle'} ml-1"></i>
+                        ${user.is_active ? 'نشط' : 'غير نشط'}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label class="text-sm text-gray-500">تاريخ الإنشاء</label>
+                      <p class="font-bold text-gray-800">${user.created_at || '-'}</p>
+                    </div>
+                    
+                    ${user.last_login ? `
+                    <div>
+                      <label class="text-sm text-gray-500">آخر تسجيل دخول</label>
+                      <p class="font-bold text-gray-800">${user.last_login}</p>
+                    </div>
+                    ` : ''}
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mt-8 pt-6 border-t border-gray-200 flex gap-3">
+                <a href="/admin/users/${user.id}/edit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg font-bold transition-all">
+                  <i class="fas fa-edit ml-2"></i> تعديل المعلومات
+                </a>
+                <a href="/admin/users/${user.id}/permissions" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-lg font-bold transition-all">
+                  <i class="fas fa-user-shield ml-2"></i> إدارة الصلاحيات
+                </a>
+                <a href="/admin/users/${user.id}/delete" onclick="return confirm('هل أنت متأكد من حذف هذا المستخدم؟\\nهذه العملية لا يمكن التراجع عنها!')" class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-bold transition-all">
+                  <i class="fas fa-trash ml-2"></i> حذف المستخدم
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `)
+  } catch (error: any) {
+    return c.html(`<h1>خطأ: ${error.message}</h1>`)
+  }
+})
+
+// ==================== تعديل مستخدم ====================
+app.get('/admin/users/:id/edit', async (c) => {
+  try {
+    const id = c.req.param('id')
+    
+    // Get user data
+    const userQuery = `
+      SELECT u.*, r.role_name
+      FROM users u
+      LEFT JOIN roles r ON u.role_id = r.id
+      WHERE u.id = ?
+    `
+    const { results: userResults } = await c.env.DB.prepare(userQuery).bind(id).all()
+    
+    if (!userResults || userResults.length === 0) {
+      return c.html('<h1>المستخدم غير موجود</h1>')
+    }
+    
+    const user = userResults[0]
+    
+    // Get roles and tenants
+    const roles = await c.env.DB.prepare('SELECT id, role_name, description FROM roles ORDER BY id').all()
+    const tenants = await c.env.DB.prepare('SELECT id, company_name FROM tenants WHERE status = "active" ORDER BY company_name').all()
+    
+    return c.html(`
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>تعديل مستخدم - ${user.full_name}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+      </head>
+      <body class="bg-gray-50">
+        <div class="max-w-4xl mx-auto p-6">
+          <div class="mb-6">
+            <a href="/admin/users/${user.id}" class="text-blue-600 hover:text-blue-800">
+              <i class="fas fa-arrow-left ml-2"></i> العودة لعرض المستخدم
+            </a>
+          </div>
+          
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+              <i class="fas fa-user-edit text-indigo-600 ml-2"></i>
+              تعديل مستخدم: ${user.full_name}
+            </h1>
+            
+            <form action="/admin/users/${user.id}" method="POST" class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 mb-2">
+                    اسم المستخدم <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" name="username" value="${user.username}" required 
+                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 mb-2">
+                    الاسم الكامل <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" name="full_name" value="${user.full_name || ''}" required 
+                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 mb-2">
+                    البريد الإلكتروني
+                  </label>
+                  <input type="email" name="email" value="${user.email || ''}" 
+                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 mb-2">
+                    رقم الجوال
+                  </label>
+                  <input type="text" name="phone" value="${user.phone || ''}" 
+                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 mb-2">
+                    كلمة المرور الجديدة
+                  </label>
+                  <input type="password" name="password" placeholder="اتركه فارغاً إن لم ترد التغيير"
+                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                  <p class="text-xs text-gray-500 mt-1">* اترك الحقل فارغاً إذا لم تريد تغيير كلمة المرور</p>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 mb-2">
+                    نوع المستخدم <span class="text-red-500">*</span>
+                  </label>
+                  <select name="user_type" required onchange="updateRoleFilter(this.value)"
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <option value="admin" ${user.user_type === 'admin' ? 'selected' : ''}>مدير النظام (Super Admin)</option>
+                    <option value="company" ${user.user_type === 'company' ? 'selected' : ''}>حساب شركة</option>
+                    <option value="employee" ${user.user_type === 'employee' ? 'selected' : ''}>موظف</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 mb-2">
+                    الدور <span class="text-red-500">*</span>
+                  </label>
+                  <select name="role_id" id="roleSelect" required
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    ${roles.results?.map((role: any) => `
+                      <option value="${role.id}" ${user.role_id === role.id ? 'selected' : ''}>
+                        ${role.role_name} ${role.description ? `- ${role.description}` : ''}
+                      </option>
+                    `).join('') || ''}
+                  </select>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 mb-2">
+                    الشركة
+                  </label>
+                  <select name="tenant_id"
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <option value="">لا توجد شركة (Super Admin فقط)</option>
+                    ${tenants.results?.map((tenant: any) => `
+                      <option value="${tenant.id}" ${user.tenant_id === tenant.id ? 'selected' : ''}>
+                        ${tenant.company_name}
+                      </option>
+                    `).join('') || ''}
+                  </select>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 mb-2">
+                    الحالة <span class="text-red-500">*</span>
+                  </label>
+                  <select name="is_active" required
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <option value="1" ${user.is_active ? 'selected' : ''}>نشط</option>
+                    <option value="0" ${!user.is_active ? 'selected' : ''}>غير نشط</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="flex gap-3 pt-6 border-t border-gray-200">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold transition-all">
+                  <i class="fas fa-save ml-2"></i> حفظ التعديلات
+                </button>
+                <a href="/admin/users/${user.id}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-bold transition-all">
+                  <i class="fas fa-times ml-2"></i> إلغاء
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <script>
+          function updateRoleFilter(userType) {
+            const roleSelect = document.getElementById('roleSelect');
+            const options = roleSelect.options;
+            
+            // Show all options first
+            for (let i = 0; i < options.length; i++) {
+              options[i].style.display = 'block';
+            }
+            
+            // Filter based on user type
+            // Role IDs: 1=Super Admin, 2=Company Account, 3=Employee, 4=Company Admin, 5=Supervisor
+            if (userType === 'admin') {
+              // Super Admin: role_id = 1
+              for (let i = 0; i < options.length; i++) {
+                if (options[i].value !== '1') {
+                  options[i].style.display = 'none';
+                } else {
+                  roleSelect.value = '1';
+                }
+              }
+            } else if (userType === 'employee') {
+              // Employee: role_id = 3
+              for (let i = 0; i < options.length; i++) {
+                if (options[i].value !== '3') {
+                  options[i].style.display = 'none';
+                } else {
+                  roleSelect.value = '3';
+                }
+              }
+            } else if (userType === 'company') {
+              // Company: role_id can be 2, 4, or 5
+              for (let i = 0; i < options.length; i++) {
+                const val = options[i].value;
+                if (val !== '2' && val !== '4' && val !== '5') {
+                  options[i].style.display = 'none';
+                }
+              }
+            }
+          }
+          
+          // Apply filter on page load
+          document.addEventListener('DOMContentLoaded', () => {
+            const userTypeSelect = document.querySelector('select[name="user_type"]');
+            if (userTypeSelect) {
+              updateRoleFilter(userTypeSelect.value);
+            }
+          });
+        </script>
+      </body>
+      </html>
+    `)
+  } catch (error: any) {
+    return c.html(`<h1>خطأ: ${error.message}</h1>`)
+  }
+})
+
+// ==================== معالجة تعديل المستخدم ====================
+app.post('/admin/users/:id', async (c) => {
+  try {
+    const id = c.req.param('id')
+    const formData = await c.req.formData()
+    
+    const username = formData.get('username')
+    const full_name = formData.get('full_name')
+    const email = formData.get('email') || null
+    const phone = formData.get('phone') || null
+    const password = formData.get('password') // Can be empty
+    const user_type = formData.get('user_type')
+    const role_id = formData.get('role_id')
+    const tenant_id = formData.get('tenant_id') || null
+    const is_active = formData.get('is_active')
+    
+    // Build UPDATE query
+    let query = `
+      UPDATE users 
+      SET username = ?, full_name = ?, email = ?, phone = ?, 
+          user_type = ?, role_id = ?, tenant_id = ?, is_active = ?
+    `
+    let params = [username, full_name, email, phone, user_type, role_id, tenant_id, is_active]
+    
+    // Only update password if provided
+    if (password && password.toString().trim() !== '') {
+      query = `
+        UPDATE users 
+        SET username = ?, full_name = ?, email = ?, phone = ?, 
+            password = ?, user_type = ?, role_id = ?, tenant_id = ?, is_active = ?
+      `
+      params = [username, full_name, email, phone, password, user_type, role_id, tenant_id, is_active]
+    }
+    
+    query += ` WHERE id = ?`
+    params.push(id)
+    
+    await c.env.DB.prepare(query).bind(...params).run()
+    
+    return c.html(`
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>تم التحديث</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+      </head>
+      <body class="bg-gray-50">
+        <div class="max-w-md mx-auto mt-20">
+          <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+            <div class="mb-4">
+              <i class="fas fa-check-circle text-green-500 text-6xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">تم التحديث بنجاح!</h2>
+            <p class="text-gray-600 mb-6">تم تحديث بيانات المستخدم بنجاح</p>
+            <div class="flex gap-3 justify-center">
+              <a href="/admin/users/${id}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold transition-all">
+                <i class="fas fa-eye ml-2"></i> عرض المستخدم
+              </a>
+              <a href="/admin/users" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-bold transition-all">
+                <i class="fas fa-list ml-2"></i> قائمة المستخدمين
+              </a>
+            </div>
+          </div>
+        </div>
+        <script>
+          // Auto redirect after 3 seconds
+          setTimeout(() => {
+            window.location.href = '/admin/users/${id}';
+          }, 3000);
+        </script>
+      </body>
+      </html>
+    `)
+  } catch (error: any) {
+    return c.html(`
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <title>خطأ</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+      </head>
+      <body class="bg-gray-50">
+        <div class="max-w-md mx-auto mt-20">
+          <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+            <i class="fas fa-exclamation-triangle text-red-500 text-6xl mb-4"></i>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">حدث خطأ</h2>
+            <p class="text-gray-600 mb-6">${error.message}</p>
+            <a href="/admin/users" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-bold">
+              العودة للقائمة
+            </a>
+          </div>
+        </div>
+      </body>
+      </html>
+    `)
+  }
+})
+
+// ==================== حذف مستخدم ====================
+app.get('/admin/users/:id/delete', async (c) => {
+  try {
+    const id = c.req.param('id')
+    
+    // Get user data first
+    const { results } = await c.env.DB.prepare('SELECT id, username, full_name FROM users WHERE id = ?').bind(id).all()
+    
+    if (!results || results.length === 0) {
+      return c.html('<h1>المستخدم غير موجود</h1>')
+    }
+    
+    const user = results[0]
+    
+    // Delete user
+    await c.env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run()
+    
+    return c.html(`
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>تم الحذف</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+      </head>
+      <body class="bg-gray-50">
+        <div class="max-w-md mx-auto mt-20">
+          <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+            <div class="mb-4">
+              <i class="fas fa-trash-alt text-red-500 text-6xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">تم الحذف بنجاح!</h2>
+            <p class="text-gray-600 mb-2">تم حذف المستخدم:</p>
+            <p class="font-bold text-gray-800 mb-6">${user.full_name} (${user.username})</p>
+            <a href="/admin/users" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold transition-all inline-block">
+              <i class="fas fa-list ml-2"></i> العودة لقائمة المستخدمين
+            </a>
+          </div>
+        </div>
+        <script>
+          // Auto redirect after 2 seconds
+          setTimeout(() => {
+            window.location.href = '/admin/users';
+          }, 2000);
+        </script>
+      </body>
+      </html>
+    `)
+  } catch (error: any) {
+    return c.html(`
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <title>خطأ</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+      </head>
+      <body class="bg-gray-50">
+        <div class="max-w-md mx-auto mt-20">
+          <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+            <i class="fas fa-exclamation-triangle text-red-500 text-6xl mb-4"></i>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">حدث خطأ</h2>
+            <p class="text-gray-600 mb-6">${error.message}</p>
+            <a href="/admin/users" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-bold">
+              العودة للقائمة
+            </a>
+          </div>
+        </div>
+      </body>
+      </html>
+    `)
+  }
+})
+
+// ==================== صفحة إضافة مستخدم جديد ====================
 app.get('/admin/users/new', async (c) => {
   try {
     const roles = await c.env.DB.prepare('SELECT id, role_name FROM roles ORDER BY id').all()
