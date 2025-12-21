@@ -1827,13 +1827,11 @@ app.get('/api/customers', async (c) => {
     let query = `
       SELECT 
         c.*,
-        ft.type_name as financing_type_name,
         COUNT(f.id) as total_requests,
         SUM(CASE WHEN f.status = 'pending' THEN 1 ELSE 0 END) as pending_requests,
         SUM(CASE WHEN f.status = 'approved' THEN 1 ELSE 0 END) as approved_requests
       FROM customers c
-      LEFT JOIN financing_requests f ON c.id = f.customer_id
-      LEFT JOIN financing_types ft ON c.financing_type_id = ft.id`
+      LEFT JOIN financing_requests f ON c.id = f.customer_id`
     
     if (tenant_id) {
       query += ` WHERE c.tenant_id = ${tenant_id}`
