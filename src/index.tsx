@@ -2686,6 +2686,18 @@ app.post('/api/calculator/save-customer', async (c) => {
       }
     }
     
+    // If no tenant_id from slug, try to get default tenant (first active tenant)
+    // This ensures calculator customers are assigned to a company
+    if (!tenant_id) {
+      const defaultTenant = await c.env.DB.prepare(`
+        SELECT id FROM tenants WHERE status = 'active' ORDER BY id LIMIT 1
+      `).first()
+      
+      if (defaultTenant) {
+        tenant_id = defaultTenant.id
+      }
+    }
+    
     // Check if customer already exists
     let customer = await c.env.DB.prepare(`
       SELECT id FROM customers WHERE phone = ?
@@ -2764,6 +2776,7 @@ app.post('/api/calculator/save-customer', async (c) => {
     return c.json({ 
       success: true, 
       customer_id: customer_id,
+      tenant_id: tenant_id,
       message: 'تم حفظ بيانات العميل بنجاح'
     })
   } catch (error: any) {
@@ -2779,9 +2792,34 @@ app.post('/api/calculator/submit-request', async (c) => {
   try {
     const data = await c.req.json()
     
+    // Get tenant_id (from slug or default to first active tenant)
+    const tenantSlug = data.tenant_slug || null
+    let tenant_id = null
+    
+    if (tenantSlug) {
+      const tenant = await c.env.DB.prepare(`
+        SELECT id FROM tenants WHERE slug = ? AND status = 'active'
+      `).bind(tenantSlug).first()
+      
+      if (tenant) {
+        tenant_id = tenant.id
+      }
+    }
+    
+    // If no tenant_id from slug, get default tenant (first active tenant)
+    if (!tenant_id) {
+      const defaultTenant = await c.env.DB.prepare(`
+        SELECT id FROM tenants WHERE status = 'active' ORDER BY id LIMIT 1
+      `).first()
+      
+      if (defaultTenant) {
+        tenant_id = defaultTenant.id
+      }
+    }
+    
     // Step 1: Check if customer exists (by national_id or phone)
     let customer = await c.env.DB.prepare(`
-      SELECT id FROM customers WHERE national_id = ? OR phone = ?
+      SELECT id, tenant_id FROM customers WHERE national_id = ? OR phone = ?
     `).bind(data.national_id, data.phone).first()
     
     let customer_id
@@ -2791,12 +2829,14 @@ app.post('/api/calculator/submit-request', async (c) => {
       customer_id = customer.id
       
       // Update customer info (including all new fields)
+      // Only update tenant_id if customer doesn't have one
       await c.env.DB.prepare(`
         UPDATE customers 
         SET full_name = ?, phone = ?, email = ?, 
             birthdate = ?, monthly_salary = ?,
             employer_name = ?, job_title = ?,
-            work_start_date = ?, city = ?
+            work_start_date = ?, city = ?,
+            tenant_id = COALESCE(tenant_id, ?)
         WHERE id = ?
       `).bind(
         data.full_name,
@@ -2808,8 +2848,14 @@ app.post('/api/calculator/submit-request', async (c) => {
         data.job_title,
         data.work_start_date,
         data.city,
+        tenant_id,
         customer_id
       ).run()
+      
+      // Use customer's tenant_id if available
+      if (customer.tenant_id) {
+        tenant_id = customer.tenant_id
+      }
     } else {
       // Create new customer - but check one more time to avoid race condition
       try {
@@ -2817,8 +2863,8 @@ app.post('/api/calculator/submit-request', async (c) => {
           INSERT INTO customers (
             full_name, phone, email, national_id, 
             birthdate, monthly_salary, employer_name, 
-            job_title, work_start_date, city
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            job_title, work_start_date, city, tenant_id
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).bind(
           data.full_name,
           data.phone,
@@ -2829,7 +2875,8 @@ app.post('/api/calculator/submit-request', async (c) => {
           data.employer,
           data.job_title,
           data.work_start_date,
-          data.city
+          data.city,
+          tenant_id
         ).run()
         
         customer_id = customerResult.meta.last_row_id
@@ -2838,11 +2885,14 @@ app.post('/api/calculator/submit-request', async (c) => {
         // Try to get the customer again
         if (insertError.message && insertError.message.includes('UNIQUE')) {
           const existingCustomer = await c.env.DB.prepare(`
-            SELECT id FROM customers WHERE national_id = ? OR phone = ?
+            SELECT id, tenant_id FROM customers WHERE national_id = ? OR phone = ?
           `).bind(data.national_id, data.phone).first()
           
           if (existingCustomer) {
             customer_id = existingCustomer.id
+            if (existingCustomer.tenant_id) {
+              tenant_id = existingCustomer.tenant_id
+            }
           } else {
             throw insertError
           }
