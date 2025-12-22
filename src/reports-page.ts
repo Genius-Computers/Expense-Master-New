@@ -214,21 +214,15 @@ export const reportsPage = `<!DOCTYPE html>
             }
         }
 
-        // Hide Requests Followup Report for employees
+        // Apply report permissions based on role
         function applyReportPermissions() {
             const userRole = userData.role || userData.user_type;
-            console.log('🔐 Applying permissions for role:', userRole);
+            const roleId = userData.role_id;
+            console.log('🔐 Applying permissions for role:', userRole, 'role_id:', roleId);
             
-            // Hide for employees/users
-            if (userRole === 'employee' || userRole === 'user') {
-                const requestsFollowupCard = document.getElementById('requestsFollowupReport');
-                if (requestsFollowupCard) {
-                    console.log('❌ Hiding Requests Followup Report for employee');
-                    requestsFollowupCard.style.display = 'none';
-                }
-            } else {
-                console.log('✅ Showing Requests Followup Report for:', userRole);
-            }
+            // Show Requests Followup Report for all roles now
+            // Previously was hidden for employees, but now accessible to all
+            console.log('✅ Showing Requests Followup Report for all users');
         }
 
         // Load stats on page load
