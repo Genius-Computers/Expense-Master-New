@@ -8379,7 +8379,30 @@ app.get('/admin/requests', async (c) => {
               </thead>
               <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
                 ${requests.results.map((req: any) => {
-                  const statusAr = req.status === 'approved' ? 'مقبول' : req.status === 'pending' ? 'قيد المراجعة' : 'مرفوض';
+                  // Map all possible status values to Arabic
+                  const statusMap: Record<string, string> = {
+                    'pending': 'قيد الانتظار',
+                    'under_review': 'قيد المراجعة',
+                    'approved': 'مقبول',
+                    'rejected': 'مرفوض',
+                    'processing': 'قيد المعالجة',
+                    'completed': 'مكتمل',
+                    'cancelled': 'ملغي'
+                  };
+                  const statusAr = statusMap[req.status] || req.status;
+                  
+                  // Map status to colors
+                  const statusColorMap: Record<string, string> = {
+                    'pending': 'bg-yellow-100 text-yellow-800',
+                    'under_review': 'bg-blue-100 text-blue-800',
+                    'approved': 'bg-green-100 text-green-800',
+                    'rejected': 'bg-red-100 text-red-800',
+                    'processing': 'bg-purple-100 text-purple-800',
+                    'completed': 'bg-teal-100 text-teal-800',
+                    'cancelled': 'bg-gray-100 text-gray-800'
+                  };
+                  const statusColor = statusColorMap[req.status] || 'bg-gray-100 text-gray-800';
+                  
                   return `
                   <tr class="hover:bg-gray-50" 
                       data-customer="${req.customer_name || ''}" 
@@ -8390,7 +8413,7 @@ app.get('/admin/requests', async (c) => {
                     <td class="px-6 py-4 whitespace-nowrap">${req.requested_amount?.toLocaleString('ar-SA')} ريال</td>
                     <td class="px-6 py-4 whitespace-nowrap">${req.duration_months} شهر</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <span class="px-2 py-1 text-xs rounded-full ${req.status === 'approved' ? 'bg-green-100 text-green-800' : req.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                      <span class="px-2 py-1 text-xs rounded-full ${statusColor}">
                         ${statusAr}
                       </span>
                     </td>
@@ -8478,7 +8501,16 @@ app.get('/admin/requests', async (c) => {
             const data = [
               ['العميل', 'البنك', 'المبلغ المطلوب', 'المدة (شهور)', 'الحالة', 'التاريخ'],
               ${requests.results.map((req: any) => {
-                const statusAr = req.status === 'approved' ? 'مقبول' : req.status === 'pending' ? 'قيد المراجعة' : 'مرفوض';
+                const statusMap: Record<string, string> = {
+                  'pending': 'قيد الانتظار',
+                  'under_review': 'قيد المراجعة',
+                  'approved': 'مقبول',
+                  'rejected': 'مرفوض',
+                  'processing': 'قيد المعالجة',
+                  'completed': 'مكتمل',
+                  'cancelled': 'ملغي'
+                };
+                const statusAr = statusMap[req.status] || req.status;
                 const customer = req.customer_name || `عميل #${req.customer_id}`;
                 const bank = req.bank_name || `بنك #${req.selected_bank_id || '-'}`;
                 return `['${customer}', '${bank}', '${req.requested_amount || 0}', '${req.duration_months}', '${statusAr}', '${new Date(req.created_at).toLocaleDateString('ar-SA')}']`;
