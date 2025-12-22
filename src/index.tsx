@@ -547,9 +547,9 @@ app.post('/api/auth/login', async (c) => {
     const tokenData = `${user.id}:${user.tenant_id || 'null'}:${user.role_id}:${Date.now()}`
     const token = btoa(tokenData)
     
-    // Set cookie for 7 days
+    // Set cookie for 7 days (without HttpOnly for now to allow JavaScript access for debugging)
     const cookieMaxAge = 7 * 24 * 60 * 60; // 7 days in seconds
-    c.header('Set-Cookie', `authToken=${token}; Path=/; Max-Age=${cookieMaxAge}; HttpOnly; SameSite=Lax`)
+    c.header('Set-Cookie', `authToken=${token}; Path=/; Max-Age=${cookieMaxAge}; SameSite=Lax`)
     
     // Determine redirect URL - always go to /admin/panel
     const redirect = '/admin/panel'
