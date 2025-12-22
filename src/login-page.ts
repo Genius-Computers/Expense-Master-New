@@ -205,8 +205,12 @@ export const loginPage = `<!DOCTYPE html>
                 if (response.data.success) {
                     showAlert('✓ تم تسجيل الدخول بنجاح! جاري التحويل...', 'success');
                     
-                    // Save token and user data in localStorage
-                    localStorage.setItem('authToken', response.data.token);
+                    // Save token in cookie (for HTML pages) and localStorage (for API calls)
+                    const token = response.data.token;
+                    // Set cookie with 7 days expiration
+                    const maxAge = 7 * 24 * 60 * 60;
+                    document.cookie = 'authToken=' + token + '; path=/; max-age=' + maxAge + '; SameSite=Lax';
+                    localStorage.setItem('authToken', token);
                     localStorage.setItem('userData', JSON.stringify(response.data.user));
                     console.log('✅ تم حفظ بيانات المستخدم:', response.data.user);
                     

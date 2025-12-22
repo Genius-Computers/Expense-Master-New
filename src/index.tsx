@@ -284,13 +284,30 @@ async function getTenant(c: any): Promise<any> {
 // Get tenant_id for current user (for multi-tenancy filtering)
 async function getUserInfo(c: any): Promise<{ userId: number | null; tenantId: number | null; roleId: number | null }> {
   try {
-    const authHeader = c.req.header('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
+    // Try to get token from Authorization Header (for API calls)
+    let token = c.req.header('Authorization')?.replace('Bearer ', '')
+    
+    // If not in header, try to get from cookie (for HTML pages)
+    if (!token) {
+      const cookieHeader = c.req.header('Cookie')
+      if (cookieHeader) {
+        const cookies = cookieHeader.split(';').map((cookie: string) => cookie.trim())
+        const authCookie = cookies.find((cookie: string) => cookie.startsWith('authToken='))
+        if (authCookie) {
+          token = authCookie.split('=')[1]
+          console.log('✅ Token found in cookie')
+        }
+      }
+    }
     
     if (!token) {
+      console.log('❌ No token found in header or cookie')
       const queryTenantId = c.req.query('tenant_id')
       return { userId: null, tenantId: queryTenantId ? parseInt(queryTenantId) : null, roleId: null }
     }
+    
+    console.log('🔍 Token:', token.substring(0, 20) + '...')
+    
     
     const decoded = atob(token)
     const parts = decoded.split(':')
