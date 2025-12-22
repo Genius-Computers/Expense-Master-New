@@ -8692,6 +8692,11 @@ app.get('/admin/requests', async (c) => {
                   <i class="fas fa-file-export ml-2"></i>
                   تصدير Excel
                 </button>
+                <a href="/admin/reports/requests-followup" 
+                   class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-bold transition-all inline-block text-center">
+                  <i class="fas fa-chart-line ml-2"></i>
+                  تقرير سير العمل
+                </a>
               </div>
             </div>
             

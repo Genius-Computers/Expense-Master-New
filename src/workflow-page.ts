@@ -341,6 +341,12 @@ export function generateWorkflowTimelinePage(requestId: number, request: any, st
     const currentRequestId = ${requestId};
     const currentStageId = ${request.current_stage_id || 'null'};
     
+    // Close modal utility function
+    function closeModal() {
+      const modal = document.body.querySelector('.fixed');
+      if (modal) modal.remove();
+    }
+    
     function updateStage() {
       // Create modal for stage selection
       const modal = document.createElement('div');
@@ -358,7 +364,7 @@ export function generateWorkflowTimelinePage(requestId: number, request: any, st
           <textarea id="stageNotes" placeholder="ملاحظات (اختياري)" class="w-full border rounded-lg p-2 mb-3" rows="3"></textarea>
           <div class="flex gap-2">
             <button onclick="confirmStageUpdate()" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">تحديث</button>
-            <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">إلغاء</button>
+            <button onclick="closeModal()" class="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">إلغاء</button>
           </div>
         </div>
       \`;
@@ -382,18 +388,142 @@ export function generateWorkflowTimelinePage(requestId: number, request: any, st
       });
       
       if (response.ok) {
+        closeModal();
         location.reload();
+      } else {
+        alert('فشل تحديث المرحلة');
+        closeModal();
+      }
+    }
+    
+    async function confirmAddAction() {
+      const actionType = document.getElementById('actionType').value;
+      const notes = document.getElementById('actionNotes').value;
+      const actionDataText = document.getElementById('actionData').value;
+      const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+      
+      let actionData = null;
+      if (actionDataText.trim()) {
+        try {
+          actionData = JSON.parse(actionDataText);
+        } catch (e) {
+          alert('بيانات JSON غير صحيحة');
+          return;
+        }
+      }
+      
+      const response = await fetch('/api/workflow/add-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requestId: currentRequestId,
+          stageId: currentStageId,
+          actionType: actionType,
+          actionData: actionData ? JSON.stringify(actionData) : null,
+          notes: notes,
+          performedBy: userData.id
+        })
+      });
+      
+      if (response.ok) {
+        closeModal();
+        location.reload();
+      } else {
+        alert('فشل إضافة الإجراء');
+        closeModal();
+      }
+    }
+    
+    async function confirmCreateTask() {
+      const title = document.getElementById('taskTitle').value;
+      const description = document.getElementById('taskDescription').value;
+      const dueDate = document.getElementById('taskDueDate').value;
+      const priority = document.getElementById('taskPriority').value;
+      const assignedTo = document.getElementById('taskAssignedTo').value;
+      const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+      
+      if (!title.trim()) {
+        alert('الرجاء إدخال عنوان المهمة');
+        return;
+      }
+      
+      const response = await fetch('/api/workflow/create-task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requestId: currentRequestId,
+          stageId: currentStageId,
+          taskTitle: title,
+          taskDescription: description,
+          dueDate: dueDate || null,
+          priority: priority,
+          assignedTo: assignedTo ? parseInt(assignedTo) : null
+        })
+      });
+      
+      if (response.ok) {
+        closeModal();
+        location.reload();
+      } else {
+        alert('فشل إنشاء المهمة');
+        closeModal();
       }
     }
     
     function addAction() {
-      // Similar modal for adding action
-      alert('سيتم إضافة نموذج إضافة إجراء قريباً');
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+      modal.innerHTML = '<div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">' +
+        '<h3 class="text-xl font-bold mb-4">إضافة إجراء جديد</h3>' +
+        '<div class="mb-3"><label class="block text-sm font-medium mb-1">نوع الإجراء</label>' +
+        '<select id="actionType" class="w-full border rounded-lg p-2">' +
+        '<option value="call">اتصال هاتفي</option>' +
+        '<option value="email">بريد إلكتروني</option>' +
+        '<option value="meeting">اجتماع</option>' +
+        '<option value="document">مستند</option>' +
+        '<option value="approval">موافقة</option>' +
+        '<option value="rejection">رفض</option>' +
+        '<option value="followup">متابعة</option>' +
+        '<option value="other">أخرى</option>' +
+        '</select></div>' +
+        '<div class="mb-3"><label class="block text-sm font-medium mb-1">ملاحظات الإجراء</label>' +
+        '<textarea id="actionNotes" placeholder="تفاصيل الإجراء..." class="w-full border rounded-lg p-2" rows="4"></textarea></div>' +
+        '<div class="mb-3"><label class="block text-sm font-medium mb-1">بيانات إضافية (JSON - اختياري)</label>' +
+        '<textarea id="actionData" class="w-full border rounded-lg p-2" rows="2"></textarea></div>' +
+        '<div class="flex gap-2">' +
+        '<button onclick="confirmAddAction()" class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">إضافة</button>' +
+        '<button onclick="closeModal()" class="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">إلغاء</button>' +
+        '</div></div>';
+      document.body.appendChild(modal);
+    }
     }
     
     function createTask() {
-      // Similar modal for creating task
-      alert('سيتم إضافة نموذج إنشاء مهمة قريباً');
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+      modal.innerHTML = '<div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">' +
+        '<h3 class="text-xl font-bold mb-4">إنشاء مهمة جديدة</h3>' +
+        '<div class="mb-3"><label class="block text-sm font-medium mb-1">عنوان المهمة</label>' +
+        '<input type="text" id="taskTitle" placeholder="عنوان المهمة..." class="w-full border rounded-lg p-2"></div>' +
+        '<div class="mb-3"><label class="block text-sm font-medium mb-1">وصف المهمة</label>' +
+        '<textarea id="taskDescription" placeholder="وصف تفصيلي للمهمة..." class="w-full border rounded-lg p-2" rows="3"></textarea></div>' +
+        '<div class="mb-3"><label class="block text-sm font-medium mb-1">تاريخ الاستحقاق</label>' +
+        '<input type="date" id="taskDueDate" class="w-full border rounded-lg p-2"></div>' +
+        '<div class="mb-3"><label class="block text-sm font-medium mb-1">الأولوية</label>' +
+        '<select id="taskPriority" class="w-full border rounded-lg p-2">' +
+        '<option value="low">منخفضة</option>' +
+        '<option value="medium" selected>متوسطة</option>' +
+        '<option value="high">عالية</option>' +
+        '<option value="urgent">عاجلة</option>' +
+        '</select></div>' +
+        '<div class="mb-3"><label class="block text-sm font-medium mb-1">المسؤول عن المهمة</label>' +
+        '<input type="text" id="taskAssignedTo" placeholder="معرف المستخدم (اختياري)" class="w-full border rounded-lg p-2">' +
+        '<small class="text-gray-500">اترك فارغاً للتعيين لاحقاً</small></div>' +
+        '<div class="flex gap-2">' +
+        '<button onclick="confirmCreateTask()" class="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">إنشاء</button>' +
+        '<button onclick="closeModal()" class="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">إلغاء</button>' +
+        '</div></div>';
+      document.body.appendChild(modal);
     }
   </script>
   
