@@ -1733,15 +1733,22 @@ app.post('/api/users', async (c) => {
     const subscription_id = formData.get('subscription_id') || null
     const is_active = formData.get('is_active') || '1'
     
-    // Get tenant_id from Authorization header
-    const authHeader = c.req.header('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
-    let tenant_id = null
+    // Get user info to check role
+    const userInfo = await getUserInfo(c);
     
-    if (token) {
-      const decoded = atob(token)
-      const parts = decoded.split(':')
-      tenant_id = parts[1] !== 'null' ? parseInt(parts[1]) : null
+    // Get tenant_id from form data (if provided by super admin)
+    // If not provided, use the current user's tenant_id (for company admin adding users)
+    let tenant_id = formData.get('tenant_id');
+    
+    if (tenant_id && tenant_id !== '') {
+      // Convert to integer if provided as string
+      tenant_id = parseInt(tenant_id as string);
+    } else if (userInfo.roleId === 1) {
+      // Super admin creating user without tenant - allow null
+      tenant_id = null;
+    } else {
+      // Company admin/supervisor creating user - use their tenant_id
+      tenant_id = userInfo.tenantId;
     }
     
     // Check for duplicate username
@@ -13369,9 +13376,9 @@ app.get('/admin/users-new', async (c) => {
                 <div id="subscriptionDiv" class="md:col-span-2" style="display: none;">
                   <label class="block text-sm font-bold text-gray-700 mb-2">
                     <i class="fas fa-building text-teal-600 ml-1"></i>
-                    الشركة
+                    الشركة <span id="tenantRequired" class="text-red-600">*</span>
                   </label>
-                  <select name="tenant_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                  <select name="tenant_id" id="tenantSelect" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     <option value="">-- اختر الشركة --</option>
                     ${tenants.results.map((tenant: any) => `
                       <option value="${tenant.id}">${tenant.company_name}</option>
@@ -13459,30 +13466,37 @@ app.get('/admin/users-new', async (c) => {
             const roleSelect = document.getElementById('roleSelect');
             const roleHint = document.getElementById('roleHint');
             const subscriptionDiv = document.getElementById('subscriptionDiv');
+            const tenantSelect = document.getElementById('tenantSelect');
             
             // إعادة تعيين
             roleSelect.selectedIndex = 0;
+            if (tenantSelect) tenantSelect.selectedIndex = 0;
             
             // تحديث تلميح الدور
             if (userType === 'admin') {
               roleHint.textContent = '(Role ID: 1) - كل الصلاحيات + بيانات SaaS';
-              roleSelect.value = '1'; // مدير النظام
-              subscriptionDiv.style.display = 'none';
+              roleSelect.value = '1'; // مدير النظام (superadmin)
+              subscriptionDiv.style.display = 'none'; // المدير العام لا ينتمي لشركة معينة
+              if (tenantSelect) tenantSelect.removeAttribute('required');
             } else if (userType === 'company_admin') {
-              roleHint.textContent = '(Role ID: 4) - كل صلاحيات الشركة (عدا SaaS)';
-              roleSelect.value = '4'; // مدير شركة
-              subscriptionDiv.style.display = 'block';
+              roleHint.textContent = '(Role ID: 2) - كل صلاحيات الشركة (عدا SaaS)';
+              roleSelect.value = '2'; // مدير شركة (companyadmin)
+              subscriptionDiv.style.display = 'block'; // يجب اختيار شركة
+              if (tenantSelect) tenantSelect.setAttribute('required', 'required');
             } else if (userType === 'supervisor') {
-              roleHint.textContent = '(Role ID: 5) - يرى جميع العملاء والطلبات (قراءة فقط)';
-              roleSelect.value = '5'; // مشرف موظفين
-              subscriptionDiv.style.display = 'block';
+              roleHint.textContent = '(Role ID: 3) - يرى جميع عملاء الشركة (قراءة فقط)';
+              roleSelect.value = '3'; // مشرف (supervisor)
+              subscriptionDiv.style.display = 'block'; // يجب اختيار شركة
+              if (tenantSelect) tenantSelect.setAttribute('required', 'required');
             } else if (userType === 'employee') {
-              roleHint.textContent = '(Role ID: 3) - يرى العملاء والطلبات المخصصة له فقط';
-              roleSelect.value = '3'; // موظف
-              subscriptionDiv.style.display = 'block';
+              roleHint.textContent = '(Role ID: 4) - يرى العملاء والطلبات المخصصة له فقط';
+              roleSelect.value = '4'; // موظف (employee)
+              subscriptionDiv.style.display = 'block'; // يجب اختيار شركة
+              if (tenantSelect) tenantSelect.setAttribute('required', 'required');
             } else {
               roleHint.textContent = '';
               subscriptionDiv.style.display = 'none';
+              if (tenantSelect) tenantSelect.removeAttribute('required');
             }
           }
           
