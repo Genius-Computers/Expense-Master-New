@@ -1538,18 +1538,17 @@ export const fullAdminPanel = `<!DOCTYPE html>
                         '/admin/reports',
                         '/admin/payments'
                     ],
-                    '4': [ // Company Admin
+                    '2': [ // Company Admin (companyadmin)
                         '/admin/dashboard',
                         '/admin/customers',
                         '/admin/requests',
                         '/admin/users',
                         '/admin/reports',
-                        '/admin/banks', // Read-only
                         '/admin/rates', // Read-only
                         '/calculator',
                         '/'
                     ],
-                    '5': [ // Supervisor (Read-only)
+                    '3': [ // Supervisor (Read-only)
                         '/admin/dashboard',
                         '/admin/customers',
                         '/admin/requests',
@@ -1559,7 +1558,7 @@ export const fullAdminPanel = `<!DOCTYPE html>
                         '/calculator',
                         '/'
                     ],
-                    '3': [ // Employee
+                    '4': [ // Employee
                         '/admin/dashboard',
                         '/admin/customers',
                         '/admin/requests',
@@ -1581,7 +1580,7 @@ export const fullAdminPanel = `<!DOCTYPE html>
                 }
                 
                 // الحصول على الروابط المتاحة للمستخدم
-                const userAllowedLinks = allowedLinks[String(roleId)] || allowedLinks['3'];
+                const userAllowedLinks = allowedLinks[String(roleId)] || allowedLinks['4'];
                 
                 console.log('✅ الروابط المتاحة:', userAllowedLinks);
                 
@@ -1610,7 +1609,7 @@ export const fullAdminPanel = `<!DOCTYPE html>
                 // إخفاء الكروت الإضافية للموظفين والمشرفين
                 const adminOnlyStats = document.querySelector('.admin-only-stats');
                 if (adminOnlyStats) {
-                    if (roleId === 3 || roleId === 5) { // Employee or Supervisor
+                    if (roleId === 4 || roleId === 3) { // Employee or Supervisor
                         adminOnlyStats.style.display = 'none';
                         console.log('🚫 إخفاء الكروت الإضافية (موظف أو مشرف)');
                     } else {

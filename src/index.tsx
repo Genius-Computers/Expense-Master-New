@@ -3505,14 +3505,9 @@ app.get('/api/dashboard/stats', async (c) => {
       ? await c.env.DB.prepare(users_query).bind(tenant_id).first()
       : await c.env.DB.prepare(users_query).first()
     
-    // Banks - filter by tenant_id if available
-    let banks_query = 'SELECT COUNT(*) as count FROM banks'
-    if (tenant_id !== null) {
-      banks_query += ' WHERE tenant_id = ?'
-    }
-    const banks_count = tenant_id !== null
-      ? await c.env.DB.prepare(banks_query).bind(tenant_id).first()
-      : await c.env.DB.prepare(banks_query).first()
+    // Banks - no tenant_id column, count all active banks
+    // Banks are shared across all tenants
+    const banks_count = await c.env.DB.prepare('SELECT COUNT(*) as count FROM banks WHERE is_active = 1').first()
     
     // Tenants - count active companies (only for super admin)
     const tenants_count = await c.env.DB.prepare('SELECT COUNT(*) as count FROM tenants WHERE status = "active"').first()
