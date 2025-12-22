@@ -8295,8 +8295,9 @@ app.get('/admin/requests', async (c) => {
       </body>
       </html>
     `)
-  } catch (error) {
-    return c.html('<h1>خطأ في تحميل البيانات</h1>')
+  } catch (error: any) {
+    console.error('Error in /admin/requests:', error)
+    return c.html(`<h1>خطأ في تحميل البيانات</h1><p style="color:red; direction:ltr;">${error.message}</p><pre style="direction:ltr; text-align:left;">${error.stack}</pre>`)
   }
 })
 
