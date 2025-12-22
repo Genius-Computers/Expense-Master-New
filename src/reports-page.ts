@@ -124,10 +124,10 @@ export const reportsPage = `<!DOCTYPE html>
                     <p class="text-sm text-purple-100 mt-2">تحليل أداء النظام والإحصائيات</p>
                 </div>
                 <div class="p-6">
-                    <button onclick="showComingSoon('تقرير الأداء')" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg font-bold transition-all">
+                    <a href="/admin/reports/performance" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg font-bold transition-all block text-center">
                         <i class="fas fa-file-alt ml-2"></i>
                         عرض التقرير
-                    </button>
+                    </a>
                 </div>
             </div>
 
@@ -154,10 +154,10 @@ export const reportsPage = `<!DOCTYPE html>
                     <p class="text-sm text-teal-100 mt-2">توزيع الطلبات حسب البنوك</p>
                 </div>
                 <div class="p-6">
-                    <button onclick="showComingSoon('تقرير البنوك')" class="w-full bg-teal-600 hover:bg-teal-700 text-white px-4 py-3 rounded-lg font-bold transition-all">
+                    <a href="/admin/reports/banks" class="w-full bg-teal-600 hover:bg-teal-700 text-white px-4 py-3 rounded-lg font-bold transition-all block text-center">
                         <i class="fas fa-file-alt ml-2"></i>
                         عرض التقرير
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
