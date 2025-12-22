@@ -7057,6 +7057,51 @@ app.get('/admin/customers', async (c) => {
     // Get user info (userId, tenantId, roleId)
     const userInfo = await getUserInfo(c);
     
+    console.log('🔍 Customer Page - User Info:', {
+      userId: userInfo.userId,
+      tenantId: userInfo.tenantId,
+      roleId: userInfo.roleId
+    });
+    
+    // Redirect to login if not authenticated
+    if (!userInfo.userId || !userInfo.roleId) {
+      return c.html(`
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>تسجيل الدخول مطلوب</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        </head>
+        <body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen flex items-center justify-center">
+            <div class="max-w-md w-full mx-4">
+                <div class="bg-white rounded-2xl shadow-2xl p-8 text-center">
+                    <div class="mb-6">
+                        <i class="fas fa-lock text-6xl text-blue-600"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-4">تسجيل الدخول مطلوب</h1>
+                    <p class="text-gray-600 mb-6">
+                        يجب تسجيل الدخول للوصول إلى صفحة العملاء
+                    </p>
+                    <div class="space-y-3">
+                        <a href="/login" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                            <i class="fas fa-sign-in-alt ml-2"></i>
+                            تسجيل الدخول
+                        </a>
+                        <a href="/" class="block w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg transition-colors">
+                            <i class="fas fa-home ml-2"></i>
+                            العودة للرئيسية
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+      `);
+    }
+    
     // Build query based on role
     let query = 'SELECT * FROM customers';
     let queryParams: any[] = [];

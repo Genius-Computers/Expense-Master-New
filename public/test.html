@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>اختبار صفحة العملاء</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">اختبار صفحة العملاء</h1>
+        
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">تسجيل الدخول</h2>
+            <div class="space-y-4">
+                <button onclick="loginAs('superadmin', 'Super@2025')" class="bg-blue-600 text-white px-6 py-3 rounded">
+                    تسجيل دخول كـ Super Admin
+                </button>
+                <button onclick="loginAs('companyadmin', 'Company@2025')" class="bg-green-600 text-white px-6 py-3 rounded ml-4">
+                    تسجيل دخول كـ Company Admin
+                </button>
+            </div>
+            <div id="status" class="mt-4"></div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold mb-4">العملاء</h2>
+            <div id="customers"></div>
+        </div>
+    </div>
+    
+    <script>
+        async function loginAs(username, password) {
+            const status = document.getElementById('status');
+            status.innerHTML = 'جاري تسجيل الدخول...';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    status.innerHTML = '<span class="text-green-600">✓ تم تسجيل الدخول بنجاح</span>';
+                    loadCustomers();
+                } else {
+                    status.innerHTML = '<span class="text-red-600">✗ فشل تسجيل الدخول</span>';
+                }
+            } catch (error) {
+                status.innerHTML = '<span class="text-red-600">✗ خطأ: ' + error.message + '</span>';
+            }
+        }
+        
+        async function loadCustomers() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                document.getElementById('customers').innerHTML = 'يرجى تسجيل الدخول أولاً';
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/customers', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                
+                const data = await response.json();
+                const customers = data.data || [];
+                
+                if (customers.length === 0) {
+                    document.getElementById('customers').innerHTML = '<p class="text-gray-500">لا توجد عملاء</p>';
+                } else {
+                    let html = '<table class="min-w-full"><thead><tr class="bg-gray-50">';
+                    html += '<th class="px-4 py-2">#</th>';
+                    html += '<th class="px-4 py-2">الاسم</th>';
+                    html += '<th class="px-4 py-2">الهاتف</th>';
+                    html += '<th class="px-4 py-2">البريد</th>';
+                    html += '</tr></thead><tbody>';
+                    
+                    customers.forEach(customer => {
+                        html += `<tr class="border-t">
+                            <td class="px-4 py-2">${customer.id}</td>
+                            <td class="px-4 py-2">${customer.full_name || '-'}</td>
+                            <td class="px-4 py-2">${customer.phone || '-'}</td>
+                            <td class="px-4 py-2">${customer.email || '-'}</td>
+                        </tr>`;
+                    });
+                    
+                    html += '</tbody></table>';
+                    html += `<p class="mt-4 text-gray-600">إجمالي العملاء: ${customers.length}</p>`;
+                    document.getElementById('customers').innerHTML = html;
+                }
+            } catch (error) {
+                document.getElementById('customers').innerHTML = '<span class="text-red-600">خطأ في تحميل العملاء: ' + error.message + '</span>';
+            }
+        }
+        
+        // Auto-load if token exists
+        if (localStorage.getItem('token')) {
+            loadCustomers();
+        }
+    </script>
+</body>
+</html>
