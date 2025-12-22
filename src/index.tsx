@@ -10660,9 +10660,9 @@ app.get('/admin/requests/:id/workflow', async (c) => {
       FROM workflow_stage_transitions wst
       LEFT JOIN workflow_stages ws_from ON wst.from_stage_id = ws_from.id
       LEFT JOIN workflow_stages ws_to ON wst.to_stage_id = ws_to.id
-      LEFT JOIN users u ON wst.changed_by = u.id
+      LEFT JOIN users u ON wst.transitioned_by = u.id
       WHERE wst.request_id = ?
-      ORDER BY wst.changed_at DESC
+      ORDER BY wst.created_at DESC
     `).bind(id).all()
     
     const { results: actions } = await c.env.DB.prepare(`
