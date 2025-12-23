@@ -1,5 +1,5 @@
-import app from '../src/index'
-import { createNeonD1Database } from '../src/platform/db/neon-d1-compat'
+import app from '../src/index.ts'
+import { createNeonD1Database } from '../src/platform/db/neon-d1-compat.ts'
 
 export const config = { runtime: 'nodejs' }
 

@@ -2,7 +2,12 @@
   "rewrites": [
     { "source": "/", "destination": "/api" },
     { "source": "/((?!api/).*)", "destination": "/api/$1" }
-  ]
+  ],
+  "functions": {
+    "api/[[...path]].ts": {
+      "includeFiles": "src/**"
+    }
+  }
 }
 
 
