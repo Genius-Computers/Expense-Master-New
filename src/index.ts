@@ -43,7 +43,44 @@ type Variables = {
   tenantId: number | null;
 }
 
+// Main application (all routes/pages).
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
+
+// Vercel rewrite compatibility wrapper.
+// In production we rewrite non-`/api/*` paths to `/api/...` (see `vercel.json`),
+// but our pages are defined at `/`, `/admin/*`, etc. This wrapper strips `/api`
+// only for page-like routes and forwards the request to `app`.
+const wrapper = new Hono<{ Bindings: Bindings; Variables: Variables }>()
+
+wrapper.all('*', async (c) => {
+  const url = new URL(c.req.url)
+  const path = url.pathname
+
+  if (path === '/api' || path.startsWith('/api/')) {
+    const after = path === '/api' ? '' : path.slice('/api/'.length)
+    const firstSeg = after.split('/')[0]
+    const pageSegs = new Set([
+      '',
+      'admin',
+      'login',
+      'forgot-password',
+      'calculator',
+      'calculator-old',
+      'packages',
+      'subscribe',
+      'test',
+      'c'
+    ])
+
+    if (pageSegs.has(firstSeg)) {
+      url.pathname = path.replace(/^\/api(?=\/|$)/, '') || '/'
+      const rewrittenReq = new Request(url.toString(), c.req.raw)
+      return await app.fetch(rewrittenReq, c.env as any)
+    }
+  }
+
+  return await app.fetch(c.req.raw, c.env as any)
+})
 
 // Ensure DB binding exists in non-Cloudflare runtimes (local dev / Node).
 // Cloudflare/Vercel entrypoints can still inject `env.DB`; we won't override it.
@@ -59,6 +96,12 @@ app.use('*', async (c, next) => {
     ;(c.env as any).DB = createNeonD1Database(databaseUrl)
   }
   await next()
+})
+
+// Prevent hard "function crashed" by catching errors and logging them.
+app.onError((err, c) => {
+  console.error('Unhandled error:', err)
+  return c.text('Internal Server Error', 500)
 })
 
 // Helper: Mobile-Responsive CSS Styles
@@ -13571,4 +13614,4 @@ app.post('/api/users/:id/permissions', async (c) => {
   }
 })
 
-export default app
+export default wrapper
