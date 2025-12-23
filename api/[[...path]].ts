@@ -2,6 +2,8 @@ import { createNeonD1Database } from '../src/platform/db/neon-d1-compat.ts'
 
 export const config = { runtime: 'nodejs' }
 
+let cachedAppPromise: Promise<any> | null = null
+
 export default async function handler(request: Request): Promise<Response> {
   try {
     // Polyfill atob/btoa for Node runtime (used by src/index.ts token logic).
@@ -13,6 +15,26 @@ export default async function handler(request: Request): Promise<Response> {
     const databaseUrl = process.env.DATABASE_URL
     if (!databaseUrl) {
       return new Response('Missing env var: DATABASE_URL', { status: 500 })
+    }
+
+    // Lightweight health endpoint for production debugging (does not require rewrites).
+    // Visit: /api/__health
+    const url0 = new URL(request.url)
+    if (url0.pathname === '/api/__health') {
+      return new Response(
+        JSON.stringify(
+          {
+            ok: true,
+            runtime: 'nodejs',
+            node: process.version,
+            hasDatabaseUrl: !!process.env.DATABASE_URL,
+            hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN
+          },
+          null,
+          2
+        ),
+        { status: 200, headers: { 'content-type': 'application/json; charset=utf-8' } }
+      )
     }
 
     // vercel.json rewrites route non-`/api/*` traffic through this function by prefixing `/api`.
@@ -32,7 +54,9 @@ export default async function handler(request: Request): Promise<Response> {
     }
 
     // Lazy-load the app so a module-resolution failure doesn't crash the function.
-    const mod = await import('../src/index')
+    // Cache between invocations in the same lambda to reduce cold start cost.
+    if (!cachedAppPromise) cachedAppPromise = import('../src/index')
+    const mod = await cachedAppPromise
     const app = (mod as any).default
     if (!app?.fetch) {
       return new Response('App import failed: default export missing `fetch`', { status: 500 })
@@ -44,7 +68,22 @@ export default async function handler(request: Request): Promise<Response> {
       // ATTACHMENTS is replaced by Vercel Blob in `src/index.ts` routes.
     }
 
-    return app.fetch(request, env as any)
+    // Prevent “endless loading” if something stalls (DB connection, etc.).
+    const timeoutMs = 9000
+    const timeout = new Promise<Response>((resolve) =>
+      setTimeout(
+        () =>
+          resolve(
+            new Response(
+              `TIMEOUT after ${timeoutMs}ms (request may be stuck on DB/network). Try /api/__health and check Vercel Function Logs.`,
+              { status: 504 }
+            )
+          ),
+        timeoutMs
+      )
+    )
+
+    return await Promise.race([app.fetch(request, env as any), timeout])
   } catch (error: any) {
     const msg =
       (error && (error.stack || error.message)) ||
