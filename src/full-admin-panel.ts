@@ -180,6 +180,12 @@ export const fullAdminPanel = `<!DOCTYPE html>
                         <div class="text-sm font-bold">التقارير</div>
                     </a>
                     
+                    <!-- زر نسب التمويل -->
+                    <a href="/admin/rates" class="quick-access-btn bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg p-4 transition-all transform hover:scale-105 shadow-lg block text-center">
+                        <i class="fas fa-percentage text-3xl mb-2"></i>
+                        <div class="text-sm font-bold">نسب التمويل</div>
+                    </a>
+                    
                     <!-- زر سندات القبض -->
                     <a href="/admin/payments" class="quick-access-btn bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-lg p-4 transition-all transform hover:scale-105 shadow-lg block text-center">
                         <i class="fas fa-receipt text-3xl mb-2"></i>
@@ -190,12 +196,6 @@ export const fullAdminPanel = `<!DOCTYPE html>
                     <a href="/admin/banks" class="quick-access-btn bg-gradient-to-br from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-lg p-4 transition-all transform hover:scale-105 shadow-lg block text-center">
                         <i class="fas fa-university text-3xl mb-2"></i>
                         <div class="text-sm font-bold">البنوك</div>
-                    </a>
-                    
-                    <!-- زر نسب التمويل -->
-                    <a href="/admin/rates" class="quick-access-btn bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg p-4 transition-all transform hover:scale-105 shadow-lg block text-center">
-                        <i class="fas fa-percentage text-3xl mb-2"></i>
-                        <div class="text-sm font-bold">نسب التمويل</div>
                     </a>
                     
                     <!-- زر الاشتراكات -->
