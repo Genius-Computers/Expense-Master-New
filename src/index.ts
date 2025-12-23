@@ -1,5 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import dotenv from 'dotenv'
+import { existsSync } from 'node:fs'
 import { homePage } from './home-page'
 import { testPage } from './test-page'
 import { calculatorPage } from './calculator-page'
@@ -21,9 +23,19 @@ import { generateWorkflowTimelinePage } from './workflow-page'
 import { banksReportPage } from './banks-report'
 import { performanceReportPage } from './performance-report'
 import { deleteBlob, putBlob } from './platform/blob/vercel-blob'
+import { createNeonD1Database } from './platform/db/neon-d1-compat'
+
+// Load local env files for local dev. (On Vercel, env vars are provided by the platform.)
+for (const p of ['.env', '.env.local', '.env.development', '.env.production']) {
+  if (existsSync(p)) dotenv.config({ path: p })
+}
+
+// Polyfill atob/btoa for Node environments (local dev / Vercel Node runtime).
+;(globalThis as any).atob ??= (b64: string) => Buffer.from(b64, 'base64').toString('binary')
+;(globalThis as any).btoa ??= (bin: string) => Buffer.from(bin, 'binary').toString('base64')
 
 type Bindings = {
-  DB: any;
+  DB?: any;
 }
 
 type Variables = {
@@ -32,6 +44,22 @@ type Variables = {
 }
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
+
+// Ensure DB binding exists in non-Cloudflare runtimes (local dev / Node).
+// Cloudflare/Vercel entrypoints can still inject `env.DB`; we won't override it.
+app.use('*', async (c, next) => {
+  if (!(c.env as any)?.DB) {
+    const databaseUrl = process.env.DATABASE_URL
+    if (!databaseUrl) {
+      return c.json(
+        { success: false, error: 'Missing env var: DATABASE_URL (Neon connection string)' },
+        500
+      )
+    }
+    ;(c.env as any).DB = createNeonD1Database(databaseUrl)
+  }
+  await next()
+})
 
 // Helper: Mobile-Responsive CSS Styles
 const getMobileResponsiveCSS = () => `
@@ -1343,12 +1371,18 @@ app.get('/api/users', async (c) => {
     const tenantId = userInfo.tenantId
     
     let query = `
-      SELECT u.*, r.role_name, r.description as role_description,
-             t.company_name as tenant_name,
-             COUNT(DISTINCT rp.permission_id) as permissions_count
+      SELECT 
+        u.*, 
+        r.role_name, 
+        r.description as role_description,
+        t.company_name as tenant_name,
+        (
+          SELECT COUNT(DISTINCT rp.permission_id)
+          FROM role_permissions rp
+          WHERE rp.role_id = u.role_id
+        ) as permissions_count
       FROM users u
       LEFT JOIN roles r ON u.role_id = r.id
-      LEFT JOIN role_permissions rp ON r.id = rp.role_id
       LEFT JOIN tenants t ON u.tenant_id = t.id`
     
     // Superadmin (role_id = 1) can see all users
@@ -1358,7 +1392,6 @@ app.get('/api/users', async (c) => {
     }
     
     query += `
-      GROUP BY u.id
       ORDER BY u.id DESC`
     
     const { results } = await c.env.DB.prepare(query).all()
@@ -1473,11 +1506,10 @@ app.get('/api/customers', async (c) => {
     let query = `
       SELECT 
         c.*,
-        COUNT(f.id) as total_requests,
-        SUM(CASE WHEN f.status = 'pending' THEN 1 ELSE 0 END) as pending_requests,
-        SUM(CASE WHEN f.status = 'approved' THEN 1 ELSE 0 END) as approved_requests
-      FROM customers c
-      LEFT JOIN financing_requests f ON c.id = f.customer_id`
+        (SELECT COUNT(*) FROM financing_requests f WHERE f.customer_id = c.id) as total_requests,
+        (SELECT COUNT(*) FROM financing_requests f WHERE f.customer_id = c.id AND f.status = 'pending') as pending_requests,
+        (SELECT COUNT(*) FROM financing_requests f WHERE f.customer_id = c.id AND f.status = 'approved') as approved_requests
+      FROM customers c`
     
     // Apply filtering based on role
     if (userInfo.roleId === 1) {
@@ -1500,7 +1532,6 @@ app.get('/api/customers', async (c) => {
     }
     
     query += `
-      GROUP BY c.id
       ORDER BY c.created_at DESC`
     
     const { results } = await c.env.DB.prepare(query).all()

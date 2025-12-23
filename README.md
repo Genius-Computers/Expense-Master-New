@@ -123,7 +123,7 @@ https://3000-ii8t2q2dzwwe7ckmslxss-3844e1b6.sandbox.novita.ai/admin/users
 
 ## 🚀 Deploy on Vercel + Neon (recommended)
 
-This repo already contains the full app (UI + API) inside the Hono server in `src/index.tsx`. On Vercel, we run the same app via a single Edge Function entrypoint so **no UI/features change**.
+This repo already contains the full app (UI + API) inside the Hono server in `src/index.ts`. On Vercel, we run the same app via a single Node Function entrypoint so **no UI/features change**.
 
 ### Required environment variables (Vercel Project → Settings → Environment Variables)
 - `DATABASE_URL`: Neon Postgres connection string (use Neon **pooled** connection string)
