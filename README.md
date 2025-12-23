@@ -118,6 +118,29 @@ https://3000-ii8t2q2dzwwe7ckmslxss-3844e1b6.sandbox.novita.ai/admin/users
 
 ### الوظائف:
 - ✅ **عرض البيانات** - جداول منظمة مع pagination
+
+---
+
+## 🚀 Deploy on Vercel + Neon (recommended)
+
+This repo already contains the full app (UI + API) inside the Hono server in `src/index.tsx`. On Vercel, we run the same app via a single Edge Function entrypoint so **no UI/features change**.
+
+### Required environment variables (Vercel Project → Settings → Environment Variables)
+- `DATABASE_URL`: Neon Postgres connection string (use Neon **pooled** connection string)
+- `BLOB_READ_WRITE_TOKEN`: from enabling **Vercel Blob** (used for attachments)
+
+Example values are in `env.example`.
+
+### One-time DB setup (Neon)
+Run the Postgres migrations + seed against your Neon database:
+
+```bash
+npm run db:migrate
+```
+
+### Notes
+- All routes (`/`, `/admin/...`, `/api/...`) are served by Vercel via `vercel.json` rewrites.
+- Attachments keep the same URLs (`/api/attachments/view/...`) but are stored in Vercel Blob.
 - ✅ **أزرار إجراءات** - عرض، تعديل، حذف لكل سجل
 - ✅ **إضافة جديد** - نماذج سهلة لإضافة البيانات
 - ✅ **تصدير Excel** - تصدير البيانات إلى CSV مع دعم UTF-8
