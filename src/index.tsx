@@ -6864,7 +6864,7 @@ app.get('/admin/rates', async (c) => {
               method: 'DELETE',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
+                'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || localStorage.getItem('token'))
               }
             })
             .then(response => response.json())
@@ -6897,7 +6897,7 @@ app.get('/admin/rates/add', async (c) => {
     return c.html('<h1>خطأ: يجب تحديد الشركة</h1>', 400);
   }
   
-  const banks = await c.env.DB.prepare('SELECT * FROM banks WHERE tenant_id = ? ORDER BY bank_name').bind(tenantId).all();
+  const banks = await c.env.DB.prepare('SELECT * FROM banks WHERE is_active = 1 ORDER BY bank_name').all();
   const financingTypes = await c.env.DB.prepare('SELECT * FROM financing_types ORDER BY type_name').all();
   
   return c.html(generateAddRatePage(tenantId, banks.results, financingTypes.results));
@@ -6924,7 +6924,7 @@ app.get('/admin/rates/edit/:id', async (c) => {
     return c.html('<h1>خطأ: النسبة غير موجودة</h1>', 404);
   }
   
-  const banks = await c.env.DB.prepare('SELECT * FROM banks WHERE tenant_id = ? ORDER BY bank_name').bind(tenantId).all();
+  const banks = await c.env.DB.prepare('SELECT * FROM banks WHERE is_active = 1 ORDER BY bank_name').all();
   const financingTypes = await c.env.DB.prepare('SELECT * FROM financing_types ORDER BY type_name').all();
   
   return c.html(generateEditRatePage(tenantId, rate, banks.results, financingTypes.results));

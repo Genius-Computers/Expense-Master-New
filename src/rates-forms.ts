@@ -173,7 +173,7 @@ export function generateAddRatePage(tenantId: string, banks: any[], financingTyp
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
+                'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || localStorage.getItem('token'))
               },
               body: JSON.stringify(data)
             });
@@ -329,7 +329,7 @@ export function generateEditRatePage(tenantId: string, rate: any, banks: any[], 
               method: 'PUT',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
+                'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || localStorage.getItem('token'))
               },
               body: JSON.stringify(data)
             });

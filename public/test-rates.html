@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>اختبار نماذج النسب</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 p-8">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">
+      <i class="fas fa-percent mr-2"></i>
+      اختبار نماذج النسب
+    </h1>
+    
+    <!-- Login Section -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <h2 class="text-2xl font-bold mb-4">تسجيل الدخول</h2>
+      <div class="flex gap-4 mb-4">
+        <input type="text" id="username" placeholder="اسم المستخدم" value="superadmin" class="flex-1 px-4 py-2 border rounded">
+        <input type="password" id="password" placeholder="كلمة المرور" value="Super@2025" class="flex-1 px-4 py-2 border rounded">
+        <button onclick="login()" class="bg-green-600 text-white px-6 py-2 rounded font-bold">دخول</button>
+      </div>
+      <div id="loginStatus" class="text-sm"></div>
+    </div>
+    
+    <!-- Rates Tests -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <h2 class="text-2xl font-bold mb-4">اختبارات النماذج</h2>
+      <div class="space-y-4">
+        <!-- View All Rates -->
+        <div class="border-b pb-4">
+          <h3 class="text-lg font-bold mb-2">1. عرض جميع النسب</h3>
+          <button onclick="testViewRates()" class="bg-blue-600 text-white px-4 py-2 rounded">
+            <i class="fas fa-list mr-2"></i>
+            اختبار عرض النسب
+          </button>
+          <div id="viewRatesResult" class="mt-2 text-sm"></div>
+        </div>
+        
+        <!-- Add Rate Form -->
+        <div class="border-b pb-4">
+          <h3 class="text-lg font-bold mb-2">2. نموذج إضافة نسبة</h3>
+          <button onclick="testAddForm()" class="bg-green-600 text-white px-4 py-2 rounded">
+            <i class="fas fa-plus mr-2"></i>
+            اختبار نموذج الإضافة
+          </button>
+          <div id="addFormResult" class="mt-2 text-sm"></div>
+        </div>
+        
+        <!-- Edit Rate Form -->
+        <div class="border-b pb-4">
+          <h3 class="text-lg font-bold mb-2">3. نموذج تعديل نسبة</h3>
+          <div class="flex gap-2">
+            <input type="number" id="editRateId" placeholder="رقم النسبة" value="4" class="px-4 py-2 border rounded">
+            <button onclick="testEditForm()" class="bg-yellow-600 text-white px-4 py-2 rounded">
+              <i class="fas fa-edit mr-2"></i>
+              اختبار نموذج التعديل
+            </button>
+          </div>
+          <div id="editFormResult" class="mt-2 text-sm"></div>
+        </div>
+        
+        <!-- Delete Rate -->
+        <div class="pb-4">
+          <h3 class="text-lg font-bold mb-2">4. حذف نسبة</h3>
+          <div class="flex gap-2">
+            <input type="number" id="deleteRateId" placeholder="رقم النسبة" value="5" class="px-4 py-2 border rounded">
+            <button onclick="testDelete()" class="bg-red-600 text-white px-4 py-2 rounded">
+              <i class="fas fa-trash mr-2"></i>
+              اختبار الحذف
+            </button>
+          </div>
+          <div id="deleteResult" class="mt-2 text-sm"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- API Response -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-2xl font-bold mb-4">نتائج الاختبار</h2>
+      <pre id="apiResponse" class="bg-gray-100 p-4 rounded text-sm overflow-auto" style="max-height: 400px;">
+جاري الانتظار...</pre>
+    </div>
+  </div>
+  
+  <script>
+    let authToken = '';
+    
+    async function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          authToken = data.token;
+          localStorage.setItem('authToken', authToken);
+          document.getElementById('loginStatus').innerHTML = 
+            '<span class="text-green-600">✅ تم تسجيل الدخول بنجاح</span>';
+          document.getElementById('apiResponse').textContent = JSON.stringify(data, null, 2);
+        } else {
+          document.getElementById('loginStatus').innerHTML = 
+            '<span class="text-red-600">❌ فشل تسجيل الدخول</span>';
+        }
+      } catch (error) {
+        document.getElementById('loginStatus').innerHTML = 
+          '<span class="text-red-600">❌ خطأ: ' + error.message + '</span>';
+      }
+    }
+    
+    async function testViewRates() {
+      document.getElementById('viewRatesResult').innerHTML = 
+        '<span class="text-blue-600">⏳ جاري الاختبار...</span>';
+      
+      window.open('/admin/rates?tenant_id=1', '_blank');
+      
+      setTimeout(() => {
+        document.getElementById('viewRatesResult').innerHTML = 
+          '<span class="text-green-600">✅ تم فتح صفحة النسب في تبويب جديد</span>';
+      }, 500);
+    }
+    
+    async function testAddForm() {
+      document.getElementById('addFormResult').innerHTML = 
+        '<span class="text-blue-600">⏳ جاري الاختبار...</span>';
+      
+      window.open('/admin/rates/add?tenant_id=1', '_blank');
+      
+      setTimeout(() => {
+        document.getElementById('addFormResult').innerHTML = 
+          '<span class="text-green-600">✅ تم فتح نموذج الإضافة في تبويب جديد</span>';
+      }, 500);
+    }
+    
+    async function testEditForm() {
+      const rateId = document.getElementById('editRateId').value;
+      document.getElementById('editFormResult').innerHTML = 
+        '<span class="text-blue-600">⏳ جاري الاختبار...</span>';
+      
+      window.open(`/admin/rates/edit/${rateId}?tenant_id=1`, '_blank');
+      
+      setTimeout(() => {
+        document.getElementById('editFormResult').innerHTML = 
+          '<span class="text-green-600">✅ تم فتح نموذج التعديل في تبويب جديد</span>';
+      }, 500);
+    }
+    
+    async function testDelete() {
+      const rateId = document.getElementById('deleteRateId').value;
+      
+      if (!authToken) {
+        document.getElementById('deleteResult').innerHTML = 
+          '<span class="text-red-600">❌ يجب تسجيل الدخول أولاً</span>';
+        return;
+      }
+      
+      if (!confirm(`هل أنت متأكد من حذف النسبة رقم ${rateId}؟`)) return;
+      
+      document.getElementById('deleteResult').innerHTML = 
+        '<span class="text-blue-600">⏳ جاري الحذف...</span>';
+      
+      try {
+        const response = await fetch(`/api/rates/${rateId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + authToken
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          document.getElementById('deleteResult').innerHTML = 
+            '<span class="text-green-600">✅ تم حذف النسبة بنجاح</span>';
+          document.getElementById('apiResponse').textContent = JSON.stringify(data, null, 2);
+        } else {
+          document.getElementById('deleteResult').innerHTML = 
+            '<span class="text-red-600">❌ فشل الحذف: ' + (data.error || 'خطأ غير معروف') + '</span>';
+        }
+      } catch (error) {
+        document.getElementById('deleteResult').innerHTML = 
+          '<span class="text-red-600">❌ خطأ: ' + error.message + '</span>';
+      }
+    }
+  </script>
+</body>
+</html>
