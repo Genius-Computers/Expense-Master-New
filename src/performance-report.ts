@@ -204,7 +204,7 @@ export const performanceReportPage = `
 
         async function loadPerformanceReport() {
             try {
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('authToken') || localStorage.getItem('token');
                 if (!token) {
                     window.location.href = '/login';
                     return;

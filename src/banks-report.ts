@@ -106,7 +106,7 @@ export const banksReportPage = `
 
         async function loadBanksReport() {
             try {
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('authToken') || localStorage.getItem('token');
                 if (!token) {
                     window.location.href = '/login';
                     return;
