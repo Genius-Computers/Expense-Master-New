@@ -1,9 +1,6 @@
-import handler from './[...path]'
+import app from '../src/index'
 
-export const config = { runtime: 'nodejs' }
-
-export default async function index(request: Request): Promise<Response> {
-  return handler(request)
-}
+// Let Vercel/Hono adapter call `app.fetch()` directly.
+export default app
 
 

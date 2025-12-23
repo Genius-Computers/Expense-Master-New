@@ -1,20 +1,17 @@
-export const config = { runtime: 'nodejs' }
+import { Hono } from 'hono'
 
-export default async function handler(_req: Request): Promise<Response> {
-  return new Response(
-    JSON.stringify(
-      {
-        ok: true,
-        runtime: 'nodejs',
-        node: process.version,
-        hasDatabaseUrl: !!process.env.DATABASE_URL,
-        hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN
-      },
-      null,
-      2
-    ),
-    { status: 200, headers: { 'content-type': 'application/json; charset=utf-8' } }
-  )
-}
+const app = new Hono()
+
+app.get('*', (c) =>
+  c.json({
+    ok: true,
+    runtime: 'hono',
+    node: typeof process !== 'undefined' ? process.version : null,
+    hasDatabaseUrl: !!process.env.DATABASE_URL,
+    hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN
+  })
+)
+
+export default app
 
 
