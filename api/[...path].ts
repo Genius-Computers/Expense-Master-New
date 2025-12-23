@@ -14,6 +14,25 @@ export default async function handler(request: Request): Promise<Response> {
       return new Response('Missing env var: DATABASE_URL', { status: 500 })
     }
 
+    // Always-available health (even if route matching prefers this catch-all).
+    const healthUrl = new URL(request.url)
+    if (healthUrl.pathname === '/api/health' || healthUrl.pathname === '/health') {
+      return new Response(
+        JSON.stringify(
+          {
+            ok: true,
+            runtime: 'nodejs',
+            node: process.version,
+            hasDatabaseUrl: !!process.env.DATABASE_URL,
+            hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN
+          },
+          null,
+          2
+        ),
+        { status: 200, headers: { 'content-type': 'application/json; charset=utf-8' } }
+      )
+    }
+
     // Undo `/api` prefix rewrite for page routes only.
     const url = new URL(request.url)
     const path = url.pathname
