@@ -1486,6 +1486,15 @@ export const fullAdminPanel = `<!DOCTYPE html>
                         console.log('✅ تم تحديث DOM - البريد:', user.email);
                     }
                     
+                    // تحديث رابط النسب بـ tenant_id إذا كان المستخدم مدير شركة
+                    if (user.tenant_id) {
+                        const ratesLink = document.querySelector('a[href="/admin/rates"]');
+                        if (ratesLink) {
+                            ratesLink.setAttribute('href', '/admin/rates?tenant_id=' + user.tenant_id);
+                            console.log('✅ تم تحديث رابط النسب: /admin/rates?tenant_id=' + user.tenant_id);
+                        }
+                    }
+                    
                     console.log('═══════════════════════════════════════');
                     console.log('✅ اكتمل تحميل بيانات المستخدم بنجاح');
                     console.log('═══════════════════════════════════════');

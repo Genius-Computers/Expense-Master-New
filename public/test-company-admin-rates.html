@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>اختبار صلاحيات مدير الشركة - النسب</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 p-8">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">
+      <i class="fas fa-user-tie mr-2"></i>
+      اختبار صلاحيات مدير الشركة - النسب
+    </h1>
+    
+    <!-- Login as Company Admin -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <h2 class="text-2xl font-bold mb-4">تسجيل دخول كمدير شركة</h2>
+      <div class="space-y-4">
+        <div class="flex gap-4">
+          <button onclick="loginAsCompany1()" class="flex-1 bg-blue-600 text-white px-6 py-3 rounded font-bold">
+            <i class="fas fa-sign-in-alt mr-2"></i>
+            تسجيل دخول - شركة 1
+          </button>
+          <button onclick="loginAsCompany2()" class="flex-1 bg-green-600 text-white px-6 py-3 rounded font-bold">
+            <i class="fas fa-sign-in-alt mr-2"></i>
+            تسجيل دخول - شركة 2
+          </button>
+        </div>
+        <div id="loginStatus" class="text-sm"></div>
+      </div>
+    </div>
+    
+    <!-- Tests -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <h2 class="text-2xl font-bold mb-4">الاختبارات</h2>
+      <div class="space-y-4">
+        <!-- View Rates Page -->
+        <div class="border-b pb-4">
+          <h3 class="text-lg font-bold mb-2">1. عرض صفحة النسب</h3>
+          <p class="text-sm text-gray-600 mb-2">يجب أن يرى مدير الشركة نسب شركته فقط مع أزرار إضافة/تعديل/حذف</p>
+          <button onclick="testViewRates()" class="bg-blue-600 text-white px-4 py-2 rounded">
+            <i class="fas fa-list mr-2"></i>
+            فتح صفحة النسب
+          </button>
+          <div id="viewRatesResult" class="mt-2 text-sm"></div>
+        </div>
+        
+        <!-- Add Rate -->
+        <div class="border-b pb-4">
+          <h3 class="text-lg font-bold mb-2">2. إضافة نسبة جديدة</h3>
+          <p class="text-sm text-gray-600 mb-2">يجب أن يتمكن مدير الشركة من إضافة نسب جديدة</p>
+          <button onclick="testAddRate()" class="bg-green-600 text-white px-4 py-2 rounded">
+            <i class="fas fa-plus mr-2"></i>
+            فتح نموذج الإضافة
+          </button>
+          <div id="addRateResult" class="mt-2 text-sm"></div>
+        </div>
+        
+        <!-- Edit Rate -->
+        <div class="border-b pb-4">
+          <h3 class="text-lg font-bold mb-2">3. تعديل نسبة</h3>
+          <p class="text-sm text-gray-600 mb-2">يجب أن يتمكن مدير الشركة من تعديل النسب</p>
+          <div class="flex gap-2">
+            <input type="number" id="editRateId" placeholder="رقم النسبة" value="4" class="px-4 py-2 border rounded">
+            <button onclick="testEditRate()" class="bg-yellow-600 text-white px-4 py-2 rounded">
+              <i class="fas fa-edit mr-2"></i>
+              فتح نموذج التعديل
+            </button>
+          </div>
+          <div id="editRateResult" class="mt-2 text-sm"></div>
+        </div>
+        
+        <!-- Delete Rate -->
+        <div class="pb-4">
+          <h3 class="text-lg font-bold mb-2">4. حذف نسبة</h3>
+          <p class="text-sm text-gray-600 mb-2">يجب أن يتمكن مدير الشركة من حذف النسب</p>
+          <p class="text-sm text-red-600 mb-2">⚠️ تحذير: سيتم الحذف فعلياً من قاعدة البيانات</p>
+          <div class="flex gap-2">
+            <input type="number" id="deleteRateId" placeholder="رقم النسبة" value="5" class="px-4 py-2 border rounded">
+            <button onclick="testDeleteRate()" class="bg-red-600 text-white px-4 py-2 rounded">
+              <i class="fas fa-trash mr-2"></i>
+              اختبار الحذف
+            </button>
+          </div>
+          <div id="deleteRateResult" class="mt-2 text-sm"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Current User Info -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-2xl font-bold mb-4">معلومات المستخدم الحالي</h2>
+      <pre id="userInfo" class="bg-gray-100 p-4 rounded text-sm overflow-auto">
+لم يتم تسجيل الدخول بعد</pre>
+    </div>
+  </div>
+  
+  <script>
+    let currentTenantId = null;
+    let authToken = '';
+    
+    async function loginAsCompany1() {
+      await login('companyadmin', 'Company@2025', 1);
+    }
+    
+    async function loginAsCompany2() {
+      await login('company2admin', 'Company2@2025', 2);
+    }
+    
+    async function login(username, password, tenantId) {
+      document.getElementById('loginStatus').innerHTML = 
+        '<span class="text-blue-600">⏳ جاري تسجيل الدخول...</span>';
+      
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          authToken = data.token;
+          currentTenantId = tenantId;
+          localStorage.setItem('authToken', authToken);
+          localStorage.setItem('token', authToken);
+          
+          // Store user data
+          const userData = {
+            username: username,
+            role_id: 2, // Company Admin
+            tenant_id: tenantId
+          };
+          localStorage.setItem('userData', JSON.stringify(userData));
+          
+          document.getElementById('loginStatus').innerHTML = 
+            '<span class="text-green-600">✅ تم تسجيل الدخول بنجاح كمدير شركة ' + tenantId + '</span>';
+          document.getElementById('userInfo').textContent = JSON.stringify(data, null, 2);
+        } else {
+          document.getElementById('loginStatus').innerHTML = 
+            '<span class="text-red-600">❌ فشل تسجيل الدخول: ' + (data.message || 'خطأ غير معروف') + '</span>';
+        }
+      } catch (error) {
+        document.getElementById('loginStatus').innerHTML = 
+          '<span class="text-red-600">❌ خطأ: ' + error.message + '</span>';
+      }
+    }
+    
+    function testViewRates() {
+      if (!currentTenantId) {
+        document.getElementById('viewRatesResult').innerHTML = 
+          '<span class="text-red-600">❌ يجب تسجيل الدخول أولاً</span>';
+        return;
+      }
+      
+      document.getElementById('viewRatesResult').innerHTML = 
+        '<span class="text-blue-600">⏳ جاري فتح الصفحة...</span>';
+      
+      window.open('/admin/rates?tenant_id=' + currentTenantId, '_blank');
+      
+      setTimeout(() => {
+        document.getElementById('viewRatesResult').innerHTML = 
+          '<span class="text-green-600">✅ تم فتح صفحة النسب. تحقق من وجود أزرار الإضافة/التعديل/الحذف</span>';
+      }, 500);
+    }
+    
+    function testAddRate() {
+      if (!currentTenantId) {
+        document.getElementById('addRateResult').innerHTML = 
+          '<span class="text-red-600">❌ يجب تسجيل الدخول أولاً</span>';
+        return;
+      }
+      
+      document.getElementById('addRateResult').innerHTML = 
+        '<span class="text-blue-600">⏳ جاري فتح نموذج الإضافة...</span>';
+      
+      window.open('/admin/rates/add?tenant_id=' + currentTenantId, '_blank');
+      
+      setTimeout(() => {
+        document.getElementById('addRateResult').innerHTML = 
+          '<span class="text-green-600">✅ تم فتح نموذج الإضافة</span>';
+      }, 500);
+    }
+    
+    function testEditRate() {
+      if (!currentTenantId) {
+        document.getElementById('editRateResult').innerHTML = 
+          '<span class="text-red-600">❌ يجب تسجيل الدخول أولاً</span>';
+        return;
+      }
+      
+      const rateId = document.getElementById('editRateId').value;
+      document.getElementById('editRateResult').innerHTML = 
+        '<span class="text-blue-600">⏳ جاري فتح نموذج التعديل...</span>';
+      
+      window.open('/admin/rates/edit/' + rateId + '?tenant_id=' + currentTenantId, '_blank');
+      
+      setTimeout(() => {
+        document.getElementById('editRateResult').innerHTML = 
+          '<span class="text-green-600">✅ تم فتح نموذج التعديل</span>';
+      }, 500);
+    }
+    
+    async function testDeleteRate() {
+      if (!currentTenantId || !authToken) {
+        document.getElementById('deleteRateResult').innerHTML = 
+          '<span class="text-red-600">❌ يجب تسجيل الدخول أولاً</span>';
+        return;
+      }
+      
+      const rateId = document.getElementById('deleteRateId').value;
+      
+      if (!confirm('هل أنت متأكد من حذف النسبة رقم ' + rateId + '؟\n\n⚠️ سيتم الحذف فعلياً من قاعدة البيانات!')) {
+        return;
+      }
+      
+      document.getElementById('deleteRateResult').innerHTML = 
+        '<span class="text-blue-600">⏳ جاري الحذف...</span>';
+      
+      try {
+        const response = await fetch('/api/rates/' + rateId, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + authToken
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          document.getElementById('deleteRateResult').innerHTML = 
+            '<span class="text-green-600">✅ تم حذف النسبة بنجاح</span>';
+        } else {
+          document.getElementById('deleteRateResult').innerHTML = 
+            '<span class="text-red-600">❌ فشل الحذف: ' + (data.error || 'خطأ غير معروف') + '</span>';
+        }
+      } catch (error) {
+        document.getElementById('deleteRateResult').innerHTML = 
+          '<span class="text-red-600">❌ خطأ: ' + error.message + '</span>';
+      }
+    }
+  </script>
+</body>
+</html>
