@@ -1,5 +1,3 @@
-import { createNeonD1Database } from '../src/platform/db/neon-d1-compat.ts'
-
 export const config = { runtime: 'nodejs' }
 
 let cachedAppPromise: Promise<any> | null = null
@@ -48,10 +46,6 @@ export default async function handler(request: Request): Promise<Response> {
       return new Response('App import failed: default export missing `fetch`', { status: 500 })
     }
 
-    const env = {
-      DB: createNeonD1Database(databaseUrl)
-    }
-
     const timeoutMs = 9000
     const timeout = new Promise<Response>((resolve) =>
       setTimeout(
@@ -66,7 +60,9 @@ export default async function handler(request: Request): Promise<Response> {
       )
     )
 
-    return await Promise.race([app.fetch(request, env as any), timeout])
+    // DB is initialized inside the app middleware (src/index.ts) from process.env.DATABASE_URL
+    // when c.env.DB is missing.
+    return await Promise.race([app.fetch(request), timeout])
   } catch (error: any) {
     const msg =
       (error && (error.stack || error.message)) ||

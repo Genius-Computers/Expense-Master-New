@@ -1,4 +1,4 @@
-import handler from './[...path].ts'
+import handler from './[...path]'
 
 export const config = { runtime: 'nodejs' }
 
