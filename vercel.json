@@ -4,7 +4,13 @@
     { "source": "/((?!api/).*)", "destination": "/api/$1" }
   ],
   "functions": {
-    "api/[[...path]].ts": {
+    "api/[...path].ts": {
+      "includeFiles": "src/**"
+    },
+    "api/index.ts": {
+      "includeFiles": "src/**"
+    },
+    "api/__health.ts": {
       "includeFiles": "src/**"
     }
   }
