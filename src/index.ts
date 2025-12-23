@@ -1387,17 +1387,17 @@ app.post('/api/users', async (c) => {
     
     // Get tenant_id from form data (if provided by super admin)
     // If not provided, use the current user's tenant_id (for company admin adding users)
-    let tenant_id = formData.get('tenant_id');
+    const tenantIdRaw = formData.get('tenant_id')
+    let tenant_id: number | null = null
     
-    if (tenant_id && tenant_id !== '') {
-      // Convert to integer if provided as string
-      tenant_id = parseInt(tenant_id as string);
+    if (typeof tenantIdRaw === 'string' && tenantIdRaw !== '') {
+      tenant_id = parseInt(tenantIdRaw, 10)
     } else if (userInfo.roleId === 1) {
       // Super admin creating user without tenant - allow null
-      tenant_id = null;
+      tenant_id = null
     } else {
       // Company admin/supervisor creating user - use their tenant_id
-      tenant_id = userInfo.tenantId;
+      tenant_id = userInfo.tenantId
     }
     
     // Check for duplicate username
