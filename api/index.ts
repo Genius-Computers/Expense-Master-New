@@ -120,6 +120,16 @@ function normalizeForPages(request: Request): Request {
   const proto = request.headers.get('x-forwarded-proto') ?? 'https'
   const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? 'localhost'
   const url = new URL(request.url, `${proto}://${host}`)
+
+  // When page requests are rewritten to `/api?__path=/admin/panel`, restore the original pathname
+  // so the Hono app can route normally.
+  if (url.pathname === '/api') {
+    const originalPath = url.searchParams.get('__path')
+    if (originalPath) {
+      url.searchParams.delete('__path')
+      url.pathname = originalPath.startsWith('/') ? originalPath : `/${originalPath}`
+    }
+  }
   const path = url.pathname
 
   if (path === '/api' || path.startsWith('/api/')) {
