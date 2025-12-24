@@ -44,7 +44,12 @@ boot.get('/__probe', (c) => c.text('OK'))
 boot.all('*', async (c) => {
   try {
     const req = normalizeForPages(c.req.raw)
-    if (!cachedAppPromise) cachedAppPromise = import('../src/index')
+    // In Vercel, import the pre-bundled app to avoid ESM resolution issues with src/*.ts files.
+    if (!cachedAppPromise) {
+      cachedAppPromise = process.env.VERCEL
+        ? import('./_app.bundle.mjs')
+        : import('../src/index')
+    }
     const mod = await cachedAppPromise
     const app = (mod as any).default
     if (!app?.fetch) return c.text('BOOT_ERROR: src/index default export has no fetch()', 500)
