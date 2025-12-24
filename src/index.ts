@@ -66,8 +66,9 @@ const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 const wrapper = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
 wrapper.all('*', async (c) => {
-  const url = new URL(c.req.url)
-  const path = url.pathname
+  // In some runtimes (notably Vercel Node), Request.url can be a relative path like `/api/auth/login`.
+  // Avoid `new URL(relative)` which throws; use `c.req.path` for routing and build a base only when we need to rewrite.
+  const path = c.req.path
 
   if (path === '/api' || path.startsWith('/api/')) {
     const after = path === '/api' ? '' : path.slice('/api/'.length)
@@ -86,6 +87,10 @@ wrapper.all('*', async (c) => {
     ])
 
     if (pageSegs.has(firstSeg)) {
+      const proto = c.req.header('x-forwarded-proto') ?? 'http'
+      const host = c.req.header('x-forwarded-host') ?? c.req.header('host') ?? 'localhost'
+      const base = `${proto}://${host}`
+      const url = new URL(c.req.url, base)
       url.pathname = path.replace(/^\/api(?=\/|$)/, '') || '/'
       const rewrittenReq = new Request(url.toString(), c.req.raw)
       return await app.fetch(rewrittenReq, c.env as any)

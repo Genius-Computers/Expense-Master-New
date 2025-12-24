@@ -114,6 +114,19 @@ function createNeonD1Database(databaseUrl: string) {
 
 let cachedAppPromise: Promise<any> | null = null
 
+function ensureAbsoluteRequest(request: Request): Request {
+  try {
+    // If this succeeds, it's already absolute.
+    new URL(request.url)
+    return request
+  } catch {
+    const proto = request.headers.get('x-forwarded-proto') ?? 'https'
+    const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? 'localhost'
+    const absUrl = new URL(request.url, `${proto}://${host}`).toString()
+    return new Request(absUrl, request)
+  }
+}
+
 export default async function handler(request: Request): Promise<Response> {
   try {
     if (request.method === 'OPTIONS') {
@@ -129,7 +142,8 @@ export default async function handler(request: Request): Promise<Response> {
     const app = (mod as any)?.default?.fetch ? (mod as any).default : (mod as any)?.default?.default
     if (!app?.fetch) return new Response('BOOT_ERROR: bundled app has no fetch()', { status: 500 })
 
-    return await app.fetch(request, env as any)
+    const req = ensureAbsoluteRequest(request)
+    return await app.fetch(req, env as any)
   } catch (e: any) {
     const msg = e?.stack || e?.message || String(e)
     return new Response(`BOOT_ERROR:\n${msg}`, { status: 500 })

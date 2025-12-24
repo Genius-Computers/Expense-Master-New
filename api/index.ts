@@ -117,7 +117,9 @@ function createNeonD1Database(databaseUrl: string) {
 }
 
 function normalizeForPages(request: Request): Request {
-  const url = new URL(request.url)
+  const proto = request.headers.get('x-forwarded-proto') ?? 'https'
+  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? 'localhost'
+  const url = new URL(request.url, `${proto}://${host}`)
   const path = url.pathname
 
   if (path === '/api' || path.startsWith('/api/')) {

@@ -36636,8 +36636,7 @@ globalThis.btoa ??= (bin) => Buffer.from(bin, "binary").toString("base64");
 var app = new Hono2();
 var wrapper = new Hono2();
 wrapper.all("*", async (c) => {
-  const url = new URL(c.req.url);
-  const path = url.pathname;
+  const path = c.req.path;
   if (path === "/api" || path.startsWith("/api/")) {
     const after = path === "/api" ? "" : path.slice("/api/".length);
     const firstSeg = after.split("/")[0];
@@ -36654,6 +36653,10 @@ wrapper.all("*", async (c) => {
       "c"
     ]);
     if (pageSegs.has(firstSeg)) {
+      const proto = c.req.header("x-forwarded-proto") ?? "http";
+      const host = c.req.header("x-forwarded-host") ?? c.req.header("host") ?? "localhost";
+      const base = `${proto}://${host}`;
+      const url = new URL(c.req.url, base);
       url.pathname = path.replace(/^\/api(?=\/|$)/, "") || "/";
       const rewrittenReq = new Request(url.toString(), c.req.raw);
       return await app.fetch(rewrittenReq, c.env);
