@@ -75,6 +75,12 @@ wrapper.all('*', async (c) => {
   if (path === '/api') {
     const originalPath = c.req.query('__path')
     if (originalPath) {
+      // Hard guarantee: always render the landing page without touching DB/middleware.
+      // This avoids rare failures in tenant/DB logic from taking down `/`.
+      if (originalPath === '/' && c.req.raw.method === 'GET') {
+        return c.html(homePage)
+      }
+
       const proto = c.req.header('x-forwarded-proto') ?? 'https'
       const host = c.req.header('x-forwarded-host') ?? c.req.header('host') ?? 'localhost'
       const base = `${proto}://${host}`
