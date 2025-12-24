@@ -3,15 +3,16 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const entry = path.resolve('src', 'index.ts')
-const outFile = path.resolve('api', '_app.bundle.mjs')
+const outFile = path.resolve('api', '_app.bundle.cjs')
 
-// Bundle the full Hono app (and its route/page modules) into a single ESM file
-// that Vercel Node runtime can import reliably.
+// Bundle the full Hono app (and its route/page modules) into a single CJS file.
+// IMPORTANT: This avoids "Dynamic require of <builtin>" errors (assert/fs/etc.)
+// coming from bundling CJS deps (e.g. undici/@vercel/blob) into an ESM bundle.
 await esbuild.build({
   entryPoints: [entry],
   outfile: outFile,
   bundle: true,
-  format: 'esm',
+  format: 'cjs',
   platform: 'node',
   target: ['node18'],
   sourcemap: true,

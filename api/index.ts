@@ -47,7 +47,7 @@ boot.all('*', async (c) => {
     // In Vercel, import the pre-bundled app to avoid ESM resolution issues with src/*.ts files.
     if (!cachedAppPromise) {
       cachedAppPromise = process.env.VERCEL
-        ? import('./_app.bundle.mjs')
+        ? import('./_app.bundle.cjs')
         : import('../src/index')
     }
     const mod = await cachedAppPromise
