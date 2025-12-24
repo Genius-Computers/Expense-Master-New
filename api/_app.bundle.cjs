@@ -19303,8 +19303,10 @@ var homePage = `<!DOCTYPE html>
                 const response = await axios.get('/api/notifications/unread-count');
                 if (response.data.success && response.data.count > 0) {
                     const badge = document.getElementById('notif-badge');
-                    badge.textContent = response.data.count;
-                    badge.classList.remove('hidden');
+                    if (badge) {
+                        badge.textContent = response.data.count;
+                        badge.classList.remove('hidden');
+                    }
                 }
             } catch (error) {
                 console.error('Error loading unread count:', error);
