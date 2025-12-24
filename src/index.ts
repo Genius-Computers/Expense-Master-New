@@ -328,6 +328,11 @@ const getMobileResponsiveCSS = () => `
 // Enable CORS
 app.use('*', cors())
 
+// Handle browser CORS preflight globally.
+// Without an explicit OPTIONS handler, some environments can return 404 for preflight requests,
+// which makes the browser block the subsequent POST (e.g. /api/auth/login).
+app.options('*', (c) => c.text('', 204))
+
 // ===================================
 // MULTI-TENANT MIDDLEWARE & HELPERS
 // ===================================

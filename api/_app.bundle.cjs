@@ -36882,6 +36882,7 @@ var getMobileResponsiveCSS4 = () => `
   }
 `;
 app.use("*", cors());
+app.options("*", (c) => c.text("", 204));
 async function getTenant(c) {
   const host = c.req.header("host") || "";
   const subdomain = host.split(".")[0];
