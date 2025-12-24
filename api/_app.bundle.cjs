@@ -36679,6 +36679,10 @@ app.onError((err, c) => {
   console.error("Unhandled error:", err);
   return c.text("Internal Server Error", 500);
 });
+app.notFound((c) => {
+  console.warn("NOT_FOUND:", c.req.method, c.req.path);
+  return c.json({ success: false, error: "Not Found", method: c.req.method, path: c.req.path }, 404);
+});
 var getMobileResponsiveCSS4 = () => `
   /* Mobile Responsive Styles */
   @media (max-width: 768px) {
@@ -37079,7 +37083,7 @@ app.delete("/api/tenants/:id", async (c) => {
     return c.json({ success: false, error: error.message }, 500);
   }
 });
-app.post("/api/auth/login", async (c) => {
+var loginHandler = async (c) => {
   try {
     const { username, password } = await c.req.json();
     console.log(`\u{1F510} Login attempt: ${username}`);
@@ -37138,7 +37142,9 @@ app.post("/api/auth/login", async (c) => {
     console.error("\u274C Login error:", error);
     return c.json({ success: false, error: "\u062D\u062F\u062B \u062E\u0637\u0623 \u0641\u064A \u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062F\u062E\u0648\u0644: " + error.message }, 500);
   }
-});
+};
+app.post("/api/auth/login", loginHandler);
+app.post("/auth/login", loginHandler);
 app.post("/api/auth/forgot-password", async (c) => {
   try {
     const { email } = await c.req.json();

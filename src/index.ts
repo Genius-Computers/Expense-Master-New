@@ -121,6 +121,12 @@ app.onError((err, c) => {
   return c.text('Internal Server Error', 500)
 })
 
+// Helpful 404 response (also logs) to diagnose routing issues in production.
+app.notFound((c) => {
+  console.warn('NOT_FOUND:', c.req.method, c.req.path)
+  return c.json({ success: false, error: 'Not Found', method: c.req.method, path: c.req.path }, 404)
+})
+
 // Helper: Mobile-Responsive CSS Styles
 const getMobileResponsiveCSS = () => `
   /* Mobile Responsive Styles */
@@ -606,7 +612,7 @@ app.delete('/api/tenants/:id', async (c) => {
 // AUTHENTICATION & AUTHORIZATION APIs
 
 // Login API
-app.post('/api/auth/login', async (c) => {
+const loginHandler = async (c: any) => {
   try {
     const { username, password } = await c.req.json()
     
@@ -678,7 +684,11 @@ app.post('/api/auth/login', async (c) => {
     console.error('❌ Login error:', error)
     return c.json({ success: false, error: 'حدث خطأ في تسجيل الدخول: ' + error.message }, 500)
   }
-})
+}
+
+// Accept both `/api/auth/login` (expected) and `/auth/login` (fallback for routing quirks)
+app.post('/api/auth/login', loginHandler)
+app.post('/auth/login', loginHandler)
 
 // Forgot Password - Step 1: Send verification code
 app.post('/api/auth/forgot-password', async (c) => {
