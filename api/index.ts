@@ -51,7 +51,11 @@ boot.all('*', async (c) => {
         : import('../src/index')
     }
     const mod = await cachedAppPromise
-    const app = (mod as any).default
+    // When importing a CJS bundle via ESM `import()`, Vercel/Node returns `{ default: module.exports }`.
+    // Our bundle exports `{ default: app }`, so the Hono app ends up at `mod.default.default`.
+    const app = (mod as any)?.default?.fetch
+      ? (mod as any).default
+      : (mod as any)?.default?.default
     if (!app?.fetch) return c.text('BOOT_ERROR: src/index default export has no fetch()', 500)
     return await app.fetch(req)
   } catch (e: any) {
