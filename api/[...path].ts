@@ -120,6 +120,10 @@ function normalizeForPages(request: Request): Request {
   const proto = request.headers.get('x-forwarded-proto') ?? 'https'
   const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? 'localhost'
   const url = new URL(request.url, `${proto}://${host}`)
+
+  // If vercel.json routed us through `/api?__path=...`, don't try to normalize here.
+  // The bundled app's wrapper restores the path safely.
+  if (url.pathname === '/api' && url.searchParams.has('__path')) return request
   const path = url.pathname
 
   if (path === '/api' || path.startsWith('/api/')) {

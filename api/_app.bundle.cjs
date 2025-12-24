@@ -36637,6 +36637,29 @@ var app = new Hono2();
 var wrapper = new Hono2();
 wrapper.all("*", async (c) => {
   const path = c.req.path;
+  if (path === "/api") {
+    const originalPath = c.req.query("__path");
+    if (originalPath) {
+      const proto = c.req.header("x-forwarded-proto") ?? "https";
+      const host = c.req.header("x-forwarded-host") ?? c.req.header("host") ?? "localhost";
+      const base = `${proto}://${host}`;
+      const url = new URL(c.req.url, base);
+      url.searchParams.delete("__path");
+      url.pathname = originalPath.startsWith("/") ? originalPath : `/${originalPath}`;
+      const method = c.req.raw.method;
+      if (method === "GET" || method === "HEAD") {
+        const rewrittenReq2 = new Request(url.toString(), c.req.raw);
+        return await app.fetch(rewrittenReq2, c.env);
+      }
+      const body = await c.req.raw.arrayBuffer();
+      const rewrittenReq = new Request(url.toString(), {
+        method,
+        headers: c.req.raw.headers,
+        body
+      });
+      return await app.fetch(rewrittenReq, c.env);
+    }
+  }
   if (path === "/api" || path.startsWith("/api/")) {
     const after = path === "/api" ? "" : path.slice("/api/".length);
     const firstSeg = after.split("/")[0];

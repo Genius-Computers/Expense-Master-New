@@ -70,6 +70,36 @@ wrapper.all('*', async (c) => {
   // Avoid `new URL(relative)` which throws; use `c.req.path` for routing and build a base only when we need to rewrite.
   const path = c.req.path
 
+  // One-go Vercel routing: all requests are rewritten to `/api?__path=/original/path`.
+  // Restore the original path here so Hono's router sees the correct pathname.
+  if (path === '/api') {
+    const originalPath = c.req.query('__path')
+    if (originalPath) {
+      const proto = c.req.header('x-forwarded-proto') ?? 'https'
+      const host = c.req.header('x-forwarded-host') ?? c.req.header('host') ?? 'localhost'
+      const base = `${proto}://${host}`
+
+      const url = new URL(c.req.url, base)
+      url.searchParams.delete('__path')
+      url.pathname = originalPath.startsWith('/') ? originalPath : `/${originalPath}`
+
+      const method = c.req.raw.method
+      if (method === 'GET' || method === 'HEAD') {
+        const rewrittenReq = new Request(url.toString(), c.req.raw)
+        return await app.fetch(rewrittenReq, c.env as any)
+      }
+
+      // For POST/PUT/etc, avoid cloning streaming bodies via `new Request(url, c.req.raw)` (can hang in Node).
+      const body = await c.req.raw.arrayBuffer()
+      const rewrittenReq = new Request(url.toString(), {
+        method,
+        headers: c.req.raw.headers,
+        body
+      })
+      return await app.fetch(rewrittenReq, c.env as any)
+    }
+  }
+
   if (path === '/api' || path.startsWith('/api/')) {
     const after = path === '/api' ? '' : path.slice('/api/'.length)
     const firstSeg = after.split('/')[0]

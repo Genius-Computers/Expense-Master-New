@@ -121,15 +121,9 @@ function normalizeForPages(request: Request): Request {
   const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? 'localhost'
   const url = new URL(request.url, `${proto}://${host}`)
 
-  // When page requests are rewritten to `/api?__path=/admin/panel`, restore the original pathname
-  // so the Hono app can route normally.
-  if (url.pathname === '/api') {
-    const originalPath = url.searchParams.get('__path')
-    if (originalPath) {
-      url.searchParams.delete('__path')
-      url.pathname = originalPath.startsWith('/') ? originalPath : `/${originalPath}`
-    }
-  }
+  // If vercel.json routed us through `/api?__path=...`, don't try to do any "strip /api"
+  // normalization here. The bundled app's wrapper handles restoring the path safely (incl POST bodies).
+  if (url.pathname === '/api' && url.searchParams.has('__path')) return request
   const path = url.pathname
 
   if (path === '/api' || path.startsWith('/api/')) {
