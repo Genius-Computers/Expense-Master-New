@@ -114,7 +114,15 @@ function createNeonD1Database(databaseUrl: string) {
 
 let cachedAppPromise: Promise<any> | null = null
 
-function ensureAbsoluteRequest(request: Request): Request {
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  let t: any
+  const timeout = new Promise<T>((_resolve, reject) => {
+    t = setTimeout(() => reject(new Error(`TIMEOUT(${label}) after ${ms}ms`)), ms)
+  })
+  return Promise.race([p, timeout]).finally(() => clearTimeout(t))
+}
+
+async function ensureAbsoluteRequest(request: Request): Promise<Request> {
   try {
     // If this succeeds, it's already absolute.
     new URL(request.url)
@@ -123,30 +131,63 @@ function ensureAbsoluteRequest(request: Request): Request {
     const proto = request.headers.get('x-forwarded-proto') ?? 'https'
     const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? 'localhost'
     const absUrl = new URL(request.url, `${proto}://${host}`).toString()
-    return new Request(absUrl, request)
+    // IMPORTANT: don't "clone" via `new Request(absUrl, request)` because it can behave badly with
+    // streaming bodies in Node runtimes (leading to hanging `req.json()` downstream).
+    const method = request.method
+    const headers = request.headers
+    let body: ArrayBuffer | undefined
+    if (method !== 'GET' && method !== 'HEAD') {
+      body = await withTimeout(request.arrayBuffer(), 10_000, 'read_body')
+    }
+    return new Request(absUrl, { method, headers, body })
   }
 }
 
 export default async function handler(request: Request): Promise<Response> {
+  const t0 = Date.now()
+  let step = 'start'
   try {
     if (request.method === 'OPTIONS') {
       return new Response('', { status: 204 })
     }
 
+    console.log('[api/auth/login] start', request.method, request.url)
+
     const databaseUrl = process.env.DATABASE_URL
     if (!databaseUrl) return new Response('Missing env var: DATABASE_URL', { status: 500 })
     const env = { DB: createNeonD1Database(databaseUrl) }
 
-    if (!cachedAppPromise) cachedAppPromise = import('../_app.bundle.cjs')
-    const mod = await cachedAppPromise
+    step = 'abs_url'
+    const req = await ensureAbsoluteRequest(request)
+
+    step = 'import_bundle'
+    const appModPromise: Promise<any> = cachedAppPromise ?? (cachedAppPromise = import('../_app.bundle.cjs'))
+    const mod: any = await withTimeout<any>(appModPromise, 10_000, 'import_bundle')
     const app = (mod as any)?.default?.fetch ? (mod as any).default : (mod as any)?.default?.default
     if (!app?.fetch) return new Response('BOOT_ERROR: bundled app has no fetch()', { status: 500 })
 
-    const req = ensureAbsoluteRequest(request)
-    return await app.fetch(req, env as any)
+    step = 'app_fetch'
+    const res: Response = await withTimeout<Response>(
+      (app.fetch(req, env as any) as Promise<Response>),
+      20_000,
+      'app_fetch'
+    )
+
+    const ms = Date.now() - t0
+    console.log('[api/auth/login] end', res.status, `${ms}ms`)
+
+    // Ensure we can see *something* from the browser Network tab even when logs are flaky.
+    const out = new Response(res.body, res)
+    out.headers.set('x-expense-debug', `auth-login;status=${res.status};ms=${ms}`)
+    return out
   } catch (e: any) {
     const msg = e?.stack || e?.message || String(e)
-    return new Response(`BOOT_ERROR:\n${msg}`, { status: 500 })
+    const ms = Date.now() - t0
+    console.error('[api/auth/login] crash', step, msg)
+    return Response.json(
+      { success: false, error: msg, step, ms },
+      { status: /TIMEOUT\(/.test(String(msg)) ? 504 : 500, headers: { 'x-expense-debug': `auth-login;step=${step};ms=${ms}` } }
+    )
   }
 }
 
