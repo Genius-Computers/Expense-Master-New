@@ -16,7 +16,8 @@ await esbuild.build({
   target: ['node18'],
   sourcemap: true,
   // Keep the function small-ish by not bundling Node builtins.
-  external: ['node:*'],
+  // Also keep dotenv external (we load it dynamically only for local dev).
+  external: ['node:*', 'dotenv'],
   logLevel: 'info'
 })
 

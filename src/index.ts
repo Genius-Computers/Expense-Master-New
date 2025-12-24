@@ -1,7 +1,5 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import dotenv from 'dotenv'
-import { existsSync } from 'node:fs'
 import { homePage } from './home-page'
 import { testPage } from './test-page'
 import { calculatorPage } from './calculator-page'
@@ -25,9 +23,24 @@ import { performanceReportPage } from './performance-report'
 import { deleteBlob, putBlob } from './platform/blob/vercel-blob'
 import { createNeonD1Database } from './platform/db/neon-d1-compat'
 
-// Load local env files for local dev. (On Vercel, env vars are provided by the platform.)
-for (const p of ['.env', '.env.local', '.env.development', '.env.production']) {
-  if (existsSync(p)) dotenv.config({ path: p })
+// Load local env files for local dev only.
+// IMPORTANT: Do NOT import `dotenv` or `node:fs` at module top-level, because the Vercel ESM bundle
+// can fail with "Dynamic require of fs is not supported" when dotenv is bundled.
+if (!process.env.VERCEL) {
+  void (async () => {
+    try {
+      const [{ default: dotenv }, { existsSync }] = await Promise.all([
+        import('dotenv'),
+        import('node:fs')
+      ])
+
+      for (const p of ['.env', '.env.local', '.env.development', '.env.production']) {
+        if (existsSync(p)) dotenv.config({ path: p })
+      }
+    } catch {
+      // ignore
+    }
+  })()
 }
 
 // Polyfill atob/btoa for Node environments (local dev / Vercel Node runtime).
