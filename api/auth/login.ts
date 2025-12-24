@@ -122,6 +122,70 @@ function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
   return Promise.race([p, timeout]).finally(() => clearTimeout(t))
 }
 
+function isWebRequest(x: any): x is Request {
+  return !!x && typeof x === 'object' && typeof x.url === 'string' && typeof x.method === 'string'
+}
+
+function getHeaderFromNodeReq(nodeReq: any, name: string): string | undefined {
+  const headers = nodeReq?.headers
+  if (!headers) return undefined
+  const key = name.toLowerCase()
+  const v = headers[key]
+  if (Array.isArray(v)) return v.join(', ')
+  if (typeof v === 'string') return v
+  return undefined
+}
+
+function toHeadersFromNode(nodeReq: any): Headers {
+  const h = new Headers()
+  const src = nodeReq?.headers ?? {}
+  for (const [k, v] of Object.entries(src)) {
+    if (v == null) continue
+    if (Array.isArray(v)) h.set(k, v.join(', '))
+    else h.set(k, String(v))
+  }
+  return h
+}
+
+async function readNodeBody(nodeReq: any): Promise<Uint8Array | undefined> {
+  // If some framework already parsed it, use that.
+  if (nodeReq?.body != null) {
+    if (typeof nodeReq.body === 'string') return new TextEncoder().encode(nodeReq.body)
+    if (nodeReq.body instanceof Uint8Array) return nodeReq.body
+    if (Buffer.isBuffer(nodeReq.body)) return new Uint8Array(nodeReq.body)
+    // object -> JSON
+    return new TextEncoder().encode(JSON.stringify(nodeReq.body))
+  }
+
+  // Otherwise, read the raw stream.
+  const chunks: Uint8Array[] = []
+  await new Promise<void>((resolve, reject) => {
+    nodeReq.on('data', (chunk: any) => chunks.push(chunk))
+    nodeReq.on('end', () => resolve())
+    nodeReq.on('error', (err: any) => reject(err))
+  })
+  if (!chunks.length) return undefined
+  const total = chunks.reduce((n, c) => n + c.length, 0)
+  const out = new Uint8Array(total)
+  let off = 0
+  for (const c of chunks) {
+    out.set(c, off)
+    off += c.length
+  }
+  return out
+}
+
+function getAbsoluteUrlFromNodeReq(nodeReq: any): string {
+  const proto = getHeaderFromNodeReq(nodeReq, 'x-forwarded-proto') ?? 'https'
+  const host =
+    getHeaderFromNodeReq(nodeReq, 'x-forwarded-host') ??
+    getHeaderFromNodeReq(nodeReq, 'host') ??
+    'localhost'
+  // Vercel Node req has `url` like `/api/auth/login`
+  const path = typeof nodeReq?.url === 'string' ? nodeReq.url : '/'
+  return new URL(path, `${proto}://${host}`).toString()
+}
+
 async function ensureAbsoluteRequest(request: Request): Promise<Request> {
   try {
     // If this succeeds, it's already absolute.
@@ -143,13 +207,12 @@ async function ensureAbsoluteRequest(request: Request): Promise<Request> {
   }
 }
 
-export default async function handler(request: Request): Promise<Response> {
+async function handleWebRequest(request: Request): Promise<Response> {
   const t0 = Date.now()
   let step = 'start'
+
   try {
-    if (request.method === 'OPTIONS') {
-      return new Response('', { status: 204 })
-    }
+    if (request.method === 'OPTIONS') return new Response('', { status: 204 })
 
     console.log('[api/auth/login] start', request.method, request.url)
 
@@ -176,7 +239,6 @@ export default async function handler(request: Request): Promise<Response> {
     const ms = Date.now() - t0
     console.log('[api/auth/login] end', res.status, `${ms}ms`)
 
-    // Ensure we can see *something* from the browser Network tab even when logs are flaky.
     const out = new Response(res.body, res)
     out.headers.set('x-expense-debug', `auth-login;status=${res.status};ms=${ms}`)
     return out
@@ -186,9 +248,48 @@ export default async function handler(request: Request): Promise<Response> {
     console.error('[api/auth/login] crash', step, msg)
     return Response.json(
       { success: false, error: msg, step, ms },
-      { status: /TIMEOUT\(/.test(String(msg)) ? 504 : 500, headers: { 'x-expense-debug': `auth-login;step=${step};ms=${ms}` } }
+      {
+        status: /TIMEOUT\(/.test(String(msg)) ? 504 : 500,
+        headers: { 'x-expense-debug': `auth-login;step=${step};ms=${ms}` }
+      }
     )
   }
+}
+
+async function sendNodeResponse(nodeRes: any, response: Response) {
+  nodeRes.statusCode = response.status
+  response.headers.forEach((value, key) => {
+    try {
+      nodeRes.setHeader(key, value)
+    } catch {
+      // ignore invalid headers
+    }
+  })
+  const ab = await response.arrayBuffer()
+  nodeRes.end(Buffer.from(ab))
+}
+
+// Vercel Node Functions call default export as (req, res).
+// But some runtimes/tools can call it as a Fetch handler (Request -> Response).
+export default async function handler(req: any, res?: any): Promise<any> {
+  if (res && req && typeof req?.on === 'function') {
+    const url = getAbsoluteUrlFromNodeReq(req)
+    const method = req.method || 'GET'
+    const headers = toHeadersFromNode(req)
+    const bodyBytes =
+      method === 'GET' || method === 'HEAD'
+        ? undefined
+        : await withTimeout(readNodeBody(req), 10_000, 'read_body')
+    const body = bodyBytes ? Buffer.from(bodyBytes) : undefined
+    const webReq = new Request(url, { method, headers, body })
+    const webRes = await handleWebRequest(webReq)
+    await sendNodeResponse(res, webRes)
+    return
+  }
+
+  // Fetch-style invocation
+  if (isWebRequest(req)) return await handleWebRequest(req)
+  return Response.json({ success: false, error: 'Unsupported handler invocation' }, { status: 500 })
 }
 
 
