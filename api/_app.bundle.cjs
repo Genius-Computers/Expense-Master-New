@@ -36662,7 +36662,8 @@ wrapper.all("*", async (c) => {
   return await app.fetch(c.req.raw, c.env);
 });
 app.use("*", async (c, next) => {
-  if (!c.env?.DB) {
+  const envObj = c.env ?? (c.env = {});
+  if (!envObj.DB) {
     const databaseUrl = process.env.DATABASE_URL;
     if (!databaseUrl) {
       return c.json(
@@ -36670,8 +36671,7 @@ app.use("*", async (c, next) => {
         500
       );
     }
-    ;
-    c.env.DB = createNeonD1Database(databaseUrl);
+    envObj.DB = createNeonD1Database(databaseUrl);
   }
   await next();
 });

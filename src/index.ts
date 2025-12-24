@@ -98,7 +98,11 @@ wrapper.all('*', async (c) => {
 // Ensure DB binding exists in non-Cloudflare runtimes (local dev / Node).
 // Cloudflare/Vercel entrypoints can still inject `env.DB`; we won't override it.
 app.use('*', async (c, next) => {
-  if (!(c.env as any)?.DB) {
+  // In some runtimes (e.g. Vercel app.fetch(req) without bindings), `c.env` may be undefined.
+  // Ensure it exists before attempting to set DB.
+  const envObj = (c as any).env ?? ((c as any).env = {})
+
+  if (!envObj.DB) {
     const databaseUrl = process.env.DATABASE_URL
     if (!databaseUrl) {
       return c.json(
@@ -106,7 +110,7 @@ app.use('*', async (c, next) => {
         500
       )
     }
-    ;(c.env as any).DB = createNeonD1Database(databaseUrl)
+    envObj.DB = createNeonD1Database(databaseUrl)
   }
   await next()
 })
