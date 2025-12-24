@@ -1,5 +1,7 @@
 import { Hono } from 'hono'
 
+export const config = { runtime: 'nodejs' }
+
 const app = new Hono()
 
 app.get('*', (c) =>
