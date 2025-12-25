@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "npm run dev -- --host 0.0.0.0 --port 3000",
     "dev": "vite",
     "build": "vite build && npm run vercel:bundle",
     "vercel:bundle": "node scripts/vercel-bundle.mjs",
     "preview": "wrangler pages dev dist",
     "deploy": "npm run build && wrangler pages deploy dist",
     "db:migrate": "npx --yes tsx scripts/db-migrate.ts",
+    "db:doctor": "npx --yes tsx scripts/db-doctor.ts",
     "test": "echo 'Tests coming soon...'"
   },
   "dependencies": {

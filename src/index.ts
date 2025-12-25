@@ -53,7 +53,7 @@ type Bindings = {
 
 type Variables = {
   tenant: any;
-  tenantId: number | null;
+  tenantId: string | null;
 }
 
 // Main application (all routes/pages).
@@ -69,6 +69,14 @@ wrapper.all('*', async (c) => {
   // In some runtimes (notably Vercel Node), Request.url can be a relative path like `/api/auth/login`.
   // Avoid `new URL(relative)` which throws; use `c.req.path` for routing and build a base only when we need to rewrite.
   const path = c.req.path
+
+  // Ensure DB is initialized in env before passing to app (for API routes that need it).
+  // This ensures login and other API endpoints have DB access even if middleware hasn't run yet.
+  const envObj = (c as any).env ?? ((c as any).env = {})
+  if (!envObj.DB && (path.startsWith('/api/') || path.startsWith('/admin/') || path.startsWith('/c/'))) {
+    const databaseUrl = process.env.DATABASE_URL
+    if (databaseUrl) envObj.DB = createNeonD1Database(databaseUrl)
+  }
 
   // One-go Vercel routing: all requests are rewritten to `/api?__path=/original/path`.
   // Restore the original path here so Hono's router sees the correct pathname.
@@ -92,7 +100,7 @@ wrapper.all('*', async (c) => {
       const method = c.req.raw.method
       if (method === 'GET' || method === 'HEAD') {
         const rewrittenReq = new Request(url.toString(), c.req.raw)
-        return await app.fetch(rewrittenReq, c.env as any)
+        return await app.fetch(rewrittenReq, envObj as any)
       }
 
       // For POST/PUT/etc, avoid cloning streaming bodies via `new Request(url, c.req.raw)` (can hang in Node).
@@ -102,7 +110,7 @@ wrapper.all('*', async (c) => {
         headers: c.req.raw.headers,
         body
       })
-      return await app.fetch(rewrittenReq, c.env as any)
+      return await app.fetch(rewrittenReq, envObj as any)
     }
   }
 
@@ -129,31 +137,73 @@ wrapper.all('*', async (c) => {
       const url = new URL(c.req.url, base)
       url.pathname = path.replace(/^\/api(?=\/|$)/, '') || '/'
       const rewrittenReq = new Request(url.toString(), c.req.raw)
-      return await app.fetch(rewrittenReq, c.env as any)
+      return await app.fetch(rewrittenReq, envObj as any)
     }
   }
 
-  return await app.fetch(c.req.raw, c.env as any)
+  return await app.fetch(c.req.raw, envObj as any)
 })
 
-// Ensure DB binding exists in non-Cloudflare runtimes (local dev / Node).
-// Cloudflare/Vercel entrypoints can still inject `env.DB`; we won't override it.
-app.use('*', async (c, next) => {
-  // In some runtimes (e.g. Vercel app.fetch(req) without bindings), `c.env` may be undefined.
-  // Ensure it exists before attempting to set DB.
+// Ensure DB binding exists for routes that actually need it.
+// This makes local `/` + `/login` render even if DATABASE_URL isn't configured yet.
+async function requireDb(c: any, next: any) {
   const envObj = (c as any).env ?? ((c as any).env = {})
-
   if (!envObj.DB) {
     const databaseUrl = process.env.DATABASE_URL
-    if (!databaseUrl) {
-      return c.json(
-        { success: false, error: 'Missing env var: DATABASE_URL (Neon connection string)' },
-        500
-      )
-    }
-    envObj.DB = createNeonD1Database(databaseUrl)
+    if (databaseUrl) envObj.DB = createNeonD1Database(databaseUrl)
   }
-  await next()
+  if (!envObj.DB) {
+    return c.json(
+      { success: false, error: 'Missing env var: DATABASE_URL (Neon connection string)' },
+      500
+    )
+  }
+  return await next()
+}
+
+// Get tenant_id from auth token or default to first active tenant
+// Ensures tenant_id is never null when required
+async function getTenantIdOrDefault(c: any): Promise<string> {
+  // Extract from auth token
+  const authHeader = c.req.header('Authorization')
+  const token = authHeader?.replace('Bearer ', '')
+  let tenant_id: string | null = null
+  
+  if (token) {
+    try {
+      const decoded = atob(token)
+      const parts = decoded.split(':')
+      tenant_id = parts[1] !== 'null' ? parts[1] : null
+    } catch (e) {
+      // Invalid token, continue to default
+    }
+  }
+  
+  // If no tenant_id, get default (first active tenant)
+  if (!tenant_id) {
+    const defaultTenant = await c.env.DB.prepare(`
+      SELECT id FROM tenants WHERE status = 'active' ORDER BY created_at LIMIT 1
+    `).first()
+    
+    if (!defaultTenant) {
+      throw new Error('No active tenant found. Please create a tenant first.')
+    }
+    
+    tenant_id = defaultTenant.id as string
+  }
+  
+  return tenant_id
+}
+
+// API + admin pages need DB. Public pages should still load without it.
+app.use('/api/*', requireDb)
+app.use('/admin/*', requireDb)
+app.use('/c/*', requireDb)
+
+// Quick sanity endpoint to confirm DB connectivity from anywhere (local/prod).
+app.get('/api/__db/ping', async (c) => {
+  const row = await c.env.DB.prepare('SELECT 1 as ok').first()
+  return c.json({ success: true, ok: (row as any)?.ok ?? 1 })
 })
 
 // Prevent hard "function crashed" by catching errors and logging them.
@@ -424,7 +474,7 @@ async function getTenant(c: any): Promise<any> {
 }
 
 // Get tenant_id for current user (for multi-tenancy filtering)
-async function getUserInfo(c: any): Promise<{ userId: number | null; tenantId: number | null; roleId: number | null }> {
+async function getUserInfo(c: any): Promise<{ userId: string | null; tenantId: string | null; roleId: string | null }> {
   try {
     // Try to get token from Authorization Header (for API calls)
     let token = c.req.header('Authorization')?.replace('Bearer ', '')
@@ -445,7 +495,7 @@ async function getUserInfo(c: any): Promise<{ userId: number | null; tenantId: n
     if (!token) {
       console.log('❌ No token found in header or cookie')
       const queryTenantId = c.req.query('tenant_id')
-      return { userId: null, tenantId: queryTenantId ? parseInt(queryTenantId) : null, roleId: null }
+      return { userId: null, tenantId: queryTenantId || null, roleId: null }
     }
     
     console.log('🔍 Token:', token.substring(0, 20) + '...')
@@ -453,8 +503,8 @@ async function getUserInfo(c: any): Promise<{ userId: number | null; tenantId: n
     
     const decoded = atob(token)
     const parts = decoded.split(':')
-    const userId = parseInt(parts[0])
-    const tenantIdFromToken = parts[1] !== 'null' && parts[1] !== 'undefined' ? parseInt(parts[1]) : null
+    const userId = parts[0] // UUID string, no parseInt needed
+    const tenantIdFromToken = parts[1] !== 'null' && parts[1] !== 'undefined' ? parts[1] : null
     
     const user = await c.env.DB.prepare(`
       SELECT id, tenant_id, role_id FROM users WHERE id = ?
@@ -464,10 +514,14 @@ async function getUserInfo(c: any): Promise<{ userId: number | null; tenantId: n
       return { userId: null, tenantId: null, roleId: null }
     }
     
-    // Super Admin (role_id = 1) can see all data
-    if (user.role_id === 1) {
+    // Super Admin check - compare role_id with super_admin role UUID
+    const superAdminRole = await c.env.DB.prepare(`
+      SELECT id FROM roles WHERE role_name = 'super_admin'
+    `).first()
+    
+    if (superAdminRole && user.role_id === superAdminRole.id) {
       const queryTenantId = c.req.query('tenant_id')
-      return { userId: user.id, tenantId: queryTenantId ? parseInt(queryTenantId) : null, roleId: 1 }
+      return { userId: user.id, tenantId: queryTenantId || null, roleId: user.role_id }
     }
     
     // For other roles, return their tenant_id
@@ -478,7 +532,7 @@ async function getUserInfo(c: any): Promise<{ userId: number | null; tenantId: n
   }
 }
 
-async function getUserTenantId(c: any): Promise<number | null> {
+async function getUserTenantId(c: any): Promise<string | null> {
   const info = await getUserInfo(c)
   return info.tenantId
 }
@@ -686,7 +740,8 @@ const loginHandler = async (c: any) => {
       .bind(user.id).run()
     
     // Create token with tenant_id (user_id:tenant_id:role_id:timestamp)
-    const tokenData = `${user.id}:${user.tenant_id || 'null'}:${user.role_id}:${Date.now()}`
+    // All IDs are now UUIDs (strings), so no conversion needed
+    const tokenData = `${user.id}:${user.tenant_id || 'null'}:${user.role_id || 'null'}:${Date.now()}`
     const token = btoa(tokenData)
     
     // Set cookie for 7 days (without HttpOnly for now to allow JavaScript access for debugging)
@@ -723,7 +778,19 @@ const loginHandler = async (c: any) => {
     })
   } catch (error: any) {
     console.error('❌ Login error:', error)
-    return c.json({ success: false, error: 'حدث خطأ في تسجيل الدخول: ' + error.message }, 500)
+    console.error('❌ Login error stack:', error?.stack)
+    console.error('❌ Login error details:', {
+      message: error?.message,
+      code: error?.code,
+      name: error?.name,
+      hasDb: !!c.env?.DB
+    })
+    const errorMsg = error?.message || String(error)
+    return c.json({ 
+      success: false, 
+      error: 'حدث خطأ في تسجيل الدخول: ' + errorMsg,
+      details: process.env.NODE_ENV === 'development' ? errorMsg : undefined
+    }, 500)
   }
 }
 
@@ -874,7 +941,7 @@ app.get('/api/banks', async (c) => {
     
     if (tenantId) {
       query += ` WHERE tenant_id = ? ORDER BY bank_name`;
-      results = (await c.env.DB.prepare(query).bind(parseInt(tenantId)).all()).results;
+      results = (await c.env.DB.prepare(query).bind(tenantId).all()).results;
     } else {
       query += ` ORDER BY bank_name`;
       results = (await c.env.DB.prepare(query).all()).results;
@@ -896,15 +963,14 @@ app.post('/api/banks', async (c) => {
     const data = await c.req.json()
     const { bank_name, bank_code, logo_url, is_active, tenant_id } = data
     
-    // Get tenant_id from Authorization header if not provided
+    // Get tenant_id from Authorization header if not provided, or use default
     let finalTenantId = tenant_id
     if (!finalTenantId) {
-      const authHeader = c.req.header('Authorization')
-      const token = authHeader?.replace('Bearer ', '')
-      if (token) {
-        const decoded = atob(token)
-        const parts = decoded.split(':')
-        finalTenantId = parts[1] !== 'null' ? parseInt(parts[1]) : null
+      try {
+        finalTenantId = await getTenantIdOrDefault(c)
+      } catch (e) {
+        // If no default tenant, allow null (for global banks)
+        finalTenantId = null
       }
     }
     
@@ -928,13 +994,12 @@ app.put('/api/banks/:id', async (c) => {
     const { bank_name, bank_code, logo_url, is_active } = data
     
     // Verify bank belongs to user's tenant
-    const authHeader = c.req.header('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
-    let tenant_id = null
-    if (token) {
-      const decoded = atob(token)
-      const parts = decoded.split(':')
-      tenant_id = parts[1] !== 'null' ? parseInt(parts[1]) : null
+    let tenant_id: string | null = null
+    try {
+      tenant_id = await getTenantIdOrDefault(c)
+    } catch (e) {
+      // If no default tenant, allow null (for global banks)
+      tenant_id = null
     }
     
     // Add tenant_id check to WHERE clause for security
@@ -976,14 +1041,12 @@ app.delete('/api/banks/:id', async (c) => {
   try {
     const id = c.req.param('id')
     
-    // Get tenant_id from Authorization header
-    const authHeader = c.req.header('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
-    let tenant_id = null
-    if (token) {
-      const decoded = atob(token)
-      const parts = decoded.split(':')
-      tenant_id = parts[1] !== 'null' ? parseInt(parts[1]) : null
+    // Get tenant_id from Authorization header or default
+    let tenant_id: string | null = null
+    try {
+      tenant_id = await getTenantIdOrDefault(c)
+    } catch (e) {
+      tenant_id = null
     }
     
     // Check if bank exists and belongs to user's tenant
@@ -1021,7 +1084,7 @@ app.get('/api/financing-types', async (c) => {
     
     if (tenantId) {
       query += ` WHERE tenant_id = ? OR tenant_id IS NULL ORDER BY type_name`;
-      results = (await c.env.DB.prepare(query).bind(parseInt(tenantId)).all()).results;
+      results = (await c.env.DB.prepare(query).bind(tenantId).all()).results;
     } else {
       query += ` ORDER BY type_name`;
       results = (await c.env.DB.prepare(query).all()).results;
@@ -1037,15 +1100,13 @@ app.get('/api/financing-types', async (c) => {
 // Get all rates with bank and type names
 app.get('/api/rates', async (c) => {
   try {
-    // Get tenant_id from Authorization header
-    const authHeader = c.req.header('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
-    let tenant_id = null
-    
-    if (token) {
-      const decoded = atob(token)
-      const parts = decoded.split(':')
-      tenant_id = parts[1] !== 'null' ? parseInt(parts[1]) : null
+    // Get tenant_id from Authorization header or default
+    let tenant_id: string | null = null
+    try {
+      tenant_id = await getTenantIdOrDefault(c)
+    } catch (e) {
+      // If no default tenant, allow null (for global rates)
+      tenant_id = null
     }
     
     // Build query with tenant_id filter
@@ -1078,15 +1139,13 @@ app.get('/api/rates', async (c) => {
 // Add rate
 app.post('/api/rates', async (c) => {
   try {
-    // Get tenant_id from Authorization header
-    const authHeader = c.req.header('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
-    let tenant_id = null
-    
-    if (token) {
-      const decoded = atob(token)
-      const parts = decoded.split(':')
-      tenant_id = parts[1] !== 'null' ? parseInt(parts[1]) : null
+    // Get tenant_id from Authorization header or default
+    let tenant_id: string | null = null
+    try {
+      tenant_id = await getTenantIdOrDefault(c)
+    } catch (e) {
+      // If no default tenant, allow null (for global rates)
+      tenant_id = null
     }
     
     const formData = await c.req.formData()
@@ -1121,14 +1180,12 @@ app.put('/api/rates/:id', async (c) => {
     const id = c.req.param('id')
     const data = await c.req.json()
     
-    // Get tenant_id from Authorization header
-    const authHeader = c.req.header('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
-    let tenant_id = null
-    if (token) {
-      const decoded = atob(token)
-      const parts = decoded.split(':')
-      tenant_id = parts[1] !== 'null' ? parseInt(parts[1]) : null
+    // Get tenant_id from Authorization header or default
+    let tenant_id: string | null = null
+    try {
+      tenant_id = await getTenantIdOrDefault(c)
+    } catch (e) {
+      tenant_id = null
     }
     
     // Add tenant_id check for security
@@ -1165,14 +1222,12 @@ app.delete('/api/rates/:id', async (c) => {
   try {
     const id = c.req.param('id')
     
-    // Get tenant_id from Authorization header
-    const authHeader = c.req.header('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
-    let tenant_id = null
-    if (token) {
-      const decoded = atob(token)
-      const parts = decoded.split(':')
-      tenant_id = parts[1] !== 'null' ? parseInt(parts[1]) : null
+    // Get tenant_id from Authorization header or default
+    let tenant_id: string | null = null
+    try {
+      tenant_id = await getTenantIdOrDefault(c)
+    } catch (e) {
+      tenant_id = null
     }
     
     // Add tenant_id check for security
@@ -1249,15 +1304,12 @@ app.put('/api/packages/:id', async (c) => {
 // Get all subscriptions
 app.get('/api/subscriptions', async (c) => {
   try {
-    // Get tenant_id from Authorization header
-    const authHeader = c.req.header('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
-    let tenant_id = null
-    
-    if (token) {
-      const decoded = atob(token)
-      const parts = decoded.split(':')
-      tenant_id = parts[1] !== 'null' ? parseInt(parts[1]) : null
+    // Get tenant_id from Authorization header or default
+    let tenant_id: string | null = null
+    try {
+      tenant_id = await getTenantIdOrDefault(c)
+    } catch (e) {
+      tenant_id = null
     }
     
     let query = `
@@ -1270,12 +1322,14 @@ app.get('/api/subscriptions', async (c) => {
       JOIN packages p ON s.package_id = p.id`
     
     if (tenant_id) {
-      query += ` WHERE s.tenant_id = ${tenant_id}`
+      query += ` WHERE s.tenant_id = ?`
     }
     
     query += ` ORDER BY s.created_at DESC`
     
-    const { results } = await c.env.DB.prepare(query).all()
+    const { results } = tenant_id
+      ? await c.env.DB.prepare(query).bind(tenant_id).all()
+      : await c.env.DB.prepare(query).all()
     return c.json({ success: true, data: results })
   } catch (error: any) {
     return c.json({ success: false, error: error.message }, 500)
@@ -1293,15 +1347,13 @@ app.post('/api/subscriptions', async (c) => {
     const status = formData.get('status') || 'active'
     const calculations_used = formData.get('calculations_used') || 0
     
-    // Get tenant_id from Authorization header
-    const authHeader = c.req.header('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
-    let tenant_id = null
-    
-    if (token) {
-      const decoded = atob(token)
-      const parts = decoded.split(':')
-      tenant_id = parts[1] !== 'null' ? parseInt(parts[1]) : null
+    // Get tenant_id from Authorization header or default
+    let tenant_id: string | null = null
+    try {
+      tenant_id = await getTenantIdOrDefault(c)
+    } catch (e) {
+      // Subscriptions can be nullable, so allow null
+      tenant_id = null
     }
     
     const result = await c.env.DB.prepare(`
@@ -1537,15 +1589,12 @@ app.post('/api/users', async (c) => {
     // Get tenant_id from form data (if provided by super admin)
     // If not provided, use the current user's tenant_id (for company admin adding users)
     const tenantIdRaw = formData.get('tenant_id')
-    let tenant_id: number | null = null
+    let tenant_id: string | null = null
     
-    if (typeof tenantIdRaw === 'string' && tenantIdRaw !== '') {
-      tenant_id = parseInt(tenantIdRaw, 10)
-    } else if (userInfo.roleId === 1) {
-      // Super admin creating user without tenant - allow null
-      tenant_id = null
+    if (typeof tenantIdRaw === 'string' && tenantIdRaw !== '' && tenantIdRaw !== 'null') {
+      tenant_id = tenantIdRaw
     } else {
-      // Company admin/supervisor creating user - use their tenant_id
+      // Use current user's tenant_id or default
       tenant_id = userInfo.tenantId
     }
     
@@ -1672,15 +1721,13 @@ app.post('/api/customers', async (c) => {
     const city = formData.get('city') as string || null
     const monthly_salary = parseFloat(formData.get('monthly_salary') as string || '0')
     
-    // Get tenant_id from Authorization header
-    const authHeader = c.req.header('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
-    let tenant_id = null
-    
-    if (token) {
-      const decoded = atob(token)
-      const parts = decoded.split(':')
-      tenant_id = parts[1] !== 'null' ? parseInt(parts[1]) : null
+    // Get tenant_id from Authorization header or default
+    let tenant_id: string | null = null
+    try {
+      tenant_id = await getTenantIdOrDefault(c)
+    } catch (e) {
+      // If no default tenant, allow null (for global customers)
+      tenant_id = null
     }
     
     // Check if national_id already exists within the same tenant
@@ -1871,15 +1918,12 @@ app.post('/api/customers/:id', async (c) => {
 // Get all financing requests
 app.get('/api/financing-requests', async (c) => {
   try {
-    // Get tenant_id from Authorization header
-    const authHeader = c.req.header('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
-    let tenant_id = null
-    
-    if (token) {
-      const decoded = atob(token)
-      const parts = decoded.split(':')
-      tenant_id = parts[1] !== 'null' ? parseInt(parts[1]) : null
+    // Get tenant_id from Authorization header or default
+    let tenant_id: string | null = null
+    try {
+      tenant_id = await getTenantIdOrDefault(c)
+    } catch (e) {
+      tenant_id = null
     }
     
     let query = `
@@ -1927,15 +1971,12 @@ app.post('/api/requests', async (c) => {
     const status = formData.get('status') || 'pending'
     const notes = formData.get('notes') || ''
     
-    // Get tenant_id from Authorization header
-    const authHeader = c.req.header('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
-    let tenant_id = null
-    
-    if (token) {
-      const decoded = atob(token)
-      const parts = decoded.split(':')
-      tenant_id = parts[1] !== 'null' ? parseInt(parts[1]) : null
+    // Get tenant_id from Authorization header or default
+    let tenant_id: string | null = null
+    try {
+      tenant_id = await getTenantIdOrDefault(c)
+    } catch (e) {
+      tenant_id = null
     }
     
     // Insert financing request directly (customer already exists from dropdown)
@@ -2170,10 +2211,10 @@ app.get('/api/payments', async (c) => {
     
     if (token) {
       try {
-        // Decode token (format: userId:tenantId:timestamp:random)
+        // Decode token (format: userId:tenantId:roleId:timestamp)
         const decoded = atob(token)
-        const [userId, tenantId] = decoded.split(':')
-        tenant_id = tenantId === 'null' ? null : parseInt(tenantId)
+        const parts = decoded.split(':')
+        tenant_id = parts[1] !== 'null' && parts[1] !== 'undefined' ? parts[1] : null
       } catch (e) {
         // Token invalid or expired
       }
@@ -2217,11 +2258,11 @@ app.post('/api/payments', async (c) => {
       return c.json({ success: false, error: 'غير مصرح' }, 401)
     }
     
-    // Decode token (format: userId:tenantId:timestamp:random)
+    // Decode token (format: userId:tenantId:roleId:timestamp)
     const decoded = atob(token)
-    const [userId, tenantId] = decoded.split(':')
-    const tenant_id = tenantId === 'null' ? null : parseInt(tenantId)
-    const created_by = parseInt(userId)
+    const parts = decoded.split(':')
+    const tenant_id = parts[1] !== 'null' && parts[1] !== 'undefined' ? parts[1] : null
+    const created_by = parts[0] // UUID string, no parseInt needed
     
     if (!tenant_id) {
       return c.json({ success: false, error: 'يجب أن تكون مرتبطاً بشركة' }, 403)
@@ -2269,10 +2310,10 @@ app.delete('/api/payments/:id', async (c) => {
       return c.json({ success: false, error: 'غير مصرح' }, 401)
     }
     
-    // Decode token (format: userId:tenantId:timestamp:random)
+    // Decode token (format: userId:tenantId:roleId:timestamp)
     const decoded = atob(token)
-    const [userId, tenantId] = decoded.split(':')
-    const tenant_id = tenantId === 'null' ? null : parseInt(tenantId)
+    const parts = decoded.split(':')
+    const tenant_id = parts[1] !== 'null' && parts[1] !== 'undefined' ? parts[1] : null
     const id = c.req.param('id')
     
     // Verify payment belongs to this tenant
@@ -2966,7 +3007,7 @@ app.post('/api/attachments/upload', async (c) => {
       blob.url,
       file.type || null,
       typeof (file as any).size === 'number' ? (file as any).size : null,
-      requestId ? parseInt(requestId) : null,
+      requestId || null,
       attachmentType || null
     ).run()
     
@@ -3076,8 +3117,8 @@ app.get('/api/notifications', async (c) => {
     if (token) {
       const decoded = atob(token)
       const parts = decoded.split(':')
-      userId = parseInt(parts[0])
-      tenant_id = parts[1] !== 'null' ? parseInt(parts[1]) : null
+      userId = parts[0] // UUID string, no parseInt needed
+      tenant_id = parts[1] !== 'null' && parts[1] !== 'undefined' ? parts[1] : null
     }
     
     let query = `
@@ -3118,11 +3159,11 @@ app.get('/api/notifications/unread-count', async (c) => {
     if (token) {
       const decoded = atob(token)
       const parts = decoded.split(':')
-      userId = parseInt(parts[0])
-      tenant_id = parts[1] !== 'null' ? parseInt(parts[1]) : null
+      userId = parts[0] // UUID string, no parseInt needed
+      tenant_id = parts[1] !== 'null' && parts[1] !== 'undefined' ? parts[1] : null
     }
     
-    let query = `SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND is_read = 0`
+    let query = `SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND is_read = FALSE`
     
     if (tenant_id) {
       query += ` AND tenant_id = ${tenant_id}`
@@ -3912,7 +3953,7 @@ app.get('/api/reports/statistics', async (c) => {
     if (token) {
       const decoded = atob(token)
       const parts = decoded.split(':')
-      tenant_id = parts[1] !== 'null' ? parseInt(parts[1]) : null
+      tenant_id = parts[1] !== 'null' && parts[1] !== 'undefined' ? parts[1] : null
     }
     
     // Build where clause
@@ -3991,7 +4032,7 @@ app.get('/api/reports/requests-followup', async (c) => {
     
     // Get tenant_id from query parameter (for Super Admin) or user info
     const queryTenantId = c.req.query('tenant_id')
-    let tenant_id = queryTenantId ? parseInt(queryTenantId) : userInfo.tenantId
+    let tenant_id = queryTenantId || userInfo.tenantId
     
     // Super Admin (role_id = 1) can access all tenants if no specific tenant_id provided
     if (userInfo.roleId === 1 && !tenant_id) {

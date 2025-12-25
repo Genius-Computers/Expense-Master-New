@@ -36639,6 +36639,11 @@ var app = new Hono2();
 var wrapper = new Hono2();
 wrapper.all("*", async (c) => {
   const path = c.req.path;
+  const envObj = c.env ?? (c.env = {});
+  if (!envObj.DB && (path.startsWith("/api/") || path.startsWith("/admin/") || path.startsWith("/c/"))) {
+    const databaseUrl = process.env.DATABASE_URL;
+    if (databaseUrl) envObj.DB = createNeonD1Database(databaseUrl);
+  }
   if (path === "/api") {
     const originalPath = c.req.query("__path");
     if (originalPath) {
@@ -36654,7 +36659,7 @@ wrapper.all("*", async (c) => {
       const method = c.req.raw.method;
       if (method === "GET" || method === "HEAD") {
         const rewrittenReq2 = new Request(url.toString(), c.req.raw);
-        return await app.fetch(rewrittenReq2, c.env);
+        return await app.fetch(rewrittenReq2, envObj);
       }
       const body = await c.req.raw.arrayBuffer();
       const rewrittenReq = new Request(url.toString(), {
@@ -36662,7 +36667,7 @@ wrapper.all("*", async (c) => {
         headers: c.req.raw.headers,
         body
       });
-      return await app.fetch(rewrittenReq, c.env);
+      return await app.fetch(rewrittenReq, envObj);
     }
   }
   if (path === "/api" || path.startsWith("/api/")) {
@@ -36687,24 +36692,31 @@ wrapper.all("*", async (c) => {
       const url = new URL(c.req.url, base);
       url.pathname = path.replace(/^\/api(?=\/|$)/, "") || "/";
       const rewrittenReq = new Request(url.toString(), c.req.raw);
-      return await app.fetch(rewrittenReq, c.env);
+      return await app.fetch(rewrittenReq, envObj);
     }
   }
-  return await app.fetch(c.req.raw, c.env);
+  return await app.fetch(c.req.raw, envObj);
 });
-app.use("*", async (c, next) => {
+async function requireDb(c, next) {
   const envObj = c.env ?? (c.env = {});
   if (!envObj.DB) {
     const databaseUrl = process.env.DATABASE_URL;
-    if (!databaseUrl) {
-      return c.json(
-        { success: false, error: "Missing env var: DATABASE_URL (Neon connection string)" },
-        500
-      );
-    }
-    envObj.DB = createNeonD1Database(databaseUrl);
+    if (databaseUrl) envObj.DB = createNeonD1Database(databaseUrl);
   }
-  await next();
+  if (!envObj.DB) {
+    return c.json(
+      { success: false, error: "Missing env var: DATABASE_URL (Neon connection string)" },
+      500
+    );
+  }
+  return await next();
+}
+app.use("/api/*", requireDb);
+app.use("/admin/*", requireDb);
+app.use("/c/*", requireDb);
+app.get("/api/__db/ping", async (c) => {
+  const row = await c.env.DB.prepare("SELECT 1 as ok").first();
+  return c.json({ success: true, ok: row?.ok ?? 1 });
 });
 app.onError((err, c) => {
   console.error("Unhandled error:", err);
@@ -37171,7 +37183,19 @@ var loginHandler = async (c) => {
     });
   } catch (error) {
     console.error("\u274C Login error:", error);
-    return c.json({ success: false, error: "\u062D\u062F\u062B \u062E\u0637\u0623 \u0641\u064A \u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062F\u062E\u0648\u0644: " + error.message }, 500);
+    console.error("\u274C Login error stack:", error?.stack);
+    console.error("\u274C Login error details:", {
+      message: error?.message,
+      code: error?.code,
+      name: error?.name,
+      hasDb: !!c.env?.DB
+    });
+    const errorMsg = error?.message || String(error);
+    return c.json({
+      success: false,
+      error: "\u062D\u062F\u062B \u062E\u0637\u0623 \u0641\u064A \u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062F\u062E\u0648\u0644: " + errorMsg,
+      details: process.env.NODE_ENV === "development" ? errorMsg : void 0
+    }, 500);
   }
 };
 app.post("/api/auth/login", loginHandler);
